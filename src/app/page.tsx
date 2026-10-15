@@ -179,9 +179,7 @@ export default function Home() {
         category: item.category,
         brand: item.brand,
         model: item.model,
-        size: item.size,
-        color: item.color,
-        stock: item.stock,
+        sizes: JSON.parse(JSON.stringify(item.sizes || [])),
         minStockAlert: item.minStockAlert,
         costPrice: item.costPrice,
         sellingPrice: item.sellingPrice,
@@ -204,12 +202,16 @@ export default function Home() {
     }
   };
 
-  const handleAdjustStock = async (id: string, delta: number) => {
+  const handleAdjustStock = async (
+    id: string,
+    delta: number,
+    variant?: { size?: string; color?: string }
+  ) => {
     try {
       const res = await fetch(`/api/inventory/${id}/stock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ delta }),
+        body: JSON.stringify({ delta, size: variant?.size, color: variant?.color }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
@@ -217,7 +219,8 @@ export default function Home() {
       setEquipment((prev) => prev.map((i) => (i.id === id ? data.item : i)));
       setStats(data.stats);
       const sign = delta > 0 ? `+${delta}` : `${delta}`;
-      addToast('info', `Stock ajusté (${sign} pcs) pour ${data.item.name}`);
+      const detail = variant?.color ? ` (${[variant.size, variant.color].filter(Boolean).join(' - ')})` : '';
+      addToast('info', `Stock ajusté (${sign} pcs)${detail} pour ${data.item.name}`);
     } catch (err: any) {
       addToast('error', err.message || 'Erreur d’ajustement de stock');
     }
@@ -225,6 +228,8 @@ export default function Home() {
 
   const handleRecordSale = async (saleData: {
     equipmentId: string;
+    size?: string;
+    color?: string;
     quantity: number;
     unitPrice: number;
     buyerName: string;

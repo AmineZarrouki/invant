@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { equipmentId, quantity, unitPrice, buyerName, paymentMethod, notes } = body;
+    const { equipmentId, size, color, quantity, unitPrice, buyerName, paymentMethod, notes } = body;
 
     if (!equipmentId || !quantity || quantity <= 0) {
       return NextResponse.json({ success: false, error: 'Informations de vente incomplètes' }, { status: 400 });
@@ -22,6 +22,8 @@ export async function POST(request: Request) {
 
     const result = await recordSale({
       equipmentId,
+      size,
+      color,
       quantity: Number(quantity),
       unitPrice: unitPrice !== undefined ? Number(unitPrice) : undefined,
       buyerName,

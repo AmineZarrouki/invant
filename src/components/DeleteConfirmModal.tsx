@@ -151,14 +151,18 @@ export default function DeleteConfirmModal({
               <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
                 {equipment.brand || 'Sans marque'}
               </span>
-              <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
-                Taille : <b className="text-white">{equipment.size}</b>
-              </span>
-              <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
-                Couleur : <b className="text-white">{equipment.color}</b>
-              </span>
+              {equipment.sizes && equipment.sizes.length > 0 ? (
+                equipment.sizes.map((sz, idx) => (
+                  <span key={idx} className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-medium">
+                    {sz.size ? `${sz.size}: ` : ''}
+                    <b className="text-white">
+                      {sz.colors.map((c) => `${c.color} (${c.quantity})`).join(', ')}
+                    </b>
+                  </span>
+                ))
+              ) : null}
               <span className="px-2 py-0.5 rounded bg-red-950/60 border border-red-900/50 text-red-300 font-bold">
-                Stock actuel : {equipment.stock} pcs
+                Stock total : {equipment.stock ?? 0} pcs
               </span>
             </div>
 

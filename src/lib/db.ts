@@ -1,6 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Equipment, Sale, InventoryStats, EquipmentCategory, DeletionLog } from '@/types/inventory';
+import {
+  Equipment,
+  Sale,
+  InventoryStats,
+  EquipmentCategory,
+  DeletionLog,
+  SizeVariant,
+  getEquipmentTotalStock,
+} from '@/types/inventory';
 import { INITIAL_EQUIPMENT, INITIAL_SALES } from './initialData';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -19,7 +27,7 @@ async function ensureDbInitialized() {
   try {
     await fs.access(INVENTORY_FILE);
   } catch {
-    await fs.writeFile(INVENTORY_FILE, JSON.stringify(INITIAL_EQUIPMENT, null, 2), 'utf-8');
+    await saveEquipmentList(INITIAL_EQUIPMENT);
   }
 
   try {
@@ -35,20 +43,101 @@ async function ensureDbInitialized() {
   }
 }
 
+/**
+ * Normalizes an equipment object to ensure sizes and colors are properly structured.
+ * Also attaches the dynamic computed `stock` for runtime display.
+ */
+function normalizeEquipment(item: any): Equipment {
+  let sizes: SizeVariant[] = item.sizes;
+
+  if (!sizes || !Array.isArray(sizes) || sizes.length === 0) {
+    if (item.size || item.color) {
+      sizes = [
+        {
+          size: item.size || 'Unique',
+          colors: [{ color: item.color || 'Standard', quantity: Number(item.stock) || 0 }],
+        },
+      ];
+    } else {
+      sizes = [{ colors: [{ color: 'Standard', quantity: Number(item.stock) || 0 }] }];
+    }
+  } else {
+    sizes = sizes.map((sz) => ({
+      ...(sz.size ? { size: sz.size.trim() } : {}),
+      colors: (sz.colors || []).map((c: any) => ({
+        color: (c.color || 'Standard').trim(),
+        quantity: Math.max(0, Number(c.quantity) || 0),
+      })),
+    }));
+  }
+
+  const normalized: Equipment = {
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    brand: item.brand || 'Générique',
+    model: item.model || '',
+    sizes,
+    minStockAlert: Number(item.minStockAlert) || 3,
+    costPrice: Number(item.costPrice) || 0,
+    sellingPrice: Number(item.sellingPrice) || 0,
+    barcode: item.barcode || '',
+    description: item.description || '',
+    createdAt: item.createdAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || new Date().toISOString(),
+  };
+
+  // Runtime computed property for convenience
+  normalized.stock = getEquipmentTotalStock(normalized);
+  return normalized;
+}
+
 export async function getEquipment(): Promise<Equipment[]> {
   await ensureDbInitialized();
   try {
     const raw = await fs.readFile(INVENTORY_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const parsed: any[] = JSON.parse(raw);
+    return parsed.map(normalizeEquipment);
   } catch (err) {
     console.error('Error reading inventory.json, falling back to seed:', err);
-    return INITIAL_EQUIPMENT;
+    return INITIAL_EQUIPMENT.map(normalizeEquipment);
   }
 }
 
+/**
+ * Saves equipment list to inventory.json.
+ * IMPORTANT: As requested, the JSON file stores quantity per color of each size,
+ * NOT a top-level total stock for the overall product.
+ */
 export async function saveEquipmentList(items: Equipment[]): Promise<void> {
   await ensureDbInitialized();
-  await fs.writeFile(INVENTORY_FILE, JSON.stringify(items, null, 2), 'utf-8');
+  // Strip top-level 'stock' property so inventory.json only contains sizes with colors & quantities
+  const jsonReady = items.map((item) => {
+    const { stock, ...rest } = item;
+    return {
+      id: rest.id,
+      name: rest.name,
+      category: rest.category,
+      brand: rest.brand,
+      model: rest.model || undefined,
+      sizes: (rest.sizes || []).map((sz) => ({
+        ...(sz.size ? { size: sz.size.trim() } : {}),
+        colors: (sz.colors || []).map((c) => ({
+          color: c.color.trim(),
+          quantity: Math.max(0, Number(c.quantity) || 0),
+        })),
+      })),
+      minStockAlert: rest.minStockAlert,
+      costPrice: rest.costPrice,
+      sellingPrice: rest.sellingPrice,
+      barcode: rest.barcode || undefined,
+      description: rest.description || undefined,
+      createdAt: rest.createdAt,
+      updatedAt: rest.updatedAt,
+    };
+  });
+
+  await fs.writeFile(INVENTORY_FILE, JSON.stringify(jsonReady, null, 2), 'utf-8');
 }
 
 export async function getSales(): Promise<Sale[]> {
@@ -67,15 +156,25 @@ export async function saveSalesList(sales: Sale[]): Promise<void> {
   await fs.writeFile(SALES_FILE, JSON.stringify(sales, null, 2), 'utf-8');
 }
 
-export async function addEquipment(item: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Equipment> {
+export async function addEquipment(item: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'stock'>): Promise<Equipment> {
   const items = await getEquipment();
   const now = new Date().toISOString();
+  
   const newItem: Equipment = {
     ...item,
     id: `eq-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    sizes: (item.sizes || []).map((sz) => ({
+      ...(sz.size ? { size: sz.size.trim() } : {}),
+      colors: (sz.colors || []).map((c) => ({
+        color: c.color.trim(),
+        quantity: Math.max(0, Number(c.quantity) || 0),
+      })),
+    })),
     createdAt: now,
     updatedAt: now,
   };
+  newItem.stock = getEquipmentTotalStock(newItem);
+
   items.unshift(newItem);
   await saveEquipmentList(items);
   return newItem;
@@ -86,14 +185,28 @@ export async function updateEquipment(id: string, updates: Partial<Equipment>): 
   const index = items.findIndex((i) => i.id === id);
   if (index === -1) return null;
 
-  items[index] = {
-    ...items[index],
+  const current = items[index];
+  const newSizes = updates.sizes
+    ? updates.sizes.map((sz) => ({
+        ...(sz.size ? { size: sz.size.trim() } : {}),
+        colors: (sz.colors || []).map((c) => ({
+          color: c.color.trim(),
+          quantity: Math.max(0, Number(c.quantity) || 0),
+        })),
+      }))
+    : current.sizes;
+
+  const updated: Equipment = {
+    ...current,
     ...updates,
+    sizes: newSizes,
     updatedAt: new Date().toISOString(),
   };
+  updated.stock = getEquipmentTotalStock(updated);
+  items[index] = updated;
 
   await saveEquipmentList(items);
-  return items[index];
+  return updated;
 }
 
 export async function getDeletions(): Promise<DeletionLog[]> {
@@ -117,6 +230,8 @@ export async function deleteEquipment(id: string, reason?: string): Promise<{ su
   const eq = items.find((i) => i.id === id);
   if (!eq) return { success: false };
 
+  const totalStock = getEquipmentTotalStock(eq);
+
   // Create deletion archive log
   const deletedLog: DeletionLog = {
     id: `del-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -125,9 +240,8 @@ export async function deleteEquipment(id: string, reason?: string): Promise<{ su
     category: eq.category,
     brand: eq.brand,
     model: eq.model,
-    size: eq.size,
-    color: eq.color,
-    stockAtDeletion: eq.stock,
+    sizes: JSON.parse(JSON.stringify(eq.sizes || [])),
+    stockAtDeletion: totalStock,
     costPrice: eq.costPrice || 0,
     sellingPrice: eq.sellingPrice || 0,
     barcode: eq.barcode,
@@ -161,9 +275,7 @@ export async function restoreDeletedEquipment(deletionId: string): Promise<Equip
     category: log.category,
     brand: log.brand,
     model: log.model,
-    size: log.size,
-    color: log.color,
-    stock: log.stockAtDeletion,
+    sizes: log.sizes || [],
     minStockAlert: 3,
     costPrice: log.costPrice,
     sellingPrice: log.sellingPrice,
@@ -172,6 +284,7 @@ export async function restoreDeletedEquipment(deletionId: string): Promise<Equip
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+  restored.stock = getEquipmentTotalStock(restored);
 
   const items = await getEquipment();
   items.unshift(restored);
@@ -180,22 +293,65 @@ export async function restoreDeletedEquipment(deletionId: string): Promise<Equip
   return restored;
 }
 
-export async function adjustEquipmentStock(id: string, delta: number): Promise<Equipment | null> {
+export async function adjustEquipmentStock(
+  id: string,
+  delta: number,
+  options?: { size?: string; color?: string }
+): Promise<Equipment | null> {
   const items = await getEquipment();
   const index = items.findIndex((i) => i.id === id);
   if (index === -1) return null;
 
-  const currentStock = items[index].stock || 0;
-  const newStock = Math.max(0, currentStock + delta);
-  items[index].stock = newStock;
-  items[index].updatedAt = new Date().toISOString();
+  const eq = items[index];
+  if (!eq.sizes || eq.sizes.length === 0) {
+    eq.sizes = [{ colors: [{ color: 'Standard', quantity: 0 }] }];
+  }
+
+  // Find matching size variant
+  let targetSize = eq.sizes.find((s) => {
+    if (!options?.size) return true;
+    return (s.size || '').trim().toLowerCase() === options.size.trim().toLowerCase();
+  });
+
+  if (!targetSize) {
+    if (options?.size) {
+      targetSize = { size: options.size.trim(), colors: [] };
+      eq.sizes.push(targetSize);
+    } else {
+      targetSize = eq.sizes[0];
+    }
+  }
+
+  // Find matching color entry
+  let targetColor = targetSize.colors.find((c) => {
+    if (!options?.color) return true;
+    return (c.color || '').trim().toLowerCase() === options.color.trim().toLowerCase();
+  });
+
+  if (!targetColor) {
+    if (options?.color) {
+      targetColor = { color: options.color.trim(), quantity: 0 };
+      targetSize.colors.push(targetColor);
+    } else if (targetSize.colors.length > 0) {
+      targetColor = targetSize.colors[0];
+    } else {
+      targetColor = { color: 'Standard', quantity: 0 };
+      targetSize.colors.push(targetColor);
+    }
+  }
+
+  targetColor.quantity = Math.max(0, (targetColor.quantity || 0) + delta);
+  eq.stock = getEquipmentTotalStock(eq);
+  eq.updatedAt = new Date().toISOString();
 
   await saveEquipmentList(items);
-  return items[index];
+  return eq;
 }
 
 export async function recordSale(saleInput: {
   equipmentId: string;
+  size?: string;
+  color?: string;
   quantity: number;
   unitPrice?: number;
   buyerName?: string;
@@ -209,12 +365,39 @@ export async function recordSale(saleInput: {
   }
 
   const eq = items[eqIndex];
-  if (eq.stock < saleInput.quantity) {
-    throw new Error(`Stock insuffisant (${eq.stock} restant(s))`);
+  if (!eq.sizes || eq.sizes.length === 0) {
+    throw new Error('Aucun stock disponible pour cet équipement');
   }
 
-  // Deduct stock
-  eq.stock -= saleInput.quantity;
+  // Find matching size variant
+  let targetSize = eq.sizes.find((s) => {
+    if (!saleInput.size) return true;
+    return (s.size || '').trim().toLowerCase() === saleInput.size.trim().toLowerCase();
+  });
+  if (!targetSize) {
+    targetSize = eq.sizes[0];
+  }
+
+  // Find matching color entry
+  let targetColor = targetSize.colors.find((c) => {
+    if (!saleInput.color) return true;
+    return (c.color || '').trim().toLowerCase() === saleInput.color.trim().toLowerCase();
+  });
+  if (!targetColor) {
+    targetColor = targetSize.colors[0];
+  }
+
+  if (!targetColor || targetColor.quantity < saleInput.quantity) {
+    const available = targetColor ? targetColor.quantity : 0;
+    const variantDesc = [targetSize.size, targetColor?.color].filter(Boolean).join(' - ');
+    throw new Error(
+      `Stock insuffisant pour ${eq.name}${variantDesc ? ` (${variantDesc})` : ''} : ${available} restant(s)`
+    );
+  }
+
+  // Deduct stock for that specific color of that size
+  targetColor.quantity -= saleInput.quantity;
+  eq.stock = getEquipmentTotalStock(eq);
   eq.updatedAt = new Date().toISOString();
   await saveEquipmentList(items);
 
@@ -231,8 +414,8 @@ export async function recordSale(saleInput: {
     equipmentName: eq.name,
     category: eq.category,
     brand: eq.brand,
-    size: eq.size,
-    color: eq.color,
+    size: targetSize.size,
+    color: targetColor.color,
     quantity: saleInput.quantity,
     unitPrice,
     totalPrice,
@@ -260,12 +443,36 @@ export async function refundSale(saleId: string): Promise<{ success: boolean; re
   const [refundedSale] = sales.splice(saleIndex, 1);
   await saveSalesList(sales);
 
-  // Restore equipment stock
+  // Restore equipment stock to matching size and color
   const items = await getEquipment();
   const eqIndex = items.findIndex((i) => i.id === refundedSale.equipmentId);
   if (eqIndex !== -1) {
-    items[eqIndex].stock += refundedSale.quantity;
-    items[eqIndex].updatedAt = new Date().toISOString();
+    const eq = items[eqIndex];
+    if (!eq.sizes || eq.sizes.length === 0) {
+      eq.sizes = [{ size: refundedSale.size, colors: [{ color: refundedSale.color || 'Standard', quantity: 0 }] }];
+    }
+
+    let targetSize = eq.sizes.find((s) => {
+      if (!refundedSale.size) return true;
+      return (s.size || '').trim().toLowerCase() === refundedSale.size.trim().toLowerCase();
+    });
+    if (!targetSize) {
+      targetSize = { size: refundedSale.size, colors: [] };
+      eq.sizes.push(targetSize);
+    }
+
+    let targetColor = targetSize.colors.find((c) => {
+      if (!refundedSale.color) return true;
+      return (c.color || '').trim().toLowerCase() === refundedSale.color.trim().toLowerCase();
+    });
+    if (!targetColor) {
+      targetColor = { color: refundedSale.color || 'Standard', quantity: 0 };
+      targetSize.colors.push(targetColor);
+    }
+
+    targetColor.quantity += refundedSale.quantity;
+    eq.stock = getEquipmentTotalStock(eq);
+    eq.updatedAt = new Date().toISOString();
     await saveEquipmentList(items);
   }
 
@@ -296,7 +503,7 @@ export function computeInventoryStats(
   const brandMap: Record<string, { unitsInStock: number; totalValue: number }> = {};
 
   equipment.forEach((item) => {
-    const qty = Number(item.stock) || 0;
+    const qty = getEquipmentTotalStock(item);
     const cost = Number(item.costPrice) || 0;
     const sell = Number(item.sellingPrice) || 0;
 
@@ -410,8 +617,9 @@ export function computeInventoryStats(
 
 export async function resetDatabase(): Promise<{ equipment: Equipment[]; sales: Sale[]; deletions: DeletionLog[] }> {
   await ensureDbInitialized();
-  await fs.writeFile(INVENTORY_FILE, JSON.stringify(INITIAL_EQUIPMENT, null, 2), 'utf-8');
+  await saveEquipmentList(INITIAL_EQUIPMENT);
   await fs.writeFile(SALES_FILE, JSON.stringify(INITIAL_SALES, null, 2), 'utf-8');
   await fs.writeFile(DELETIONS_FILE, JSON.stringify([], null, 2), 'utf-8');
-  return { equipment: INITIAL_EQUIPMENT, sales: INITIAL_SALES, deletions: [] };
+  const eqWithStock = INITIAL_EQUIPMENT.map(normalizeEquipment);
+  return { equipment: eqWithStock, sales: INITIAL_SALES, deletions: [] };
 }

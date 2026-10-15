@@ -1,7 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Check, ShoppingBag, Banknote, CreditCard, Landmark, AlertCircle, TrendingUp, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  X,
+  Check,
+  ShoppingBag,
+  Banknote,
+  CreditCard,
+  Landmark,
+  AlertCircle,
+  TrendingUp,
+  AlertTriangle,
+  Layers,
+} from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { CurrencyCode, CURRENCY_CONFIG, formatCurrency } from '@/lib/currency';
 
@@ -11,13 +22,19 @@ interface QuickSaleModalProps {
   equipment: Equipment | null;
   onConfirmSale: (saleData: {
     equipmentId: string;
+    size?: string;
+    color?: string;
     quantity: number;
     unitPrice: number;
     buyerName: string;
     paymentMethod: 'cash' | 'card' | 'transfer' | 'autre';
     notes?: string;
   }) => Promise<void>;
-  onDirectAdjustStock?: (equipmentId: string, delta: number) => Promise<void>;
+  onDirectAdjustStock?: (
+    equipmentId: string,
+    delta: number,
+    variant?: { size?: string; color?: string }
+  ) => Promise<void>;
   currency: CurrencyCode;
 }
 
@@ -29,6 +46,8 @@ export default function QuickSaleModal({
   onDirectAdjustStock,
   currency,
 }: QuickSaleModalProps) {
+  const [selectedSizeIndex, setSelectedSizeIndex] = useState<number>(0);
+  const [selectedColor, setSelectedColor] = useState<string>('');
   const [soldPrice, setSoldPrice] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [buyerName, setBuyerName] = useState<string>('');
@@ -38,8 +57,13 @@ export default function QuickSaleModal({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize selection when equipment opens
   useEffect(() => {
     if (equipment) {
+      setSelectedSizeIndex(0);
+      const firstSize = equipment.sizes?.[0];
+      const firstColor = firstSize?.colors?.[0]?.color || '';
+      setSelectedColor(firstColor);
       setQuantity(1);
       setSoldPrice(equipment.sellingPrice || 0);
       setBuyerName('');
@@ -49,6 +73,31 @@ export default function QuickSaleModal({
       setError(null);
     }
   }, [equipment, isOpen]);
+
+  // When size changes, pick first available color in that size
+  const handleSizeChange = (index: number) => {
+    setSelectedSizeIndex(index);
+    const sizeVariant = equipment?.sizes?.[index];
+    if (sizeVariant && sizeVariant.colors.length > 0) {
+      setSelectedColor(sizeVariant.colors[0].color);
+    } else {
+      setSelectedColor('');
+    }
+  };
+
+  const currentSizeVariant = equipment?.sizes?.[selectedSizeIndex];
+  const hasMultipleSizes = Boolean(
+    equipment?.sizes &&
+      equipment.sizes.length > 1 &&
+      equipment.sizes.some((s) => s.size && s.size !== 'Unique')
+  );
+
+  // Current stock for the selected variant
+  const currentVariantStock = useMemo(() => {
+    if (!currentSizeVariant) return 0;
+    const colorEntry = currentSizeVariant.colors.find((c) => c.color === selectedColor);
+    return colorEntry ? Number(colorEntry.quantity) || 0 : 0;
+  }, [currentSizeVariant, selectedColor]);
 
   if (!isOpen || !equipment) return null;
 
@@ -61,8 +110,8 @@ export default function QuickSaleModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (equipment.stock < quantity) {
-      setError(`Stock insuffisant (${equipment.stock} disponible(s))`);
+    if (currentVariantStock < quantity) {
+      setError(`Stock insuffisant pour cette variante (${currentVariantStock} disponible(s))`);
       return;
     }
     if (!isAdjustingWithoutSale && soldPrice <= 0) {
@@ -73,13 +122,17 @@ export default function QuickSaleModal({
     setLoading(true);
     setError(null);
     try {
+      const chosenSize = currentSizeVariant?.size;
       if (isAdjustingWithoutSale && onDirectAdjustStock) {
-        // Direct stock decrement without logging sale/profit
-        await onDirectAdjustStock(equipment.id, -quantity);
+        await onDirectAdjustStock(equipment.id, -quantity, {
+          size: chosenSize,
+          color: selectedColor,
+        });
       } else {
-        // Standard sale: log sale, deduct stock, credit profit difference
         await onConfirmSale({
           equipmentId: equipment.id,
+          size: chosenSize,
+          color: selectedColor,
           quantity,
           unitPrice: Number(soldPrice),
           buyerName: buyerName.trim() || 'Client comptant',
@@ -97,7 +150,7 @@ export default function QuickSaleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden text-zinc-100">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden text-zinc-100 animate-scaleUp">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/80">
           <div className="flex items-center gap-3">
@@ -106,10 +159,10 @@ export default function QuickSaleModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-white">
-                {isAdjustingWithoutSale ? 'Correction de Stock (-1 pc)' : 'Enregistrer une Vente (-1 pc)'}
+                {isAdjustingWithoutSale ? 'Correction de Stock (-1 pc)' : 'Enregistrer une Vente'}
               </h3>
               <p className="text-xs text-zinc-400">
-                {equipment.brand} • {equipment.size} • {equipment.color}
+                {equipment.brand} • {equipment.name}
               </p>
             </div>
           </div>
@@ -121,8 +174,8 @@ export default function QuickSaleModal({
           </button>
         </div>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form Content */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
           {error && (
             <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -134,8 +187,91 @@ export default function QuickSaleModal({
           <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80">
             <div className="text-sm font-bold text-white">{equipment.name}</div>
             <div className="flex items-center justify-between text-xs text-zinc-400 mt-1">
-              <span>Stock disponible : <strong className="text-white">{equipment.stock} pcs</strong></span>
-              <span>Prix catalogue : <strong className="text-zinc-200">{formatCurrency(equipment.sellingPrice, currency)}</strong></span>
+              <span>
+                Stock total produit : <strong className="text-white">{equipment.stock ?? 0} pcs</strong>
+              </span>
+              <span>
+                Prix catalogue :{' '}
+                <strong className="text-zinc-200">
+                  {formatCurrency(equipment.sellingPrice, currency)}
+                </strong>
+              </span>
+            </div>
+          </div>
+
+          {/* VARIANT SELECTION (TAILLE & COULEUR) */}
+          <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
+            {/* Size selection if multiple sizes */}
+            {hasMultipleSizes && (
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                  1. Sélectionner la Taille :
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {equipment.sizes?.map((sz, idx) => {
+                    const isSelected = selectedSizeIndex === idx;
+                    const sizeTotal = (sz.colors || []).reduce((s, c) => s + (Number(c.quantity) || 0), 0);
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSizeChange(idx)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                          isSelected
+                            ? 'bg-red-600 text-white shadow-sm'
+                            : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                        }`}
+                      >
+                        {sz.size || 'Taille unique'} ({sizeTotal} pcs)
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Color selection for this size */}
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                {hasMultipleSizes ? '2. Sélectionner la Couleur :' : 'Sélectionner la Couleur :'}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {currentSizeVariant?.colors.map((c) => {
+                  const isSelected = selectedColor === c.color;
+                  return (
+                    <button
+                      key={c.color}
+                      type="button"
+                      onClick={() => setSelectedColor(c.color)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                        isSelected
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                      }`}
+                    >
+                      <span>{c.color}</span>
+                      <span className="px-1.5 py-0.2 rounded bg-black/40 text-[10px] font-bold">
+                        {c.quantity} pcs
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Stock status for chosen variant */}
+            <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+              <span className="text-zinc-400">
+                Stock disponible pour {currentSizeVariant?.size ? `${currentSizeVariant.size} - ` : ''}
+                <strong className="text-zinc-200">{selectedColor}</strong> :
+              </span>
+              <span
+                className={`font-black ${
+                  currentVariantStock > 0 ? 'text-emerald-400' : 'text-red-400'
+                }`}
+              >
+                {currentVariantStock > 0 ? `${currentVariantStock} pcs` : 'Rupture (0 pc)'}
+              </span>
             </div>
           </div>
 
@@ -145,168 +281,190 @@ export default function QuickSaleModal({
               <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-3">
                 <div className="flex items-center justify-between text-xs text-zinc-400 pb-2 border-b border-zinc-800/80">
                   <span>Coût d’achat fournisseur :</span>
-                  <span className="font-semibold text-zinc-300">{formatCurrency(costPerUnit, currency)}</span>
+                  <span className="font-semibold text-zinc-300">
+                    {formatCurrency(costPerUnit, currency)}
+                  </span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
-                    Prix de vente encaissé ({currSymbol}) *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      step="1"
-                      min="0"
-                      required
-                      autoFocus
-                      placeholder="0"
-                      value={soldPrice || ''}
-                      onChange={(e) => setSoldPrice(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-lg font-black text-emerald-400 focus:outline-none focus:border-emerald-500 transition-colors"
-                    />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">
-                      {currSymbol}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-emerald-400">
+                      Prix de Vente Encaissé ({currSymbol}) *
+                    </label>
+                    <span className="text-[11px] text-zinc-400">
+                      Modifiable si remise ou prix négocié
                     </span>
                   </div>
-                  <p className="text-[11px] text-zinc-500 mt-1">
-                    Indiquez le prix exact payé par l'acheteur (modifiable en cas de réduction).
-                  </p>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    required
+                    value={soldPrice}
+                    onChange={(e) => setSoldPrice(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-zinc-900 border border-emerald-500/50 rounded-xl px-3.5 py-2 text-base text-emerald-400 font-black focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
                 </div>
 
-                {/* Profit Live Breakdown */}
-                <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-900/60 flex items-center justify-between">
+                {/* Profit Preview */}
+                <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-zinc-300 font-semibold">Bénéfice Net :</span>
+                  </div>
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-400" />
-                    <div>
-                      <span className="text-[11px] font-semibold text-emerald-300 block">
-                        Bénéfice net calculé
+                    <span
+                      className={`font-extrabold ${
+                        totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'
+                      }`}
+                    >
+                      {totalProfit >= 0 ? `+${totalProfit.toFixed(1)}` : totalProfit.toFixed(1)}{' '}
+                      {currSymbol}
+                    </span>
+                    {soldPrice > 0 && (
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] text-zinc-300 font-bold">
+                        {marginPercent}% marge
                       </span>
-                      <span className="text-[10px] text-emerald-400/80">
-                        ({soldPrice} - {costPerUnit} {currSymbol})
-                      </span>
-                    </div>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <div className="text-base font-black text-emerald-400">
-                      +{formatCurrency(unitProfit, currency)}
-                    </div>
-                    <div className="text-[10px] font-bold text-emerald-500">
-                      {marginPercent}% marge
-                    </div>
-                  </div>
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                <span className="text-xs font-bold text-zinc-300">Quantité Vendue :</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm flex items-center justify-center disabled:opacity-30 transition-colors"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max={currentVariantStock}
+                    value={quantity}
+                    onChange={(e) =>
+                      setQuantity(
+                        Math.min(currentVariantStock, Math.max(1, parseInt(e.target.value) || 1))
+                      )
+                    }
+                    className="w-12 bg-zinc-900 border border-zinc-800 rounded-lg text-center font-bold text-white text-sm py-1 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(currentVariantStock, q + 1))}
+                    disabled={quantity >= currentVariantStock}
+                    className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm flex items-center justify-center disabled:opacity-30 transition-colors"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
               {/* Payment Method */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                  Règlement
+                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
+                  Moyen de Paiement :
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('cash')}
-                    className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
-                      paymentMethod === 'cash'
-                        ? 'bg-zinc-800 border-zinc-600 text-white shadow-sm'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                    }`}
-                  >
-                    <Banknote className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Espèces</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
-                      paymentMethod === 'card'
-                        ? 'bg-zinc-800 border-zinc-600 text-white shadow-sm'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                    }`}
-                  >
-                    <CreditCard className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Carte</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('transfer')}
-                    className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all ${
-                      paymentMethod === 'transfer'
-                        ? 'bg-zinc-800 border-zinc-600 text-white shadow-sm'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-                    }`}
-                  >
-                    <Landmark className="w-3.5 h-3.5 text-zinc-300" />
-                    <span>Virement</span>
-                  </button>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { id: 'cash', label: 'Espèces', icon: Banknote },
+                    { id: 'card', label: 'Carte', icon: CreditCard },
+                    { id: 'transfer', label: 'Virement', icon: Landmark },
+                    { id: 'autre', label: 'Autre', icon: Check },
+                  ].map((m) => {
+                    const Icon = m.icon;
+                    const isSelected = paymentMethod === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setPaymentMethod(m.id as any)}
+                        className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-[11px] font-bold transition-colors ${
+                          isSelected
+                            ? 'bg-zinc-800 border-emerald-500 text-white'
+                            : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{m.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Buyer Name (Optional) */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">
-                  Client / Adhérent (Optionnel)
-                </label>
+              {/* Buyer & Notes */}
+              <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
+                  placeholder="Nom de l'adhérent / client..."
                   value={buyerName}
                   onChange={(e) => setBuyerName(e.target.value)}
-                  placeholder="Client dojo, Coach..."
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600"
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                />
+                <input
+                  type="text"
+                  placeholder="Notes / Remarque..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
                 />
               </div>
             </>
           ) : (
-            /* Non-Sale Adjust Warning */
-            <div className="p-4 rounded-xl bg-amber-950/20 border border-amber-900/50 space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-amber-400 font-bold">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Sortie de stock sans enregistrement de vente</span>
-              </div>
-              <p className="text-zinc-400">
-                Cette option déduit 1 pièce du stock pour cause de perte, détérioration ou inventaire, sans enregistrer de vente ni de bénéfice.
-              </p>
+            <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-300">
+              <span className="font-bold">Mode Correction de Stock :</span> 1 pièce de la variante{' '}
+              <strong>
+                {currentSizeVariant?.size ? `${currentSizeVariant.size} - ` : ''}
+                {selectedColor}
+              </strong>{' '}
+              sera déduite sans enregistrer de vente ni de bénéfice commercial.
             </div>
           )}
 
-          {/* Toggle between Sale and Non-Sale adjust */}
-          <div className="pt-1 text-center">
+          {/* Toggle between Sale & Stock Correction */}
+          <div className="pt-1 flex items-center justify-between text-xs text-zinc-400">
             <button
               type="button"
               onClick={() => setIsAdjustingWithoutSale(!isAdjustingWithoutSale)}
-              className="text-xs text-zinc-400 hover:text-zinc-200 underline transition-colors"
+              className="text-zinc-400 hover:text-white underline transition-colors"
             >
               {isAdjustingWithoutSale
                 ? '← Revenir à l’enregistrement de vente avec bénéfice'
-                : 'Ce n’est pas une vente ? Sortie simple pour perte / inventaire'}
+                : 'Juste ajuster le stock sans vente (casse / perte)'}
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-800">
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition-colors"
+              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
-              disabled={loading || equipment.stock <= 0}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-white font-bold text-xs shadow-lg transition-all disabled:opacity-40 active:scale-95 ${
+              disabled={loading || currentVariantStock < quantity}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 ${
                 isAdjustingWithoutSale
-                  ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-950/50'
-                  : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50'
+                  ? 'bg-amber-600 hover:bg-amber-500'
+                  : 'bg-emerald-600 hover:bg-emerald-500'
               }`}
             >
               <Check className="w-4 h-4" />
               <span>
                 {loading
-                  ? 'Traitement...'
+                  ? 'Validation...'
                   : isAdjustingWithoutSale
-                  ? 'Déduire 1 pc du stock'
-                  : `Confirmer la vente (+${formatCurrency(unitProfit, currency)} profit)`}
+                  ? 'Confirmer le Retrait'
+                  : `Encaisser ${formatCurrency(totalRevenue, currency)}`}
               </span>
             </button>
           </div>

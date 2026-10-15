@@ -37,9 +37,12 @@ export default function DeletionHistoryView({
       (d) =>
         d.equipmentName.toLowerCase().includes(q) ||
         (d.brand || '').toLowerCase().includes(q) ||
-        (d.size || '').toLowerCase().includes(q) ||
-        (d.color || '').toLowerCase().includes(q) ||
-        (d.deletedReason || '').toLowerCase().includes(q)
+        (d.deletedReason || '').toLowerCase().includes(q) ||
+        d.sizes?.some(
+          (s) =>
+            (s.size || '').toLowerCase().includes(q) ||
+            s.colors?.some((c) => c.color.toLowerCase().includes(q))
+        )
     );
   }, [deletions, searchTerm]);
 
@@ -68,25 +71,29 @@ export default function DeletionHistoryView({
       'Date Suppression',
       'Article',
       'Marque',
-      'Taille',
-      'Couleur',
+      'Tailles & Couleurs',
       'Stock Supprime',
       'Prix Vente',
       'Cout Achat',
       'Motif Suppression',
     ];
-    const rows = deletions.map((d) => [
-      d.id,
-      new Date(d.deletedAt).toISOString(),
-      `"${d.equipmentName.replace(/"/g, '""')}"`,
-      d.brand || '',
-      d.size || '',
-      d.color || '',
-      d.stockAtDeletion,
-      d.sellingPrice,
-      d.costPrice,
-      `"${(d.deletedReason || 'Suppression manuelle').replace(/"/g, '""')}"`,
-    ]);
+    const rows = deletions.map((d) => {
+      const variantSummary = (d.sizes || [])
+        .map((s) => (s.size ? `${s.size}: ` : '') + (s.colors || []).map((c) => `${c.color}(${c.quantity})`).join(' '))
+        .join(' | ');
+
+      return [
+        d.id,
+        new Date(d.deletedAt).toISOString(),
+        `"${d.equipmentName.replace(/"/g, '""')}"`,
+        d.brand || '',
+        `"${variantSummary.replace(/"/g, '""')}"`,
+        d.stockAtDeletion,
+        d.sellingPrice,
+        d.costPrice,
+        `"${(d.deletedReason || 'Suppression manuelle').replace(/"/g, '""')}"`,
+      ];
+    });
 
     const csvContent =
       'data:text/csv;charset=utf-8,' +
@@ -225,11 +232,23 @@ export default function DeletionHistoryView({
                         {log.brand} {log.model ? `· ${log.model}` : ''}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-zinc-300 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 font-semibold mr-1.5">
-                        {log.size}
-                      </span>
-                      <span className="text-zinc-400">{log.color}</span>
+                    <td className="py-3 px-3 text-zinc-300">
+                      {log.sizes && log.sizes.length > 0 ? (
+                        <div className="space-y-1">
+                          {log.sizes.map((sz, i) => (
+                            <div key={i} className="text-[11px]">
+                              {sz.size && sz.size !== 'Unique' && (
+                                <span className="font-bold text-red-400 mr-1">{sz.size}:</span>
+                              )}
+                              <span className="text-zinc-300">
+                                {sz.colors.map((c) => `${c.color} (${c.quantity})`).join(', ')}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-zinc-500 italic text-[11px]">Standard</span>
+                      )}
                     </td>
                     <td className="py-3 px-3">
                       <span className="font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-950/50 border border-amber-900/50">

@@ -15,23 +15,33 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    if (!body.name || !body.category || body.stock === undefined) {
-      return NextResponse.json({ success: false, error: 'Champs requis manquants' }, { status: 400 });
+    if (!body.name || !body.category) {
+      return NextResponse.json({ success: false, error: 'Champs requis manquants (nom, catégorie)' }, { status: 400 });
+    }
+
+    let sizes = body.sizes;
+    if (!sizes || !Array.isArray(sizes) || sizes.length === 0) {
+      // Fallback for legacy format or quick entry
+      const fallbackColor = body.color || 'Standard';
+      const fallbackQty = Number(body.stock) || 0;
+      if (body.size) {
+        sizes = [{ size: body.size, colors: [{ color: fallbackColor, quantity: fallbackQty }] }];
+      } else {
+        sizes = [{ colors: [{ color: fallbackColor, quantity: fallbackQty }] }];
+      }
     }
 
     const newItem = await addEquipment({
-      name: body.name,
+      name: body.name.trim(),
       category: body.category,
-      brand: body.brand || 'Générique',
-      model: body.model || '',
-      size: body.size || 'Unique',
-      color: body.color || 'Standard',
-      stock: Number(body.stock) || 0,
+      brand: (body.brand || 'Générique').trim(),
+      model: body.model ? body.model.trim() : '',
+      sizes,
       minStockAlert: Number(body.minStockAlert) || 3,
       costPrice: Number(body.costPrice) || 0,
       sellingPrice: Number(body.sellingPrice) || 0,
-      barcode: body.barcode || '',
-      description: body.description || '',
+      barcode: body.barcode ? body.barcode.trim() : '',
+      description: body.description ? body.description.trim() : '',
     });
 
     const [equipment, sales, deletions] = await Promise.all([getEquipment(), getSales(), getDeletions()]);

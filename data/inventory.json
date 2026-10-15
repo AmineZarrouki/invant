@@ -1,746 +1,538 @@
 [
   {
-    "id": "bnd-35m",
-    "name": "Bandes de Boxe Élastiques 3,5m",
+    "id": "bnd-std-pro",
+    "name": "Bandes de Boxe Élastiques Standard Pro",
     "category": "bandes",
     "brand": "Standard Pro",
-    "size": "3,5m",
-    "color": "Noir / Assorti",
-    "stock": 30,
+    "model": "Élastique Pro",
     "minStockAlert": 10,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "BND-35M-001",
-    "description": "Bandes de protection kickboxing 3,5 mètres en coton extensible avec fermeture velcro résistante.",
+    "barcode": "BND-STD-PRO",
+    "description": "Bandes de protection kickboxing en coton extensible avec fermeture velcro résistante.",
+    "sizes": [
+      {
+        "size": "3,5m",
+        "colors": [
+          {
+            "color": "Noir / Assorti",
+            "quantity": 30
+          }
+        ]
+      },
+      {
+        "size": "4,5m",
+        "colors": [
+          {
+            "color": "Noir / Assorti",
+            "quantity": 30
+          }
+        ]
+      },
+      {
+        "size": "5,5m",
+        "colors": [
+          {
+            "color": "Noir / Assorti",
+            "quantity": 20
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "bnd-45m",
-    "name": "Bandes de Boxe Élastiques 4,5m",
-    "category": "bandes",
-    "brand": "Standard Pro",
-    "size": "4,5m",
-    "color": "Noir / Assorti",
-    "stock": 30,
-    "minStockAlert": 10,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BND-45M-002",
-    "description": "Bandes de protection standard compétition 4,5 mètres, maintien poignet optimal.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "bnd-55m",
-    "name": "Bandes de Boxe Élastiques 5,5m",
-    "category": "bandes",
-    "brand": "Standard Pro",
-    "size": "5,5m",
-    "color": "Noir / Assorti",
-    "stock": 20,
-    "minStockAlert": 8,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BND-55M-003",
-    "description": "Bandes longues 5,5 mètres pour grand bandage professionnel et frappes lourdes.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-vnm-12-noir",
-    "name": "Gants Venum Challenger 12oz Noir",
+    "id": "gnt-vnm-challenger",
+    "name": "Gants Venum Challenger",
     "category": "gants",
     "brand": "Venum",
     "model": "Challenger",
-    "size": "12 oz",
-    "color": "Noir",
-    "stock": 5,
     "minStockAlert": 3,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "VNM-CH-12-BLK",
-    "description": "Gants de boxe Venum 12oz en cuir synthétique premium triple densité.",
+    "barcode": "VNM-CHALLENGER",
+    "description": "Gants de boxe Venum Challenger triple densité avec paume respirante.",
+    "sizes": [
+      {
+        "size": "12 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Gold / Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Rouge / Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Blanc / Noir",
+            "quantity": 2
+          },
+          {
+            "color": "Vert",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "14 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-vnm-12-gold",
-    "name": "Gants Venum Challenger 12oz Gold / Noir",
-    "category": "gants",
-    "brand": "Venum",
-    "model": "Challenger",
-    "size": "12 oz",
-    "color": "Gold / Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CH-12-GLD",
-    "description": "Édition Gold & Noir élégante avec paume respirante.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-vnm-12-rouge",
-    "name": "Gants Venum Challenger 12oz Rouge / Noir",
-    "category": "gants",
-    "brand": "Venum",
-    "model": "Challenger",
-    "size": "12 oz",
-    "color": "Rouge / Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CH-12-RED",
-    "description": "Gants Venum coloris Rouge et Noir, protection du pouce attachée.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-vnm-12-blanc",
-    "name": "Gants Venum Challenger 12oz Blanc / Noir",
-    "category": "gants",
-    "brand": "Venum",
-    "model": "Challenger",
-    "size": "12 oz",
-    "color": "Blanc / Noir",
-    "stock": 2,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CH-12-WHT",
-    "description": "Gants Venum Blanc et Noir - Stock limité.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-vnm-12-vert",
-    "name": "Gants Venum Challenger 12oz Vert",
-    "category": "gants",
-    "brand": "Venum",
-    "model": "Challenger",
-    "size": "12 oz",
-    "color": "Vert",
-    "stock": 2,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CH-12-GRN",
-    "description": "Gants Venum Vert militaire édition spéciale.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-vnm-14-noir",
-    "name": "Gants Venum Challenger 14oz Noir",
-    "category": "gants",
-    "brand": "Venum",
-    "model": "Challenger",
-    "size": "14 oz",
-    "color": "Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CH-14-BLK",
-    "description": "Gants Venum 14oz idéal pour le sparring sécurisé.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-bak-10-noir",
-    "name": "Gants Baklee 10oz Noir (FC Baklee)",
+    "id": "gnt-bak-fc",
+    "name": "Gants Baklee FC Baklee",
     "category": "gants",
     "brand": "Baklee",
     "model": "FC Baklee",
-    "size": "10 oz",
-    "color": "Noir",
-    "stock": 5,
     "minStockAlert": 3,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "BAK-FC-10-BLK",
-    "description": "Gants Baklee 10oz compétition kickboxing & boxe anglaise.",
+    "barcode": "BAK-FC-BLK",
+    "description": "Gants de boxe Baklee FC pour entraînement quotidien et sparring.",
+    "sizes": [
+      {
+        "size": "10 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          }
+        ]
+      },
+      {
+        "size": "12 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-bak-12-noir",
-    "name": "Gants Baklee 12oz Noir (FC Baklee)",
-    "category": "gants",
-    "brand": "Baklee",
-    "model": "FC Baklee",
-    "size": "12 oz",
-    "color": "Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BAK-FC-12-BLK",
-    "description": "Gants Baklee 12oz ergonomiques avec rembourrage dense.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-pk-bx1010-10",
-    "name": "Gants Pakka BX1010 Pro 10oz",
-    "category": "gants",
-    "brand": "Pakka",
-    "model": "BX1010 Excellent Qualité",
-    "size": "10 oz",
-    "color": "Couleurs Différentes",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BX1010-10",
-    "description": "Modèle haute qualité BX1010, finitions soignées, coloris variés.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-pk-bx1010-12",
-    "name": "Gants Pakka BX1010 Pro 12oz",
+    "id": "gnt-pk-bx1010",
+    "name": "Gants Pakka BX1010 Pro",
     "category": "gants",
     "brand": "Pakka",
-    "model": "BX1010 Excellent Qualité",
-    "size": "12 oz",
-    "color": "Couleurs Différentes",
-    "stock": 5,
+    "model": "BX1010 Pro",
     "minStockAlert": 3,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PK-BX1010-12",
-    "description": "Modèle haute qualité BX1010 12oz pour entraînement polyvalent.",
+    "barcode": "PK-BX1010",
+    "description": "Gants Pakka série pro BX1010, excellente qualité de finition et absorption des chocs.",
+    "sizes": [
+      {
+        "size": "10 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "12 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 3
+          },
+          {
+            "color": "Bleu",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "14 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 3
+          },
+          {
+            "color": "Blanc",
+            "quantity": 2
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-pk-bx1010-14",
-    "name": "Gants Pakka BX1010 Pro 14oz",
-    "category": "gants",
-    "brand": "Pakka",
-    "model": "BX1010 Excellent Qualité",
-    "size": "14 oz",
-    "color": "Couleurs Différentes",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BX1010-14",
-    "description": "Modèle BX1010 14oz grand confort pour sparring appuyé.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-pk-fc1041-4",
-    "name": "Gants Pakka FC 1041 4oz (Junior / Enfant)",
+    "id": "gnt-pk-fc1041",
+    "name": "Gants Pakka FC 1041 (Junior)",
     "category": "gants",
     "brand": "Pakka",
     "model": "FC 1041",
-    "size": "4 oz",
-    "color": "Couleurs Différentes",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-1041-4OZ",
-    "description": "Gants de boxe enfants 4oz, protection optimale des petites mains.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-pk-fc1041-6",
-    "name": "Gants Pakka FC 1041 6oz (Junior)",
-    "category": "gants",
-    "brand": "Pakka",
-    "model": "FC 1041",
-    "size": "6 oz",
-    "color": "Couleurs Différentes",
-    "stock": 10,
     "minStockAlert": 4,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PK-1041-6OZ",
-    "description": "Gants enfants / cadets 6oz pour initiation et frappe sac.",
+    "barcode": "PK-FC1041",
+    "description": "Gants de boxe format Junior et Enfant avec protection du pouce renforcée.",
+    "sizes": [
+      {
+        "size": "4 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "6 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-pk-fc1051-8",
-    "name": "Gants Pakka FC 1051 8oz",
+    "id": "gnt-pk-fc1051",
+    "name": "Gants Pakka FC 1051",
     "category": "gants",
     "brand": "Pakka",
     "model": "FC 1051",
-    "size": "8 oz",
-    "color": "Couleurs Différentes",
-    "stock": 10,
     "minStockAlert": 4,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PK-1051-8OZ",
-    "description": "Gants légers 8oz pour le travail de vitesse et jeunes compétiteurs.",
+    "barcode": "PK-FC1051",
+    "description": "Gants Pakka polyvalents pour frappe sur sac et travail aux paos.",
+    "sizes": [
+      {
+        "size": "8 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Rouge",
+            "quantity": 5
+          }
+        ]
+      },
+      {
+        "size": "10 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 5
+          }
+        ]
+      },
+      {
+        "size": "12 oz",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-pk-fc1051-10",
-    "name": "Gants Pakka FC 1051 10oz",
+    "id": "gnt-ftx-bxfa44",
+    "name": "Gants Fairtex BXF A44",
     "category": "gants",
-    "brand": "Pakka",
-    "model": "FC 1051",
-    "size": "10 oz",
-    "color": "Couleurs Différentes",
-    "stock": 10,
+    "brand": "Fairtex",
+    "model": "BXF A44",
+    "minStockAlert": 2,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "FTX-BXFA44",
+    "description": "Gants de boxe haut de gamme Fairtex, cuir véritable thaïlandais.",
+    "sizes": [
+      {
+        "size": "12 oz",
+        "colors": [
+          {
+            "color": "Blanc / Noir",
+            "quantity": 1
+          },
+          {
+            "color": "Noir / Or",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "size": "14 oz",
+        "colors": [
+          {
+            "color": "Blanc / Noir",
+            "quantity": 1
+          },
+          {
+            "color": "Noir / Or",
+            "quantity": 1
+          }
+        ]
+      }
+    ],
+    "createdAt": "2026-10-01T08:00:00.000Z",
+    "updatedAt": "2026-10-01T08:00:00.000Z"
+  },
+  {
+    "id": "pt-bs-fc2026",
+    "name": "Protège-Tibias BS FC 2026",
+    "category": "protege_tibias",
+    "brand": "BS",
+    "model": "FC BS 2026",
     "minStockAlert": 4,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PK-1051-10OZ",
-    "description": "Gants 10oz polyvalents modèle FC 1051 couleurs panachées.",
+    "barcode": "BS-FC2026",
+    "description": "Protège-tibias compétition BS FC 2026 double sangle velcro ergonomique.",
+    "sizes": [
+      {
+        "size": "S",
+        "colors": [
+          {
+            "color": "Noir / Rouge",
+            "quantity": 10
+          }
+        ]
+      },
+      {
+        "size": "M",
+        "colors": [
+          {
+            "color": "Noir / Rouge",
+            "quantity": 10
+          }
+        ]
+      },
+      {
+        "size": "L",
+        "colors": [
+          {
+            "color": "Noir / Rouge",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-pk-fc1051-12",
-    "name": "Gants Pakka FC 1051 12oz",
-    "category": "gants",
+    "id": "pt-pk-shpa20",
+    "name": "Protège-Tibias Pakka SHPA20",
+    "category": "protege_tibias",
     "brand": "Pakka",
-    "model": "FC 1051",
-    "size": "12 oz",
-    "color": "Couleurs Différentes",
-    "stock": 5,
+    "model": "SHPA20",
     "minStockAlert": 3,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PK-1051-12OZ",
-    "description": "Gants 12oz modèle FC 1051 pour séances club régulières.",
+    "barcode": "PK-SHPA20",
+    "description": "Protège-tibias semi-rigides Pakka SHPA20 avec mousse haute densité sur l’arête tibiale.",
+    "sizes": [
+      {
+        "size": "M",
+        "colors": [
+          {
+            "color": "Rouge",
+            "quantity": 3
+          },
+          {
+            "color": "Gris",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "size": "L",
+        "colors": [
+          {
+            "color": "Rouge",
+            "quantity": 3
+          },
+          {
+            "color": "Gris",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "size": "XL",
+        "colors": [
+          {
+            "color": "Rouge",
+            "quantity": 2
+          },
+          {
+            "color": "Gris",
+            "quantity": 2
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "gnt-ftx-12-blanc-noir",
-    "name": "Gants Fairtex BXF A44 12oz Blanc / Noir",
-    "category": "gants",
-    "brand": "Fairtex",
-    "model": "BXF A44",
-    "size": "12 oz",
-    "color": "Blanc / Noir",
-    "stock": 1,
-    "minStockAlert": 1,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "FTX-A44-12-WN",
-    "description": "Gants Muay Thai / Kickboxing Fairtex BXF A44 cuir véritable.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-ftx-14-blanc-noir",
-    "name": "Gants Fairtex BXF A44 14oz Blanc / Noir",
-    "category": "gants",
-    "brand": "Fairtex",
-    "model": "BXF A44",
-    "size": "14 oz",
-    "color": "Blanc / Noir",
-    "stock": 1,
-    "minStockAlert": 1,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "FTX-A44-14-WN",
-    "description": "Gants Fairtex 14oz Blanc / Noir finition haut de gamme.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-ftx-12-noir-or",
-    "name": "Gants Fairtex BXF A44 12oz Noir / Or",
-    "category": "gants",
-    "brand": "Fairtex",
-    "model": "BXF A44",
-    "size": "12 oz",
-    "color": "Noir / Or",
-    "stock": 1,
-    "minStockAlert": 1,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "FTX-A44-12-NO",
-    "description": "Fairtex BXF A44 Noir et Or finition luxe compétition.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "gnt-ftx-14-noir-or",
-    "name": "Gants Fairtex BXF A44 14oz Noir / Or",
-    "category": "gants",
-    "brand": "Fairtex",
-    "model": "BXF A44",
-    "size": "14 oz",
-    "color": "Noir / Or",
-    "stock": 1,
-    "minStockAlert": 1,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "FTX-A44-14-NO",
-    "description": "Fairtex BXF A44 14oz Noir et Or, absorption de choc maximale.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-bs-2026-s",
-    "name": "Protège-Tibias BS FC 2026 Taille S",
-    "category": "protege_tibias",
-    "brand": "BS",
-    "model": "FC BS 2026",
-    "size": "S",
-    "color": "Noir / Rouge",
-    "stock": 10,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BS-2026-S",
-    "description": "Protège-tibias rigides BS FC 2026 taille S avec protection coup de pied.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-bs-2026-m",
-    "name": "Protège-Tibias BS FC 2026 Taille M",
-    "category": "protege_tibias",
-    "brand": "BS",
-    "model": "FC BS 2026",
-    "size": "M",
-    "color": "Noir / Rouge",
-    "stock": 10,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BS-2026-M",
-    "description": "Protège-tibias BS FC 2026 taille M avec double attache velcro renforcée.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-bs-2026-l",
-    "name": "Protège-Tibias BS FC 2026 Taille L",
-    "category": "protege_tibias",
-    "brand": "BS",
-    "model": "FC BS 2026",
-    "size": "L",
-    "color": "Noir / Rouge",
-    "stock": 5,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BS-2026-L",
-    "description": "Protège-tibias BS FC 2026 taille L grande protection tibiale.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-rouge-m",
-    "name": "Protège-Tibias Pakka SHPA20 Rouge Taille M",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "M",
-    "color": "Rouge",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-R-M",
-    "description": "Protège-tibias Pakka SHPA20 haute densité coloris Rouge.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-rouge-l",
-    "name": "Protège-Tibias Pakka SHPA20 Rouge Taille L",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "L",
-    "color": "Rouge",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-R-L",
-    "description": "Protège-tibias Pakka SHPA20 Rouge taille L.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-rouge-xl",
-    "name": "Protège-Tibias Pakka SHPA20 Rouge Taille XL",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "XL",
-    "color": "Rouge",
-    "stock": 2,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-R-XL",
-    "description": "Protège-tibias Pakka SHPA20 Rouge grand format XL.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-gris-m",
-    "name": "Protège-Tibias Pakka SHPA20 Gris Taille M",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "M",
-    "color": "Gris",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-G-M",
-    "description": "Protège-tibias Pakka SHPA20 coloris Gris anthracite taille M.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-gris-l",
-    "name": "Protège-Tibias Pakka SHPA20 Gris Taille L",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "L",
-    "color": "Gris",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-G-L",
-    "description": "Protège-tibias Pakka SHPA20 Gris taille L.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-shpa20-gris-xl",
-    "name": "Protège-Tibias Pakka SHPA20 Gris Taille XL",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "SHPA20",
-    "size": "XL",
-    "color": "Gris",
-    "stock": 2,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20-G-XL",
-    "description": "Protège-tibias Pakka SHPA20 Gris taille XL.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-bs1009-m",
-    "name": "Protège-Tibias Pakka BS1009 Taille M",
+    "id": "pt-pk-bs1009",
+    "name": "Protège-Tibias Pakka BS1009",
     "category": "protege_tibias",
     "brand": "Pakka",
     "model": "BS1009",
-    "size": "M",
-    "color": "Noir / Rouge / Bleu (Mixte)",
-    "stock": 5,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BS1009-M",
-    "description": "Protège-tibias Pakka modèle BS1009 taille M en couleurs mixtes.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-pk-bs1009-l",
-    "name": "Protège-Tibias Pakka BS1009 Taille L",
-    "category": "protege_tibias",
-    "brand": "Pakka",
-    "model": "BS1009",
-    "size": "L",
-    "color": "Noir / Rouge / Bleu (Mixte)",
-    "stock": 5,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BS1009-L",
-    "description": "Protège-tibias Pakka modèle BS1009 taille L en couleurs mixtes.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-noir-s",
-    "name": "Protège-Tibias Élastique (T9chira) Noir S",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "S",
-    "color": "Noir",
-    "stock": 5,
     "minStockAlert": 3,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "T9-BLK-S",
-    "description": "Chaussettes de protection tibias en tissu extensible rembourré mousse.",
+    "barcode": "PK-BS1009",
+    "description": "Protège-tibias Pakka BS1009 coloris mixte résistant.",
+    "sizes": [
+      {
+        "size": "M",
+        "colors": [
+          {
+            "color": "Noir / Rouge",
+            "quantity": 3
+          },
+          {
+            "color": "Bleu",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "L",
+        "colors": [
+          {
+            "color": "Noir / Rouge",
+            "quantity": 3
+          },
+          {
+            "color": "Bleu",
+            "quantity": 2
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "pt-t9-noir-m",
-    "name": "Protège-Tibias Élastique (T9chira) Noir M",
+    "id": "pt-t9-elastic",
+    "name": "Protège-Tibias Élastique (T9chira)",
     "category": "protege_tibias",
     "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "M",
-    "color": "Noir",
-    "stock": 5,
-    "minStockAlert": 3,
+    "model": "T9chira Club Elastic",
+    "minStockAlert": 5,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "T9-BLK-M",
-    "description": "Protège-tibias chaussette Noir taille M facile à enfiler.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-noir-l",
-    "name": "Protège-Tibias Élastique (T9chira) Noir L",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "L",
-    "color": "Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-BLK-L",
-    "description": "Protège-tibias chaussette Noir taille L.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-noir-xl",
-    "name": "Protège-Tibias Élastique (T9chira) Noir XL",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "XL",
-    "color": "Noir",
-    "stock": 10,
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-BLK-XL",
-    "description": "Protège-tibias chaussette Noir grand format XL.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-bleu-s",
-    "name": "Protège-Tibias Élastique (T9chira) Bleu S",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "S",
-    "color": "Bleu",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-BLU-S",
-    "description": "Chaussettes de protection tibiale couleur Bleu taille S.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-bleu-m",
-    "name": "Protège-Tibias Élastique (T9chira) Bleu M",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "M",
-    "color": "Bleu",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-BLU-M",
-    "description": "Chaussettes tibias Bleu taille M.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-bleu-l",
-    "name": "Protège-Tibias Élastique (T9chira) Bleu L",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "L",
-    "color": "Bleu",
-    "stock": 3,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-BLU-L",
-    "description": "Chaussettes tibias Bleu taille L.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-rouge-s",
-    "name": "Protège-Tibias Élastique (T9chira) Rouge S",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "S",
-    "color": "Rouge",
-    "stock": 2,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-RED-S",
-    "description": "Chaussettes tibias Rouge taille S.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-rouge-m",
-    "name": "Protège-Tibias Élastique (T9chira) Rouge M",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "M",
-    "color": "Rouge",
-    "stock": 2,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-RED-M",
-    "description": "Chaussettes tibias Rouge taille M.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "pt-t9-rouge-l",
-    "name": "Protège-Tibias Élastique (T9chira) Rouge L",
-    "category": "protege_tibias",
-    "brand": "Standard Club",
-    "model": "T9chira Élastique",
-    "size": "L",
-    "color": "Rouge",
-    "stock": 2,
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "T9-RED-L",
-    "description": "Chaussettes tibias Rouge taille L.",
+    "barcode": "PT-T9CHIRA",
+    "description": "Chaussettes de protection tibias/pieds en coton élastique tubulaire lavable en machine.",
+    "sizes": [
+      {
+        "size": "S",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "M",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "L",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 3
+          },
+          {
+            "color": "Rouge",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "size": "XL",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 10
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -750,14 +542,30 @@
     "category": "protege_dents",
     "brand": "Baklee",
     "model": "BK 035",
-    "size": "Adulte",
-    "color": "Couleurs Différentes",
-    "stock": 20,
     "minStockAlert": 5,
     "costPrice": 0,
     "sellingPrice": 0,
     "barcode": "BAK-BK035",
-    "description": "Protège-dents thermoformable Baklee BK 035 avec étui antibactérien.",
+    "description": "Protège-dents thermo-moulable avec boîte hygiénique de rangement.",
+    "sizes": [
+      {
+        "size": "Adulte",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 10
+          },
+          {
+            "color": "Blanc",
+            "quantity": 5
+          },
+          {
+            "color": "Bleu",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -766,15 +574,27 @@
     "name": "Protège-Dents Venum Challenger Gel",
     "category": "protege_dents",
     "brand": "Venum",
-    "model": "Challenger",
-    "size": "Adulte",
-    "color": "Différentes Couleurs",
-    "stock": 15,
-    "minStockAlert": 5,
+    "model": "Challenger Gel",
+    "minStockAlert": 4,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "VNM-PD-CH",
-    "description": "Protège-dents Venum Challenger à structure gel pour respiration facilitée.",
+    "barcode": "VNM-PD-CHALL",
+    "description": "Cadre gel Nextfit et canal respiratoire optimisé pour les combats intenses.",
+    "sizes": [
+      {
+        "size": "Adulte",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 8
+          },
+          {
+            "color": "Rouge",
+            "quantity": 7
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -782,67 +602,78 @@
     "id": "pd-normale-standard",
     "name": "Protège-Dents Simple Standard",
     "category": "protege_dents",
-    "brand": "Standard",
+    "brand": "Standard Club",
     "model": "Classique",
-    "size": "Standard",
-    "color": "Rouge / Noir / Bleu / Orange",
-    "stock": 50,
-    "minStockAlert": 15,
+    "minStockAlert": 10,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "PD-STD-MIX",
-    "description": "Protège-dents d’entraînement économique thermoformable à l’eau bouillante.",
+    "barcode": "PD-SIMPLE-STD",
+    "description": "Protège-dents simple arcade standard pour débutants (taille unique standard).",
+    "sizes": [
+      {
+        "colors": [
+          {
+            "color": "Rouge",
+            "quantity": 15
+          },
+          {
+            "color": "Noir",
+            "quantity": 15
+          },
+          {
+            "color": "Bleu",
+            "quantity": 10
+          },
+          {
+            "color": "Orange",
+            "quantity": 10
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
   {
-    "id": "coq-pro-s",
-    "name": "Coquille de Protection Homme Taille S",
+    "id": "coq-pro",
+    "name": "Coquille de Protection Homme Anatomique",
     "category": "coquilles",
     "brand": "Standard Pro",
     "model": "Anatomique Cup",
-    "size": "S",
-    "color": "Noir",
-    "stock": 10,
     "minStockAlert": 4,
     "costPrice": 0,
     "sellingPrice": 0,
-    "barcode": "COQ-BLK-S",
-    "description": "Slip de maintien avec coquille anatomique ventilée amovible taille S.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "coq-pro-m",
-    "name": "Coquille de Protection Homme Taille M",
-    "category": "coquilles",
-    "brand": "Standard Pro",
-    "model": "Anatomique Cup",
-    "size": "M",
-    "color": "Noir",
-    "stock": 15,
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "COQ-BLK-M",
-    "description": "Coquille kickboxing & sports de combat taille M ceinture élastique confort.",
-    "createdAt": "2026-10-01T08:00:00.000Z",
-    "updatedAt": "2026-10-01T08:00:00.000Z"
-  },
-  {
-    "id": "coq-pro-l",
-    "name": "Coquille de Protection Homme Taille L",
-    "category": "coquilles",
-    "brand": "Standard Pro",
-    "model": "Anatomique Cup",
-    "size": "L",
-    "color": "Noir",
-    "stock": 5,
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "COQ-BLK-L",
-    "description": "Coquille de protection taille L avec protection périphérique en gel.",
+    "barcode": "COQ-PRO-BLK",
+    "description": "Coquille kickboxing & sports de combat avec ceinture élastique confort et bords en gel.",
+    "sizes": [
+      {
+        "size": "S",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 10
+          }
+        ]
+      },
+      {
+        "size": "M",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 15
+          }
+        ]
+      },
+      {
+        "size": "L",
+        "colors": [
+          {
+            "color": "Noir",
+            "quantity": 5
+          }
+        ]
+      }
+    ],
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   }

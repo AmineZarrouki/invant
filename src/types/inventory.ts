@@ -6,15 +6,24 @@ export type EquipmentCategory =
   | 'coquilles'
   | 'autres';
 
+export interface ColorStock {
+  color: string;
+  quantity: number;
+}
+
+export interface SizeVariant {
+  size?: string; // Taille (e.g. "12 oz", "3,5m", "M", "L", etc. - Optional if no size)
+  colors: ColorStock[]; // Quantities for each color of this size
+}
+
 export interface Equipment {
   id: string;
   name: string;
   category: EquipmentCategory;
   brand: string;
   model?: string;
-  size: string; // e.g. "12 oz", "3.5m", "M", "L", "XL"
-  color: string;
-  stock: number;
+  sizes: SizeVariant[]; // For each taille (if there is one), quantity for each color
+  stock?: number; // Dynamically computed total units in stock (for UI/display, NOT saved in JSON)
   minStockAlert: number;
   costPrice: number; // Prix d'achat
   sellingPrice: number; // Prix de vente
@@ -30,8 +39,8 @@ export interface Sale {
   equipmentName: string;
   category: EquipmentCategory;
   brand: string;
-  size: string;
-  color: string;
+  size?: string;
+  color?: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -50,8 +59,7 @@ export interface DeletionLog {
   category: EquipmentCategory;
   brand: string;
   model?: string;
-  size: string;
-  color: string;
+  sizes: SizeVariant[];
   stockAtDeletion: number;
   costPrice: number;
   sellingPrice: number;
@@ -59,6 +67,17 @@ export interface DeletionLog {
   description?: string;
   deletedAt: string; // ISO string
   deletedReason?: string;
+}
+
+/** Helper function to calculate total stock from sizes */
+export function getEquipmentTotalStock(equipment: Equipment): number {
+  if (!equipment.sizes || !Array.isArray(equipment.sizes)) {
+    return (equipment as any).stock || 0;
+  }
+  return equipment.sizes.reduce((total, sz) => {
+    if (!sz.colors || !Array.isArray(sz.colors)) return total;
+    return total + sz.colors.reduce((cTotal, c) => cTotal + (Number(c.quantity) || 0), 0);
+  }, 0);
 }
 
 export interface InventoryStats {

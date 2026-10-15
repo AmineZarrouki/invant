@@ -332,16 +332,21 @@ export default function DashboardView({
               >
                 <div className="min-w-0">
                   <h4 className="text-xs font-bold text-white truncate">{item.name}</h4>
-                  <div className="text-[11px] text-zinc-400 mt-0.5">
-                    {item.size} · {item.color}
+                  <div className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                    {item.brand}
+                    {item.sizes && item.sizes.length > 0 && (
+                      <span className="text-zinc-500 ml-1">
+                        · {item.sizes.map((sz) => sz.size ? `${sz.size}: ${sz.colors.map((c) => `${c.color} (${c.quantity})`).join(', ')}` : sz.colors.map((c) => `${c.color} (${c.quantity})`).join(', ')).join(' | ')}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-1">
                     <span
                       className={`text-xs font-bold ${
-                        item.stock === 0 ? 'text-red-400' : 'text-amber-400'
+                        (item.stock ?? 0) === 0 ? 'text-red-400' : 'text-amber-400'
                       }`}
                     >
-                      {item.stock === 0 ? 'Rupture (0 pc)' : `${item.stock} restant(s)`}
+                      {(item.stock ?? 0) === 0 ? 'Rupture (0 pc)' : `${item.stock ?? 0} restant(s)`}
                     </span>
                   </div>
                 </div>

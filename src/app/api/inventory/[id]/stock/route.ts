@@ -14,7 +14,10 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Delta invalide' }, { status: 400 });
     }
 
-    const updated = await adjustEquipmentStock(id, delta);
+    const updated = await adjustEquipmentStock(id, delta, {
+      size: body.size,
+      color: body.color,
+    });
     if (!updated) {
       return NextResponse.json({ success: false, error: 'Équipement non trouvé' }, { status: 404 });
     }
