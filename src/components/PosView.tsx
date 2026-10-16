@@ -14,12 +14,15 @@ import {
   User,
   FileText,
   Flame,
-  Printer,
   X,
   Layers,
+  Sparkles,
+  HelpCircle,
+  Check,
 } from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { formatCurrency, CurrencyCode, CURRENCY_CONFIG } from '@/lib/currency';
+import { getColorSwatch, CATEGORY_CONFIG } from '@/lib/categoryColors';
 
 interface PosViewProps {
   equipment: Equipment[];
@@ -180,7 +183,6 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
     if (cart.length === 0) return;
     setLoading(true);
     try {
-      // Process each cart item through the sales API
       for (const item of cart) {
         await onRecordSale({
           equipmentId: item.equipment.id,
@@ -190,7 +192,7 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
           unitPrice: item.unitPrice,
           buyerName: buyerName.trim() || 'Client Dojo',
           paymentMethod,
-          notes: notes.trim() || 'Vente Caisse Rapide',
+          notes: notes.trim() || 'Vente Caisse',
         });
       }
 
@@ -212,311 +214,358 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
-      {/* Product Selection Catalog (Left 7 Cols) */}
-      <div className="lg:col-span-7 space-y-4">
-        {/* Header & Search */}
-        <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <Flame className="w-5 h-5 text-red-500" />
-              <span>Catalogue Rapide • Caisse</span>
+    <div className="space-y-4 animate-fadeIn text-[#f8fafc]">
+      {/* Friendly Guide Banner */}
+      <div className="p-4 rounded-2xl bg-[#131c31] border border-[#22314e] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold">
+            <ShoppingCart className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <span>Caisse Rapide · Encaisser une vente</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">
+                Étape par étape
+              </span>
             </h2>
-            <span className="text-xs text-zinc-400 font-semibold">
-              {availableItems.length} référence(s) disponible(s)
-            </span>
-          </div>
-
-          <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Rechercher par nom, taille ou couleur (12oz, M, Noir, Gold...)"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
-            />
-          </div>
-
-          {/* Quick Categories */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-            {[
-              { id: 'all', label: 'Tous' },
-              { id: 'gants', label: 'Gants' },
-              { id: 'protege_tibias', label: 'Tibias' },
-              { id: 'bandes', label: 'Bandes' },
-              { id: 'protege_dents', label: 'Dents' },
-              { id: 'coquilles', label: 'Coquilles' },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors border ${
-                  categoryFilter === cat.id
-                    ? 'bg-zinc-100 text-zinc-950 font-bold border-zinc-100 shadow-sm'
-                    : 'bg-zinc-950 text-zinc-400 hover:text-zinc-200 border-zinc-800 hover:bg-zinc-900'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            <p className="text-xs text-slate-300 mt-0.5">
+              1️⃣ Cliquez sur un article à gauche → 2️⃣ Choisissez la taille/couleur → 3️⃣ Cliquez sur le gros bouton vert à droite pour valider !
+            </p>
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
-          {availableItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleProductCardClick(item)}
-              className="text-left p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 hover:border-red-500/60 hover:bg-zinc-850 transition-all flex flex-col justify-between group active:scale-95"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1">
-                  <span className="font-bold text-zinc-300">{item.brand}</span>
-                  <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-white font-bold">
-                    {item.stock ?? 0} dispo
-                  </span>
-                </div>
-                <h4 className="text-xs font-bold text-white group-hover:text-red-400 line-clamp-2">
-                  {item.name}
-                </h4>
-                {/* Variants preview */}
-                <div className="text-[11px] text-zinc-400 mt-1 flex flex-wrap gap-1">
-                  {item.sizes?.map((sz, i) => (
-                    <span
-                      key={i}
-                      className="px-1.5 py-0.2 bg-zinc-950 rounded text-[10px] text-zinc-300 border border-zinc-800"
-                    >
-                      {sz.size ? `${sz.size}: ` : ''}
-                      {sz.colors.map((c) => c.color).join(', ')}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-3 pt-2 border-t border-zinc-800/80 flex items-center justify-between">
-                <span className="text-xs font-black text-emerald-400">
-                  {formatCurrency(item.sellingPrice, currency)}
-                </span>
-                <span className="w-6 h-6 rounded-lg bg-zinc-800 group-hover:bg-red-600 text-zinc-300 group-hover:text-white flex items-center justify-center font-bold text-xs transition-colors">
-                  +
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
+        {lastSaleReceipt && (
+          <div className="px-3 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/60 text-emerald-300 text-xs font-bold flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>Dernière vente : {formatCurrency(lastSaleReceipt.total, currency)}</span>
+          </div>
+        )}
       </div>
 
-      {/* Cart & Checkout Panel (Right 5 Cols) */}
-      <div className="lg:col-span-5 bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between shadow-2xl">
-        <div>
-          {/* Cart Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-red-500" />
-              <h3 className="text-base font-bold text-white">Ticket de Caisse en cours</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Product Selection Catalog (Left 7 Cols) */}
+        <div className="lg:col-span-7 space-y-4">
+          {/* Search & Category Pills */}
+          <div className="p-4 rounded-3xl bg-[#131c31] border border-[#22314e] shadow-xl space-y-3">
+            <div className="relative">
+              <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="🔍 Rechercher un article à vendre (ex: 12oz, Venum, Rouge)..."
+                className="w-full bg-[#0e1628] border border-[#263756] rounded-2xl pl-12 pr-4 py-3 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-red-500 font-medium"
+              />
             </div>
-            {cart.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-xs text-zinc-400 hover:text-red-400 flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Vider
-              </button>
-            )}
+
+            {/* Quick Categories */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+              {[
+                { id: 'all', label: 'Tous', icon: '🥊' },
+                { id: 'gants', label: 'Gants', icon: '🥊' },
+                { id: 'protege_tibias', label: 'Tibias', icon: '🦵' },
+                { id: 'bandes', label: 'Bandes', icon: '🎗️' },
+                { id: 'protege_dents', label: 'Dents', icon: '🦷' },
+                { id: 'coquilles', label: 'Coquilles', icon: '🛡️' },
+                { id: 'autres', label: 'Autres', icon: '⚡' },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold whitespace-nowrap transition-all border ${
+                    categoryFilter === cat.id
+                      ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/30'
+                      : 'bg-[#0e1628] text-slate-300 hover:text-white border-[#22314e] hover:bg-[#18233d]'
+                  }`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Cart Item List */}
-          {cart.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
-              <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-xs font-medium">Le panier de caisse est vide.</p>
-              <p className="text-[11px] text-zinc-600 mt-1">
-                Cliquez sur un article du catalogue pour l’ajouter au ticket.
+          {/* Product Grid */}
+          {availableItems.length === 0 ? (
+            <div className="p-12 text-center text-slate-400 bg-[#131c31] border border-[#22314e] rounded-3xl">
+              <p className="text-sm font-bold text-white">Aucun article disponible</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Tous les articles correspondants sont soit épuisés soit introuvables.
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
-              {cart.map((line) => (
-                <div
-                  key={line.cartLineId}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs"
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[640px] overflow-y-auto pr-1">
+              {availableItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleProductCardClick(item)}
+                  className="text-left p-4 rounded-2xl bg-[#131c31] border border-[#22314e] hover:border-emerald-500/80 hover:bg-[#18233d] transition-all flex flex-col justify-between group active:scale-95 shadow-lg relative"
                 >
-                  <div className="min-w-0 flex-1 pr-2">
-                    <h5 className="font-bold text-white truncate">{line.equipment.name}</h5>
-                    <div className="text-[11px] text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                      {line.size && (
-                        <span className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-                          {line.size}
-                        </span>
-                      )}
-                      {line.color && (
-                        <span className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">
-                          {line.color}
-                        </span>
-                      )}
-                      <span>·</span>
-                      <span className="text-emerald-400 font-bold">
-                        {formatCurrency(line.unitPrice, currency)}/u
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-slate-300 mb-1.5">
+                      <span className="font-bold text-slate-200">{item.brand || 'Dojo'}</span>
+                      <span className="px-2 py-0.5 rounded-lg bg-[#0e1628] text-emerald-300 font-black border border-emerald-500/30">
+                        🟢 {item.stock ?? 0} dispo
                       </span>
+                    </div>
+
+                    <h4 className="text-xs sm:text-sm font-black text-white group-hover:text-emerald-300 line-clamp-2 leading-snug">
+                      {item.name}
+                    </h4>
+
+                    {/* Variants preview */}
+                    <div className="text-xs text-slate-300 mt-2 flex flex-wrap gap-1">
+                      {item.sizes?.map((sz, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#0e1628] rounded-md text-[11px] text-slate-300 border border-[#22314e]"
+                        >
+                          {sz.size && sz.size !== 'Unique' ? (
+                            <strong className="text-rose-400">{sz.size}: </strong>
+                          ) : null}
+                          <span>{sz.colors.map((c) => c.color).join(', ')}</span>
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Quantity & Delete */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
-                      <button
-                        onClick={() => updateCartQuantity(line.cartLineId, -1)}
-                        className="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center font-bold text-xs"
-                      >
-                        <Minus className="w-3 h-3" />
-                      </button>
-                      <span className="w-7 text-center font-bold text-white text-xs">
-                        {line.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateCartQuantity(line.cartLineId, 1)}
-                        disabled={line.quantity >= line.maxStock}
-                        className="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center font-bold text-xs disabled:opacity-30"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    <div className="text-right w-16">
-                      <span className="font-black text-white text-xs block">
-                        {formatCurrency(line.quantity * line.unitPrice, currency)}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => removeFromCart(line.cartLineId)}
-                      className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="mt-4 pt-2.5 border-t border-[#22314e] flex items-center justify-between">
+                    <span className="text-sm font-black text-emerald-400">
+                      {formatCurrency(item.sellingPrice, currency)}
+                    </span>
+                    <span className="px-3 py-1.5 rounded-xl bg-emerald-600 group-hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-1 shadow-md shadow-emerald-600/30 transition-all">
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Ajouter</span>
+                    </span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Checkout Form & Total */}
-        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-3">
-          {/* Total Row */}
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs uppercase font-bold tracking-wider text-zinc-400">
-              Total à Encaisser :
-            </span>
-            <span className="text-2xl font-black text-emerald-400">
-              {formatCurrency(cartTotal, currency)}
-            </span>
-          </div>
+        {/* Cart & Checkout Panel (Right 5 Cols) */}
+        <div className="lg:col-span-5 bg-[#131c31] border border-[#22314e] rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+          <div>
+            {/* Cart Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-[#22314e] mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center font-bold">
+                  <ShoppingCart className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Ticket de Caisse</h3>
+                  <p className="text-xs text-slate-400">{cart.length} ligne(s) sélectionnée(s)</p>
+                </div>
+              </div>
 
-          {/* Payment Method Selector */}
-          <div className="grid grid-cols-4 gap-1">
-            {[
-              { id: 'cash', label: 'Espèces', icon: Banknote },
-              { id: 'card', label: 'Carte', icon: CreditCard },
-              { id: 'transfer', label: 'Virement', icon: Landmark },
-              { id: 'autre', label: 'Autre', icon: CheckCircle },
-            ].map((m) => {
-              const Icon = m.icon;
-              return (
+              {cart.length > 0 && (
                 <button
-                  key={m.id}
-                  onClick={() => setPaymentMethod(m.id as any)}
-                  className={`py-1.5 px-2 rounded-xl border flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
-                    paymentMethod === m.id
-                      ? 'bg-zinc-800 border-emerald-500 text-white'
-                      : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
-                  }`}
+                  onClick={clearCart}
+                  className="text-xs text-slate-400 hover:text-rose-400 flex items-center gap-1 font-bold py-1 px-2 rounded-lg hover:bg-rose-950/40 transition-colors"
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{m.label}</span>
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Tout vider</span>
                 </button>
-              );
-            })}
+              )}
+            </div>
+
+            {/* Cart Item List */}
+            {cart.length === 0 ? (
+              <div className="text-center py-12 text-slate-400 border-2 border-dashed border-[#22314e] rounded-2xl p-6">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-30 text-slate-400" />
+                <p className="text-sm font-bold text-slate-200">Le ticket est vide pour l'instant</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                  Cliquez sur un article à gauche dans le catalogue pour l'ajouter à la commande.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
+                {cart.map((line) => (
+                  <div
+                    key={line.cartLineId}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-[#0e1628] border border-[#22314e] text-xs shadow-sm"
+                  >
+                    <div className="min-w-0 flex-1 pr-2">
+                      <h5 className="font-black text-white truncate text-xs sm:text-sm">
+                        {line.equipment.name}
+                      </h5>
+                      <div className="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
+                        {line.size && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#131c31] border border-[#22314e] text-rose-300 font-bold">
+                            {line.size}
+                          </span>
+                        )}
+                        {line.color && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#131c31] border border-[#22314e] text-slate-200">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-white/20"
+                              style={{ background: getColorSwatch(line.color) }}
+                            />
+                            <span>{line.color}</span>
+                          </span>
+                        )}
+                        <span className="text-emerald-400 font-bold ml-1">
+                          {formatCurrency(line.unitPrice, currency)}/u
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Quantity & Delete */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-[#131c31] rounded-xl p-1 border border-[#22314e]">
+                        <button
+                          onClick={() => updateCartQuantity(line.cartLineId, -1)}
+                          className="w-7 h-7 rounded-lg bg-[#1e2c47] hover:bg-[#283b5e] text-white flex items-center justify-center font-black text-xs transition-colors"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="w-8 text-center font-black text-white text-sm">
+                          {line.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateCartQuantity(line.cartLineId, 1)}
+                          disabled={line.quantity >= line.maxStock}
+                          className="w-7 h-7 rounded-lg bg-[#1e2c47] hover:bg-[#283b5e] text-white flex items-center justify-center font-black text-xs disabled:opacity-30 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="text-right w-16">
+                        <span className="font-black text-emerald-400 text-sm block">
+                          {formatCurrency(line.quantity * line.unitPrice, currency)}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => removeFromCart(line.cartLineId)}
+                        className="p-1.5 text-slate-400 hover:text-rose-400 transition-colors"
+                        title="Retirer cette ligne"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Client & Notes */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="relative">
-              <User className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Nom adhérent / client"
-                value={buyerName}
-                onChange={(e) => setBuyerName(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-8 pr-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
-              />
-            </div>
-            <div className="relative">
-              <FileText className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Note / Remarque"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-8 pr-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
-              />
-            </div>
-          </div>
-
-          {/* Checkout Button */}
-          <button
-            onClick={handleCheckout}
-            disabled={cart.length === 0 || loading}
-            className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-md transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <CheckCircle className="w-4 h-4" />
-            <span>
-              {loading ? 'Validation en cours...' : `Valider l'Encaissement (${formatCurrency(cartTotal, currency)})`}
-            </span>
-          </button>
-
-          {/* Last Sale Receipt pill */}
-          {lastSaleReceipt && (
-            <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 text-xs flex items-center justify-between text-zinc-400">
+          {/* Checkout Form & Total */}
+          <div className="mt-5 pt-4 border-t border-[#22314e] space-y-4">
+            {/* Total Row */}
+            <div className="p-3.5 rounded-2xl bg-[#0e1628] border border-[#22314e] flex items-baseline justify-between">
               <div>
-                <span className="font-bold text-white">Dernière vente réussie :</span>{' '}
-                <span>
-                  {lastSaleReceipt.items.length} article(s) pour {lastSaleReceipt.buyer} (
-                  {formatCurrency(lastSaleReceipt.total, currency)})
+                <span className="text-xs uppercase font-black tracking-wider text-slate-400 block">
+                  Total à payer
+                </span>
+                <span className="text-xs text-slate-400 font-medium">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} article(s) au total
                 </span>
               </div>
-              <span className="text-[10px] text-zinc-500 font-mono">{lastSaleReceipt.date}</span>
+              <span className="text-3xl font-black text-emerald-400">
+                {formatCurrency(cartTotal, currency)}
+              </span>
             </div>
-          )}
+
+            {/* Payment Method Selector */}
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-1.5">
+                Moyen de règlement :
+              </span>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { id: 'cash', label: 'Espèces', icon: Banknote },
+                  { id: 'card', label: 'Carte', icon: CreditCard },
+                  { id: 'transfer', label: 'Virement', icon: Landmark },
+                  { id: 'autre', label: 'Autre', icon: CheckCircle },
+                ].map((m) => {
+                  const Icon = m.icon;
+                  const isSelected = paymentMethod === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => setPaymentMethod(m.id as any)}
+                      className={`py-2.5 px-2 rounded-2xl border flex flex-col items-center gap-1 text-xs font-bold transition-all ${
+                        isSelected
+                          ? 'bg-emerald-600 border-emerald-400 text-white shadow-md shadow-emerald-600/30'
+                          : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:text-white hover:bg-[#18233d]'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span>{m.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Client & Notes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="relative">
+                <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Nom de l'adhérent (optionnel)"
+                  value={buyerName}
+                  onChange={(e) => setBuyerName(e.target.value)}
+                  className="w-full bg-[#0e1628] border border-[#22314e] rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+              <div className="relative">
+                <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Remarque (ex: Payé en avance)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full bg-[#0e1628] border border-[#22314e] rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Giant Checkout Button */}
+            <button
+              onClick={handleCheckout}
+              disabled={cart.length === 0 || loading}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black text-base shadow-xl shadow-emerald-600/30 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+            >
+              <Check className="w-6 h-6 stroke-[3]" />
+              <span>
+                {loading
+                  ? 'Encaissement en cours...'
+                  : `Valider l'Encaissement (${formatCurrency(cartTotal, currency)})`}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* VARIANT PICKER MODAL */}
+      {/* VARIANT PICKER MODAL (When tapping an item with multiple sizes/colors) */}
       {pickingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl text-zinc-100 animate-scaleUp">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#101828] border-2 border-emerald-500/40 rounded-3xl w-full max-w-sm p-6 space-y-5 shadow-2xl text-slate-100 animate-scaleUp">
+            <div className="flex items-center justify-between border-b border-[#22314e] pb-3">
               <div>
-                <h4 className="text-sm font-bold text-white">{pickingItem.name}</h4>
-                <p className="text-xs text-zinc-400">Choisir la taille et la couleur</p>
+                <h4 className="text-base font-black text-white">{pickingItem.name}</h4>
+                <p className="text-xs text-slate-400">Sélectionnez la taille et la couleur désirées</p>
               </div>
               <button
                 onClick={() => setPickingItem(null)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#1e2c47]"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Size selection if has sizes */}
             {pickingItem.sizes && pickingItem.sizes.length > 1 && (
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                  Taille :
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                  1. Choisir la taille :
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {pickingItem.sizes.map((sz, idx) => (
                     <button
                       key={idx}
@@ -526,10 +575,10 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                           setPickerColor(sz.colors[0].color);
                         }
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all border ${
                         pickerSizeIndex === idx
-                          ? 'bg-red-600 text-white'
-                          : 'bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                          ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/30'
+                          : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:border-[#33466d]'
                       }`}
                     >
                       {sz.size || 'Unique'}
@@ -541,24 +590,28 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
 
             {/* Color selection */}
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                Couleur :
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                2. Choisir la couleur :
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {pickingItem.sizes?.[pickerSizeIndex]?.colors.map((c) => {
                   const isSelected = pickerColor === c.color;
                   return (
                     <button
                       key={c.color}
                       onClick={() => setPickerColor(c.color)}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border ${
                         isSelected
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/40'
+                          : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:border-[#33466d]'
                       }`}
                     >
+                      <span
+                        className="w-3 h-3 rounded-full border border-white/20 shrink-0"
+                        style={{ background: getColorSwatch(c.color) }}
+                      />
                       <span>{c.color}</span>
-                      <span className="px-1.5 py-0.2 rounded bg-black/40 text-[10px] font-bold">
+                      <span className="px-1.5 py-0.2 rounded-md bg-black/40 text-xs font-black">
                         {c.quantity} pcs
                       </span>
                     </button>
@@ -567,19 +620,27 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
               </div>
             </div>
 
+            {/* Price reminder */}
+            <div className="p-3 rounded-2xl bg-[#0e1628] border border-[#22314e] flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-300">Prix unitaire :</span>
+              <span className="text-base font-black text-emerald-400">
+                {formatCurrency(pickingItem.sellingPrice, currency)}
+              </span>
+            </div>
+
             {/* Confirm add to cart */}
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-zinc-800">
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#22314e]">
               <button
                 onClick={() => setPickingItem(null)}
-                className="px-3 py-1.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold"
+                className="px-4 py-2.5 rounded-xl bg-[#1e2c47] text-slate-200 text-xs font-bold border border-[#2e4166]"
               >
                 Annuler
               </button>
               <button
                 onClick={handlePickerConfirm}
-                className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Ajouter au Ticket</span>
               </button>
             </div>

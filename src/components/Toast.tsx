@@ -24,10 +24,10 @@ export default function Toast({ toasts, onDismiss }: ToastProps) {
           key={toast.id}
           className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-xl backdrop-blur-md animate-fadeIn ${
             toast.type === 'success'
-              ? 'bg-emerald-950/90 border-emerald-800 text-emerald-200'
+              ? 'bg-emerald-950/95 border-emerald-500/80 text-emerald-100 shadow-emerald-950/50'
               : toast.type === 'error'
-              ? 'bg-red-950/90 border-red-800 text-red-200'
-              : 'bg-zinc-900/90 border-zinc-800 text-zinc-200'
+              ? 'bg-rose-950/95 border-rose-500/80 text-rose-100 shadow-rose-950/50'
+              : 'bg-[#131c31]/95 border-[#263756] text-slate-100 shadow-black/50'
           }`}
         >
           <div className="flex items-center gap-2.5">

@@ -5,11 +5,6 @@
     "category": "bandes",
     "brand": "Standard Pro",
     "model": "Élastique Pro",
-    "minStockAlert": 10,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BND-STD-PRO",
-    "description": "Bandes de protection kickboxing en coton extensible avec fermeture velcro résistante.",
     "sizes": [
       {
         "size": "3,5m",
@@ -39,6 +34,11 @@
         ]
       }
     ],
+    "minStockAlert": 10,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "BND-STD-PRO",
+    "description": "Bandes de protection kickboxing en coton extensible avec fermeture velcro résistante.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -48,11 +48,6 @@
     "category": "gants",
     "brand": "Venum",
     "model": "Challenger",
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-CHALLENGER",
-    "description": "Gants de boxe Venum Challenger triple densité avec paume respirante.",
     "sizes": [
       {
         "size": "12 oz",
@@ -89,6 +84,11 @@
         ]
       }
     ],
+    "minStockAlert": 3,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "VNM-CHALLENGER",
+    "description": "Gants de boxe Venum Challenger triple densité avec paume respirante.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -98,11 +98,6 @@
     "category": "gants",
     "brand": "Baklee",
     "model": "FC Baklee",
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BAK-FC-BLK",
-    "description": "Gants de boxe Baklee FC pour entraînement quotidien et sparring.",
     "sizes": [
       {
         "size": "10 oz",
@@ -123,6 +118,11 @@
         ]
       }
     ],
+    "minStockAlert": 3,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "BAK-FC-BLK",
+    "description": "Gants de boxe Baklee FC pour entraînement quotidien et sparring.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -132,11 +132,6 @@
     "category": "gants",
     "brand": "Pakka",
     "model": "BX1010 Pro",
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BX1010",
-    "description": "Gants Pakka série pro BX1010, excellente qualité de finition et absorption des chocs.",
     "sizes": [
       {
         "size": "10 oz",
@@ -178,6 +173,11 @@
         ]
       }
     ],
+    "minStockAlert": 3,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PK-BX1010",
+    "description": "Gants Pakka série pro BX1010, excellente qualité de finition et absorption des chocs.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -187,11 +187,6 @@
     "category": "gants",
     "brand": "Pakka",
     "model": "FC 1041",
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-FC1041",
-    "description": "Gants de boxe format Junior et Enfant avec protection du pouce renforcée.",
     "sizes": [
       {
         "size": "4 oz",
@@ -220,6 +215,11 @@
         ]
       }
     ],
+    "minStockAlert": 4,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PK-FC1041",
+    "description": "Gants de boxe format Junior et Enfant avec protection du pouce renforcée.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -229,11 +229,6 @@
     "category": "gants",
     "brand": "Pakka",
     "model": "FC 1051",
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-FC1051",
-    "description": "Gants Pakka polyvalents pour frappe sur sac et travail aux paos.",
     "sizes": [
       {
         "size": "8 oz",
@@ -275,6 +270,11 @@
         ]
       }
     ],
+    "minStockAlert": 4,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PK-FC1051",
+    "description": "Gants Pakka polyvalents pour frappe sur sac et travail aux paos.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -284,11 +284,6 @@
     "category": "gants",
     "brand": "Fairtex",
     "model": "BXF A44",
-    "minStockAlert": 2,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "FTX-BXFA44",
-    "description": "Gants de boxe haut de gamme Fairtex, cuir véritable thaïlandais.",
     "sizes": [
       {
         "size": "12 oz",
@@ -317,6 +312,11 @@
         ]
       }
     ],
+    "minStockAlert": 2,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "FTX-BXFA44",
+    "description": "Gants de boxe haut de gamme Fairtex, cuir véritable thaïlandais.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -326,11 +326,6 @@
     "category": "protege_tibias",
     "brand": "BS",
     "model": "FC BS 2026",
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BS-FC2026",
-    "description": "Protège-tibias compétition BS FC 2026 double sangle velcro ergonomique.",
     "sizes": [
       {
         "size": "S",
@@ -360,6 +355,11 @@
         ]
       }
     ],
+    "minStockAlert": 4,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "BS-FC2026",
+    "description": "Protège-tibias compétition BS FC 2026 double sangle velcro ergonomique.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -369,11 +369,6 @@
     "category": "protege_tibias",
     "brand": "Pakka",
     "model": "SHPA20",
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-SHPA20",
-    "description": "Protège-tibias semi-rigides Pakka SHPA20 avec mousse haute densité sur l’arête tibiale.",
     "sizes": [
       {
         "size": "M",
@@ -415,6 +410,11 @@
         ]
       }
     ],
+    "minStockAlert": 3,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PK-SHPA20",
+    "description": "Protège-tibias semi-rigides Pakka SHPA20 avec mousse haute densité sur l’arête tibiale.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -424,11 +424,6 @@
     "category": "protege_tibias",
     "brand": "Pakka",
     "model": "BS1009",
-    "minStockAlert": 3,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PK-BS1009",
-    "description": "Protège-tibias Pakka BS1009 coloris mixte résistant.",
     "sizes": [
       {
         "size": "M",
@@ -457,6 +452,11 @@
         ]
       }
     ],
+    "minStockAlert": 3,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PK-BS1009",
+    "description": "Protège-tibias Pakka BS1009 coloris mixte résistant.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -466,11 +466,6 @@
     "category": "protege_tibias",
     "brand": "Standard Club",
     "model": "T9chira Club Elastic",
-    "minStockAlert": 5,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PT-T9CHIRA",
-    "description": "Chaussettes de protection tibias/pieds en coton élastique tubulaire lavable en machine.",
     "sizes": [
       {
         "size": "S",
@@ -533,6 +528,11 @@
         ]
       }
     ],
+    "minStockAlert": 5,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PT-T9CHIRA",
+    "description": "Chaussettes de protection tibias/pieds en coton élastique tubulaire lavable en machine.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -542,11 +542,6 @@
     "category": "protege_dents",
     "brand": "Baklee",
     "model": "BK 035",
-    "minStockAlert": 5,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "BAK-BK035",
-    "description": "Protège-dents thermo-moulable avec boîte hygiénique de rangement.",
     "sizes": [
       {
         "size": "Adulte",
@@ -566,6 +561,11 @@
         ]
       }
     ],
+    "minStockAlert": 5,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "BAK-BK035",
+    "description": "Protège-dents thermo-moulable avec boîte hygiénique de rangement.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -575,11 +575,6 @@
     "category": "protege_dents",
     "brand": "Venum",
     "model": "Challenger Gel",
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "VNM-PD-CHALL",
-    "description": "Cadre gel Nextfit et canal respiratoire optimisé pour les combats intenses.",
     "sizes": [
       {
         "size": "Adulte",
@@ -595,6 +590,11 @@
         ]
       }
     ],
+    "minStockAlert": 4,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "VNM-PD-CHALL",
+    "description": "Cadre gel Nextfit et canal respiratoire optimisé pour les combats intenses.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -604,11 +604,6 @@
     "category": "protege_dents",
     "brand": "Standard Club",
     "model": "Classique",
-    "minStockAlert": 10,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "PD-SIMPLE-STD",
-    "description": "Protège-dents simple arcade standard pour débutants (taille unique standard).",
     "sizes": [
       {
         "colors": [
@@ -631,6 +626,11 @@
         ]
       }
     ],
+    "minStockAlert": 10,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "PD-SIMPLE-STD",
+    "description": "Protège-dents simple arcade standard pour débutants (taille unique standard).",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   },
@@ -640,11 +640,6 @@
     "category": "coquilles",
     "brand": "Standard Pro",
     "model": "Anatomique Cup",
-    "minStockAlert": 4,
-    "costPrice": 0,
-    "sellingPrice": 0,
-    "barcode": "COQ-PRO-BLK",
-    "description": "Coquille kickboxing & sports de combat avec ceinture élastique confort et bords en gel.",
     "sizes": [
       {
         "size": "S",
@@ -674,6 +669,11 @@
         ]
       }
     ],
+    "minStockAlert": 4,
+    "costPrice": 0,
+    "sellingPrice": 0,
+    "barcode": "COQ-PRO-BLK",
+    "description": "Coquille kickboxing & sports de combat avec ceinture élastique confort et bords en gel.",
     "createdAt": "2026-10-01T08:00:00.000Z",
     "updatedAt": "2026-10-01T08:00:00.000Z"
   }

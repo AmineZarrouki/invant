@@ -10,6 +10,7 @@ import SettingsView from '@/components/SettingsView';
 import EquipmentModal from '@/components/EquipmentModal';
 import QuickSaleModal from '@/components/QuickSaleModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import EasyHelpModal from '@/components/EasyHelpModal';
 import Toast, { ToastMessage } from '@/components/Toast';
 import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
@@ -28,6 +29,7 @@ export default function Home() {
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [saleItem, setSaleItem] = useState<Equipment | null>(null);
   const [itemToDelete, setItemToDelete] = useState<Equipment | null>(null);
@@ -310,7 +312,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-[#0b0f19] text-[#f8fafc] flex flex-col font-sans selection:bg-red-600 selection:text-white">
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
@@ -322,6 +324,7 @@ export default function Home() {
           setEditingItem(null);
           setIsAddModalOpen(true);
         }}
+        onOpenHelpModal={() => setIsHelpModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -341,6 +344,11 @@ export default function Home() {
                 onNavigateToInventory={() => setActiveTab('inventory')}
                 onNavigateToPos={() => setActiveTab('pos')}
                 onNavigateToSales={() => setActiveTab('sales')}
+                onOpenAddModal={() => {
+                  setEditingItem(null);
+                  setIsAddModalOpen(true);
+                }}
+                onOpenHelpModal={() => setIsHelpModalOpen(true)}
               />
             )}
 
@@ -431,6 +439,17 @@ export default function Home() {
         equipment={itemToDelete}
         currency={currency}
         onConfirmDelete={handleConfirmDelete}
+      />
+
+      {/* Easy Beginner Help Modal */}
+      <EasyHelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        onNavigate={setActiveTab}
+        onOpenAddModal={() => {
+          setEditingItem(null);
+          setIsAddModalOpen(true);
+        }}
       />
 
       {/* Toast Notifications */}

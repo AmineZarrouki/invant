@@ -10,16 +10,19 @@ import {
   ShoppingBag,
   LayoutGrid,
   List,
-  AlertTriangle,
-  CheckCircle2,
   Package,
   Layers,
   ArrowUpDown,
   X,
+  PackagePlus,
+  RotateCcw,
+  Sparkles,
+  HelpCircle,
+  MoreVertical,
 } from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { formatCurrency, CurrencyCode } from '@/lib/currency';
-import { CATEGORY_CONFIG, getStockStatus } from '@/lib/categoryColors';
+import { CATEGORY_CONFIG, getStockStatus, getColorSwatch } from '@/lib/categoryColors';
 
 interface InventoryViewProps {
   equipment: Equipment[];
@@ -58,8 +61,9 @@ export default function InventoryView({
     'name' | 'stock-desc' | 'stock-asc' | 'price-desc' | 'price-asc'
   >('stock-desc');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [activeItemMenuId, setActiveItemMenuId] = useState<string | null>(null);
 
-  // Quick Restock Variant modal state
+  // Quick Restock Variant modal state with custom quantity support
   const [quickRestockState, setQuickRestockState] = useState<{
     item: Equipment;
     delta: number;
@@ -131,30 +135,32 @@ export default function InventoryView({
   );
 
   const categoryPills = [
-    { id: 'all', label: 'Tous les articles' },
+    { id: 'all', label: 'Tous les articles', icon: '🥊' },
     ...Object.entries(CATEGORY_CONFIG).map(([id, cfg]) => ({
       id,
       label: cfg.label,
+      icon:
+        id === 'gants'
+          ? '🥊'
+          : id === 'bandes'
+          ? '🎗️'
+          : id === 'protege_tibias'
+          ? '🦵'
+          : id === 'protege_dents'
+          ? '🦷'
+          : id === 'coquilles'
+          ? '🛡️'
+          : '⚡',
     })),
   ];
 
-  // Helper when clicking quick '+' or '+5' on card
-  const handleQuickAddClick = (item: Equipment, delta: number) => {
+  // Helper when clicking quick restock on card
+  const handleOpenRestockModal = (item: Equipment, initialDelta: number = 10) => {
     const sizes = item.sizes || [];
-    // If only 1 size and 1 color: adjust directly
-    if (sizes.length === 1 && sizes[0].colors.length === 1) {
-      onAdjustStock(item.id, delta, {
-        size: sizes[0].size,
-        color: sizes[0].colors[0].color,
-      });
-      return;
-    }
-
-    // Otherwise prompt to pick which variant to restock
     const firstColor = sizes[0]?.colors?.[0]?.color || '';
     setQuickRestockState({
       item,
-      delta,
+      delta: initialDelta,
       sizeIdx: 0,
       color: firstColor,
     });
@@ -163,60 +169,67 @@ export default function InventoryView({
   const confirmQuickRestock = () => {
     if (!quickRestockState) return;
     const { item, delta, sizeIdx, color } = quickRestockState;
+    if (delta <= 0) return;
     const chosenSize = item.sizes?.[sizeIdx]?.size;
     onAdjustStock(item.id, delta, { size: chosenSize, color });
     setQuickRestockState(null);
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn text-zinc-100">
-      {/* Top Header */}
+    <div className="space-y-6 animate-fadeIn text-[#f8fafc]">
+      {/* 1. Header with direct actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <span>Inventaire Kickboxing</span>
-            <span className="text-xs px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-300 font-medium border border-zinc-700">
-              {filteredItems.length} références · {totalFilteredUnits} pcs
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span>📦 Mon Stock de Matériel</span>
+            <span className="text-xs px-2.5 py-1 rounded-xl bg-[#131c31] text-emerald-300 font-bold border border-emerald-500/30">
+              {filteredItems.length} article(s) · {totalFilteredUnits} pcs au club
             </span>
           </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            Gestion du matériel par taille & couleur, avec vente directe et calcul de marge.
+          <p className="text-xs text-slate-300 mt-1">
+            Chaque article affiche son stock restant. Cliquez sur <strong className="text-emerald-400">"Vendre"</strong> pour encaisser ou <strong className="text-blue-300">"+ Stock"</strong> pour ajouter des pièces.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {/* Grid / Table switcher */}
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-[#131c31] border border-[#22314e] rounded-xl p-1 gap-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                viewMode === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title="Affichage en Grille"
+              title="Cartes Faciles"
             >
               <LayoutGrid className="w-4 h-4" />
+              <span className="hidden sm:inline">Cartes</span>
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                viewMode === 'table' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title="Affichage en Tableau"
+              title="Tableau Compact"
             >
               <List className="w-4 h-4" />
+              <span className="hidden sm:inline">Tableau</span>
             </button>
           </div>
 
           {onOpenDeletionsHistory && (
             <button
               onClick={onOpenDeletionsHistory}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-semibold text-xs border border-zinc-800 transition-colors"
-              title="Consulter le journal des suppressions"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#131c31] hover:bg-[#18233d] text-slate-300 hover:text-white font-bold text-xs border border-[#22314e] transition-colors"
+              title="Consulter les articles supprimés"
             >
-              <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
+              <Trash2 className="w-3.5 h-3.5 text-slate-400" />
               <span className="hidden sm:inline">Corbeille</span>
               {deletionsCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-red-950 text-red-300 border border-red-800/60 text-[10px] font-bold">
+                <span className="px-1.5 py-0.2 rounded-full bg-red-950 text-red-300 border border-red-800/80 text-xs font-black">
                   {deletionsCount}
                 </span>
               )}
@@ -225,102 +238,109 @@ export default function InventoryView({
 
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs shadow-lg shadow-red-600/30 transition-all active:scale-95"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 stroke-[3]" />
             <span>Nouveau Matériel</span>
           </button>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Rechercher par article, marque, modèle, taille (12oz, M) ou couleur..."
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Brand Filter */}
-          <select
-            value={selectedBrand}
-            onChange={(e) => setSelectedBrand(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-300 font-semibold focus:outline-none focus:border-red-500 cursor-pointer"
-          >
-            <option value="all">Toutes les marques ({brandsList.length})</option>
-            {brandsList.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-
-          {/* Stock Status Filter */}
-          <select
-            value={selectedStockStatus}
-            onChange={(e) => setSelectedStockStatus(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-300 font-semibold focus:outline-none focus:border-red-500 cursor-pointer"
-          >
-            <option value="all">Tous les statuts de stock</option>
-            <option value="in_stock">🟢 En Stock</option>
-            <option value="low_stock">🟡 Stock Faible</option>
-            <option value="out_of_stock">🔴 Rupture</option>
-          </select>
-
-          {/* Sort By */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-300 font-semibold focus:outline-none focus:border-red-500 cursor-pointer"
-          >
-            <option value="stock-desc">Stock (Décroissant)</option>
-            <option value="stock-asc">Stock (Croissant)</option>
-            <option value="price-desc">Prix (Plus cher)</option>
-            <option value="price-asc">Prix (Moins cher)</option>
-            <option value="name">Nom (A-Z)</option>
-          </select>
+      {/* 2. Search & Category Filters (Big, readable, touch-friendly) */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-[#131c31] border border-[#22314e] shadow-xl space-y-4">
+        {/* Big Search Input */}
+        <div className="relative">
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="🔍 Taper ici pour chercher : nom, taille (12oz, M, L) ou couleur (Noir, Rouge, Or)..."
+            className="w-full bg-[#0e1628] border border-[#263756] rounded-2xl pl-12 pr-10 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 font-medium transition-all"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-          {categoryPills.map((pill) => (
-            <button
-              key={pill.id}
-              onClick={() => setSelectedCategory(pill.id)}
-              className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors border ${
-                selectedCategory === pill.id
-                  ? 'bg-zinc-100 text-zinc-950 font-bold border-zinc-100 shadow-sm'
-                  : 'bg-zinc-950 text-zinc-400 hover:text-zinc-200 border-zinc-800 hover:bg-zinc-900'
-              }`}
+        {/* Visual Category Buttons */}
+        <div>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-2">
+            Filtrer par catégorie :
+          </span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+            {categoryPills.map((pill) => (
+              <button
+                key={pill.id}
+                onClick={() => setSelectedCategory(pill.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all border ${
+                  selectedCategory === pill.id
+                    ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/30 ring-1 ring-rose-400/40'
+                    : 'bg-[#0e1628] text-slate-300 hover:text-white border-[#22314e] hover:bg-[#18233d]'
+                }`}
+              >
+                <span>{pill.icon}</span>
+                <span>{pill.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Secondary filters row */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-[#1e2c47] flex-wrap">
+          {/* Stock status pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs font-bold text-slate-400 mr-1">Statut :</span>
+            {[
+              { id: 'all', label: 'Tous' },
+              { id: 'in_stock', label: '🟢 En stock' },
+              { id: 'low_stock', label: '🟡 Bientôt épuisé' },
+              { id: 'out_of_stock', label: '🔴 Rupture' },
+            ].map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedStockStatus(s.id)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
+                  selectedStockStatus === s.id
+                    ? 'bg-[#1e2c47] text-white border-slate-400'
+                    : 'bg-[#0e1628] text-slate-400 hover:text-white border-[#22314e]'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-400">Trier par :</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-[#0e1628] border border-[#263756] rounded-xl px-3 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-red-500 cursor-pointer"
             >
-              {pill.label}
-            </button>
-          ))}
+              <option value="stock-desc">Plus de stock en premier</option>
+              <option value="stock-asc">Moins de stock en premier</option>
+              <option value="name">Nom alphabétique (A-Z)</option>
+              <option value="price-desc">Prix (Plus cher)</option>
+              <option value="price-asc">Prix (Moins cher)</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Empty State */}
+      {/* 3. Empty State */}
       {filteredItems.length === 0 ? (
-        <div className="rounded-2xl bg-zinc-900 border border-zinc-800 p-12 text-center text-zinc-400">
-          <Package className="w-12 h-12 mx-auto mb-3 opacity-30 text-zinc-400" />
-          <h3 className="text-base font-bold text-white">Aucun équipement trouvé</h3>
-          <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
-            Aucun article ne correspond aux critères de recherche actuels.
+        <div className="rounded-3xl bg-[#131c31] border border-[#22314e] p-12 text-center text-slate-300 shadow-xl">
+          <Package className="w-14 h-14 mx-auto mb-3 opacity-40 text-slate-400" />
+          <h3 className="text-base font-bold text-white">Aucun matériel trouvé</h3>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Aucun article ne correspond à votre recherche actuelle.
           </p>
           <button
             onClick={() => {
@@ -329,182 +349,165 @@ export default function InventoryView({
               setSelectedBrand('all');
               setSelectedStockStatus('all');
             }}
-            className="mt-4 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold rounded-xl transition-colors"
+            className="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-colors shadow-md"
           >
-            Réinitialiser les filtres
+            Effacer les filtres et tout réafficher
           </button>
         </div>
       ) : viewMode === 'grid' ? (
-        /* PROFESSIONAL GRID VIEW */
+        /* 4. HIGH-VISIBILITY, ZERO-CONFUSION PRODUCT CARDS */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredItems.map((item) => {
             const itemStock = item.stock ?? 0;
             const status = getStockStatus(itemStock, item.minStockAlert || 3);
             const categoryLabel = CATEGORY_CONFIG[item.category]?.badge || 'Matériel';
+            const isMenuOpen = activeItemMenuId === item.id;
 
             return (
               <div
                 key={item.id}
-                className="bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-4 flex flex-col justify-between transition-all shadow-sm hover:shadow-md"
+                className="bg-[#131c31] border border-[#22314e] hover:border-[#384f7c] rounded-3xl p-5 flex flex-col justify-between transition-all shadow-lg hover:shadow-2xl group relative"
               >
                 <div>
                   {/* Category & Status */}
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <span className="text-[11px] font-semibold text-zinc-400 bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700/60">
-                      {item.brand} · {categoryLabel}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-bold text-slate-200 bg-[#0e1628] px-2.5 py-1 rounded-lg border border-[#22314e]">
+                      {item.brand || 'Dojo'} · {categoryLabel}
                     </span>
 
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${status.badgeClass}`}
+                      className={`text-xs font-black px-2.5 py-0.5 rounded-lg border uppercase tracking-wider ${status.badgeClass}`}
                     >
                       {status.label}
                     </span>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-sm font-bold text-white line-clamp-2 leading-snug">
+                  {/* Title & Model */}
+                  <h3 className="text-base font-black text-white line-clamp-2 leading-snug">
                     {item.name}
                   </h3>
                   {item.model && (
-                    <span className="text-[10px] text-zinc-400 block mt-0.5">
-                      Réf: {item.model}
+                    <span className="text-xs text-slate-400 block mt-0.5 font-medium">
+                      Modèle : {item.model}
                     </span>
                   )}
 
-                  {/* SIZES & COLORS BREAKDOWN */}
-                  <div className="mt-3 space-y-1.5 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80">
-                    <span className="text-[10px] uppercase font-bold text-zinc-500 block tracking-wider">
-                      Tailles & Couleurs en stock :
+                  {/* Stock Count Display (Big & Bold) */}
+                  <div className="mt-4 p-3 rounded-2xl bg-[#0e1628] border border-[#1e2c47] flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                        Quantité restante
+                      </span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className={`text-2xl font-black ${status.textClass}`}>
+                          {itemStock}
+                        </span>
+                        <span className="text-xs text-slate-300 font-bold">pièces</span>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                        Prix adhérent
+                      </span>
+                      <span className="text-base font-black text-emerald-400 mt-0.5 block">
+                        {item.sellingPrice > 0
+                          ? formatCurrency(item.sellingPrice, currency)
+                          : 'Non fixé'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Sizes & Colors Preview */}
+                  <div className="mt-3 space-y-1.5">
+                    <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">
+                      Tailles & Couleurs disponibles :
                     </span>
-                    <div className="space-y-1 max-h-36 overflow-y-auto pr-0.5">
+                    <div className="space-y-1.5 max-h-28 overflow-y-auto pr-0.5">
                       {item.sizes && item.sizes.length > 0 ? (
                         item.sizes.map((sz, sIdx) => (
-                          <div key={sIdx} className="text-xs">
+                          <div key={sIdx} className="text-xs flex flex-wrap items-center gap-1.5">
                             {sz.size && sz.size !== 'Unique' && (
-                              <span className="font-bold text-red-400 mr-1.5 text-[11px]">
-                                {sz.size} :
+                              <span className="font-black text-rose-400 text-xs">
+                                {sz.size}:
                               </span>
                             )}
-                            <span className="inline-flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1.5">
                               {sz.colors.map((c, cIdx) => (
                                 <span
                                   key={cIdx}
-                                  className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300"
+                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#0e1628] border border-[#243555] text-xs text-slate-200 font-medium"
+                                  title={`${c.color} - ${c.quantity} pcs`}
                                 >
-                                  {c.color} <strong className="text-white">({c.quantity})</strong>
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0"
+                                    style={{ background: getColorSwatch(c.color) }}
+                                  />
+                                  <span>{c.color}</span>
+                                  <strong className="text-white font-bold">({c.quantity})</strong>
                                 </span>
                               ))}
-                            </span>
+                            </div>
                           </div>
                         ))
                       ) : (
-                        <span className="text-xs text-zinc-500 italic">Aucune variante</span>
+                        <span className="text-xs text-slate-500 italic">Taille unique</span>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-zinc-800">
-                  {/* Stock counter & Quick decrement/increment */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                        Stock Global
-                      </span>
-                      <div className="flex items-baseline gap-1">
-                        <span className={`text-2xl font-black ${status.textClass}`}>
-                          {itemStock}
-                        </span>
-                        <span className="text-xs text-zinc-400">pcs</span>
-                      </div>
-                    </div>
+                {/* TWO MAIN LARGE BUTTONS + OPTIONS BAR */}
+                <div className="mt-5 pt-3.5 border-t border-[#22314e] space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Big Green Vendre Button */}
+                    <button
+                      onClick={() => onOpenSaleModal(item)}
+                      disabled={itemStock <= 0}
+                      className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingBag className="w-4 h-4 shrink-0" />
+                      <span>Vendre</span>
+                    </button>
 
-                    {/* Stock action buttons */}
-                    <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800">
-                      {/* Clicking '-' triggers Sale Modal to pick size, color and sell */}
-                      <button
-                        onClick={() => onOpenSaleModal(item)}
-                        disabled={itemStock <= 0}
-                        className="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center font-bold text-sm transition-colors disabled:opacity-30"
-                        title="Vendre (choisir taille et couleur)"
-                      >
-                        -
-                      </button>
-                      <button
-                        onClick={() => handleQuickAddClick(item, 1)}
-                        className="w-7 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center font-bold text-sm transition-colors"
-                        title="Ajouter 1 pièce en stock"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => handleQuickAddClick(item, 5)}
-                        className="px-2 h-7 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center font-bold text-[11px] transition-colors"
-                        title="Réapprovisionner +5 pièces"
-                      >
-                        +5
-                      </button>
-                    </div>
+                    {/* Big Blue +Stock Button */}
+                    <button
+                      onClick={() => handleOpenRestockModal(item, 10)}
+                      className="py-2.5 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                    >
+                      <PackagePlus className="w-4 h-4 shrink-0" />
+                      <span>+ Stock</span>
+                    </button>
                   </div>
 
-                  {/* Price & Action row */}
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <div>
-                      {item.sellingPrice > 0 ? (
-                        <span className="text-sm font-black text-emerald-400">
-                          {formatCurrency(item.sellingPrice, currency)}
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-medium text-zinc-500 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">
-                          Prix non fixé
-                        </span>
-                      )}
-                      {item.costPrice > 0 && (
-                        <div className="text-[10px] text-zinc-400">
-                          Coût: {formatCurrency(item.costPrice, currency)}
-                        </div>
-                      )}
-                    </div>
+                  {/* Secondary clean action bar (Edit, Duplicate, Delete) */}
+                  <div className="flex items-center justify-between text-xs pt-1 px-1">
+                    <button
+                      onClick={() => onOpenEditModal(item)}
+                      className="text-slate-300 hover:text-white flex items-center gap-1 font-bold py-1 px-1.5 rounded-lg hover:bg-[#1e2c47] transition-colors"
+                      title="Modifier les informations"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Modifier</span>
+                    </button>
 
-                    <div className="flex items-center gap-1.5">
-                      {/* Quick Sell Button */}
-                      <button
-                        onClick={() => onOpenSaleModal(item)}
-                        disabled={itemStock <= 0}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all disabled:opacity-30 active:scale-95 shadow-sm"
-                        title="Enregistrer une vente"
-                      >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        <span>Vendre</span>
-                      </button>
+                    <button
+                      onClick={() => onDuplicateItem(item)}
+                      className="text-slate-300 hover:text-white flex items-center gap-1 font-bold py-1 px-1.5 rounded-lg hover:bg-[#1e2c47] transition-colors"
+                      title="Créer une copie"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copier</span>
+                    </button>
 
-                      {/* Edit */}
-                      <button
-                        onClick={() => onOpenEditModal(item)}
-                        className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
-                        title="Modifier la fiche"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Duplicate */}
-                      <button
-                        onClick={() => onDuplicateItem(item)}
-                        className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
-                        title="Dupliquer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-
-                      {/* Delete */}
-                      <button
-                        onClick={() => onDeleteItem(item)}
-                        className="p-1.5 rounded-lg bg-zinc-800 hover:bg-red-950/80 text-zinc-400 hover:text-red-300 transition-colors"
-                        title="Supprimer (compte à rebours 5s)"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => onDeleteItem(item)}
+                      className="text-slate-400 hover:text-rose-400 flex items-center gap-1 font-bold py-1 px-1.5 rounded-lg hover:bg-rose-950/40 transition-colors"
+                      title="Supprimer l'article"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Supprimer</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -512,116 +515,111 @@ export default function InventoryView({
           })}
         </div>
       ) : (
-        /* PROFESSIONAL TABLE VIEW */
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
+        /* TABLE VIEW */
+        <div className="bg-[#131c31] border border-[#22314e] rounded-3xl overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-950/80 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                  <th className="py-3 px-4">Article</th>
-                  <th className="py-3 px-3">Marque</th>
-                  <th className="py-3 px-3">Tailles & Couleurs (Quantités)</th>
-                  <th className="py-3 px-3">Stock Total</th>
-                  <th className="py-3 px-3">Prix de Vente</th>
-                  <th className="py-3 px-3">Statut</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                <tr className="border-b border-[#22314e] bg-[#0e1628] text-xs font-black text-slate-300 uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Article</th>
+                  <th className="py-3.5 px-3">Marque</th>
+                  <th className="py-3.5 px-3">Tailles & Couleurs</th>
+                  <th className="py-3.5 px-3">Stock Restant</th>
+                  <th className="py-3.5 px-3">Prix de Vente</th>
+                  <th className="py-3.5 px-3">Statut</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/80 text-xs">
+              <tbody className="divide-y divide-[#1e2c47] text-xs">
                 {filteredItems.map((item) => {
                   const itemStock = item.stock ?? 0;
                   const status = getStockStatus(itemStock, item.minStockAlert || 3);
 
                   return (
-                    <tr key={item.id} className="hover:bg-zinc-850/50 transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-white">{item.name}</div>
+                    <tr key={item.id} className="hover:bg-[#18233d]/70 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-white text-xs sm:text-sm">{item.name}</div>
                         {item.model && (
-                          <div className="text-[10px] text-zinc-400">Réf: {item.model}</div>
+                          <div className="text-xs text-slate-400">Modèle: {item.model}</div>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-zinc-300 font-semibold">{item.brand}</td>
-                      <td className="py-3 px-3">
+                      <td className="py-3.5 px-3 text-slate-200 font-bold">{item.brand}</td>
+                      <td className="py-3.5 px-3">
                         <div className="space-y-1">
                           {item.sizes?.map((sz, i) => (
-                            <div key={i} className="text-[11px]">
+                            <div key={i} className="text-xs flex flex-wrap items-center gap-1.5">
                               {sz.size && sz.size !== 'Unique' && (
-                                <strong className="text-red-400 mr-1">{sz.size}:</strong>
+                                <strong className="text-rose-400 mr-1">{sz.size}:</strong>
                               )}
-                              <span className="text-zinc-300">
-                                {sz.colors.map((c) => `${c.color} (${c.quantity})`).join(', ')}
-                              </span>
+                              <div className="flex flex-wrap gap-1">
+                                {sz.colors.map((c, cIdx) => (
+                                  <span
+                                    key={cIdx}
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#0e1628] border border-[#22314e] text-xs text-slate-300 font-medium"
+                                  >
+                                    <span
+                                      className="w-2 h-2 rounded-full border border-white/20"
+                                      style={{ background: getColorSwatch(c.color) }}
+                                    />
+                                    <span>{c.color}</span>
+                                    <strong className="text-white ml-0.5">({c.quantity})</strong>
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-3.5 px-3">
                         <div className="flex items-center gap-2">
                           <span className={`font-black text-sm ${status.textClass}`}>
                             {itemStock} pcs
                           </span>
-                          <div className="flex items-center gap-0.5">
-                            <button
-                              onClick={() => onOpenSaleModal(item)}
-                              disabled={itemStock <= 0}
-                              className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center font-bold disabled:opacity-30"
-                              title="Vendre 1 pièce"
-                            >
-                              -
-                            </button>
-                            <button
-                              onClick={() => handleQuickAddClick(item, 1)}
-                              className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 hover:text-white flex items-center justify-center font-bold"
-                              title="Ajouter 1 pièce"
-                            >
-                              +
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleOpenRestockModal(item, 10)}
+                            className="px-2 py-0.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 text-xs font-bold transition-colors"
+                            title="Ajouter du stock"
+                          >
+                            + Stock
+                          </button>
                         </div>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-3.5 px-3">
                         {item.sellingPrice > 0 ? (
-                          <span className="font-bold text-emerald-400">
+                          <span className="font-bold text-emerald-400 text-sm">
                             {formatCurrency(item.sellingPrice, currency)}
                           </span>
                         ) : (
-                          <span className="text-[11px] text-zinc-500 font-medium">Non fixé</span>
+                          <span className="text-xs text-slate-400 font-semibold">Non fixé</span>
                         )}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-3.5 px-3">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${status.badgeClass}`}
+                          className={`px-2.5 py-0.5 rounded-lg text-xs font-black border uppercase ${status.badgeClass}`}
                         >
                           {status.label}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => onOpenSaleModal(item)}
                             disabled={itemStock <= 0}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold disabled:opacity-30"
+                            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all disabled:opacity-30"
                           >
                             Vendre
                           </button>
                           <button
                             onClick={() => onOpenEditModal(item)}
-                            className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+                            className="p-1.5 rounded-lg bg-[#1a253f] hover:bg-[#243555] text-slate-200 border border-[#2a3c5f]"
                             title="Modifier"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => onDuplicateItem(item)}
-                            className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-                            title="Dupliquer"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button
                             onClick={() => onDeleteItem(item)}
-                            className="p-1 rounded bg-zinc-800 hover:bg-red-950 text-zinc-400 hover:text-red-300"
-                            title="Supprimer (compte à rebours 5s)"
+                            className="p-1.5 rounded-lg bg-[#1a253f] hover:bg-rose-950 text-slate-300 hover:text-rose-300 border border-[#2a3c5f]"
+                            title="Supprimer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -636,98 +634,189 @@ export default function InventoryView({
         </div>
       )}
 
-      {/* QUICK RESTOCK VARIANT SELECTOR MODAL */}
+      {/* 5. FRIENDLY RESTOCK MODAL */}
       {quickRestockState && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl text-zinc-100 animate-scaleUp">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <div>
-                <h4 className="text-sm font-bold text-white">
-                  Réapprovisionner (+{quickRestockState.delta} pcs)
-                </h4>
-                <p className="text-xs text-zinc-400">{quickRestockState.item.name}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#101828] border-2 border-blue-500/40 rounded-3xl w-full max-w-md p-6 space-y-5 shadow-2xl text-slate-100 animate-scaleUp">
+            <div className="flex items-center justify-between border-b border-[#22314e] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                  <PackagePlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-base font-black text-white">
+                    Ajouter du Stock
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    {quickRestockState.item.name}
+                  </p>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setQuickRestockState(null)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* Quantity stepper with quick shortcuts */}
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                Combien de pièces voulez-vous ajouter ?
+              </label>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuickRestockState((prev) =>
+                      prev ? { ...prev, delta: Math.max(1, prev.delta - 1) } : null
+                    )
+                  }
+                  className="w-11 h-11 rounded-2xl bg-[#1a253f] hover:bg-[#243555] text-white font-black text-lg border border-[#2a3c5f] flex items-center justify-center transition-colors"
+                >
+                  -1
+                </button>
+
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    min="1"
+                    value={quickRestockState.delta}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setQuickRestockState((prev) =>
+                        prev ? { ...prev, delta: Math.max(1, val) } : null
+                      );
+                    }}
+                    className="w-full bg-[#0e1628] border-2 border-blue-500/60 rounded-2xl py-2.5 text-center text-xl font-black text-white focus:outline-none focus:border-blue-400"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuickRestockState((prev) =>
+                      prev ? { ...prev, delta: prev.delta + 1 } : null
+                    )
+                  }
+                  className="w-11 h-11 rounded-2xl bg-[#1a253f] hover:bg-[#243555] text-white font-black text-lg border border-[#2a3c5f] flex items-center justify-center transition-colors"
+                >
+                  +1
+                </button>
+              </div>
+
+              {/* Booster buttons */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-2.5">
+                <span className="text-xs font-bold text-slate-400 mr-1">Raccourcis :</span>
+                {[5, 10, 20, 50, 100].map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() =>
+                      setQuickRestockState((prev) => (prev ? { ...prev, delta: amt } : null))
+                    }
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      quickRestockState.delta === amt
+                        ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                        : 'bg-[#131c31] text-slate-300 hover:text-white border-[#243555] hover:bg-[#1a253f]'
+                    }`}
+                  >
+                    +{amt}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Size selection if multiple */}
             {quickRestockState.item.sizes && quickRestockState.item.sizes.length > 1 && (
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                  Taille à réapprovisionner :
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-1.5">
+                  Taille concernée :
                 </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {quickRestockState.item.sizes.map((sz, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        const newFirstColor = sz.colors[0]?.color || '';
-                        setQuickRestockState({
-                          ...quickRestockState,
-                          sizeIdx: idx,
-                          color: newFirstColor,
-                        });
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        quickRestockState.sizeIdx === idx
-                          ? 'bg-red-600 text-white'
-                          : 'bg-zinc-950 border border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      {sz.size || 'Unique'}
-                    </button>
-                  ))}
+                  {quickRestockState.item.sizes.map((sz, idx) => {
+                    const isSelected = quickRestockState.sizeIdx === idx;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          const newFirstColor = sz.colors[0]?.color || '';
+                          setQuickRestockState({
+                            ...quickRestockState,
+                            sizeIdx: idx,
+                            color: newFirstColor,
+                          });
+                        }}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                          isSelected
+                            ? 'bg-rose-600 text-white border-rose-500 shadow-sm'
+                            : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:border-[#33466d]'
+                        }`}
+                      >
+                        {sz.size || 'Unique'}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* Color selection */}
             <div>
-              <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                Couleur à réapprovisionner :
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-1.5">
+                Couleur :
               </label>
               <div className="flex flex-wrap gap-1.5">
-                {quickRestockState.item.sizes?.[quickRestockState.sizeIdx]?.colors.map((c) => (
-                  <button
-                    key={c.color}
-                    onClick={() =>
-                      setQuickRestockState({
-                        ...quickRestockState,
-                        color: c.color,
-                      })
-                    }
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                      quickRestockState.color === c.color
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-zinc-950 border border-zinc-800 text-zinc-300'
-                    }`}
-                  >
-                    <span>{c.color}</span>
-                    <span className="px-1.5 py-0.2 rounded bg-black/40 text-[10px] font-bold">
-                      {c.quantity} pcs
-                    </span>
-                  </button>
-                ))}
+                {quickRestockState.item.sizes?.[quickRestockState.sizeIdx]?.colors.map((c) => {
+                  const isSelected = quickRestockState.color === c.color;
+                  return (
+                    <button
+                      key={c.color}
+                      type="button"
+                      onClick={() =>
+                        setQuickRestockState({
+                          ...quickRestockState,
+                          color: c.color,
+                        })
+                      }
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border ${
+                        isSelected
+                          ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-600/30'
+                          : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:border-[#33466d]'
+                      }`}
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full border border-white/20 shrink-0"
+                        style={{ background: getColorSwatch(c.color) }}
+                      />
+                      <span>{c.color}</span>
+                      <span className="px-1.5 py-0.2 rounded bg-black/40 text-xs font-bold">
+                        {c.quantity} pcs actuelles
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-zinc-800">
+            <div className="pt-3 flex items-center justify-end gap-2 border-t border-[#22314e]">
               <button
+                type="button"
                 onClick={() => setQuickRestockState(null)}
-                className="px-3 py-1.5 rounded-xl bg-zinc-800 text-zinc-300 text-xs font-bold"
+                className="px-4 py-2.5 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-200 text-xs font-bold border border-[#2e4166] transition-colors"
               >
                 Annuler
               </button>
               <button
+                type="button"
                 onClick={confirmQuickRestock}
-                className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold"
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-600/30 transition-all active:scale-95"
               >
-                Confirmer (+{quickRestockState.delta} pcs)
+                Valider l'ajout (+{quickRestockState.delta} pcs)
               </button>
             </div>
           </div>

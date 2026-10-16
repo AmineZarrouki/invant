@@ -12,9 +12,11 @@ import {
   TrendingUp,
   AlertTriangle,
   Layers,
+  Sparkles,
 } from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { CurrencyCode, CURRENCY_CONFIG, formatCurrency } from '@/lib/currency';
+import { getColorSwatch } from '@/lib/categoryColors';
 
 interface QuickSaleModalProps {
   isOpen: boolean;
@@ -115,7 +117,7 @@ export default function QuickSaleModal({
       return;
     }
     if (!isAdjustingWithoutSale && soldPrice <= 0) {
-      setError('Veuillez saisir le prix de vente encaissé pour calculer le bénéfice.');
+      setError('Veuillez saisir le montant encaissé.');
       return;
     }
 
@@ -135,7 +137,7 @@ export default function QuickSaleModal({
           color: selectedColor,
           quantity,
           unitPrice: Number(soldPrice),
-          buyerName: buyerName.trim() || 'Client comptant',
+          buyerName: buyerName.trim() || 'Client adhérent',
           paymentMethod,
           notes: notes.trim() || undefined,
         });
@@ -149,80 +151,67 @@ export default function QuickSaleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden text-zinc-100 animate-scaleUp">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+      <div className="bg-[#101828] border-2 border-emerald-500/40 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden text-slate-100 animate-scaleUp my-6">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#22314e] bg-[#141d33]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-              <ShoppingBag className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold">
+              <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">
-                {isAdjustingWithoutSale ? 'Correction de Stock (-1 pc)' : 'Enregistrer une Vente'}
+              <h3 className="text-base sm:text-lg font-black text-white">
+                {isAdjustingWithoutSale ? 'Correction de stock (Perte/Casse)' : 'Enregistrer une Vente'}
               </h3>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-slate-300">
                 {equipment.brand} • {equipment.name}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
           {error && (
-            <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-2xl bg-red-950/60 border border-red-500/60 text-red-200 text-xs flex items-center gap-2 font-bold">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Item Banner */}
-          <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80">
-            <div className="text-sm font-bold text-white">{equipment.name}</div>
-            <div className="flex items-center justify-between text-xs text-zinc-400 mt-1">
-              <span>
-                Stock total produit : <strong className="text-white">{equipment.stock ?? 0} pcs</strong>
-              </span>
-              <span>
-                Prix catalogue :{' '}
-                <strong className="text-zinc-200">
-                  {formatCurrency(equipment.sellingPrice, currency)}
-                </strong>
-              </span>
-            </div>
-          </div>
-
           {/* VARIANT SELECTION (TAILLE & COULEUR) */}
-          <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
-            {/* Size selection if multiple sizes */}
+          <div className="p-4 rounded-2xl bg-[#141d33] border border-[#22314e] space-y-3.5">
+            {/* Size selection */}
             {hasMultipleSizes && (
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                  1. Sélectionner la Taille :
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                  1. Choisir la Taille :
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {equipment.sizes?.map((sz, idx) => {
                     const isSelected = selectedSizeIndex === idx;
-                    const sizeTotal = (sz.colors || []).reduce((s, c) => s + (Number(c.quantity) || 0), 0);
+                    const sizeTotal = (sz.colors || []).reduce(
+                      (s, c) => s + (Number(c.quantity) || 0),
+                      0
+                    );
                     return (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => handleSizeChange(idx)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all border ${
                           isSelected
-                            ? 'bg-red-600 text-white shadow-sm'
-                            : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                            ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/30'
+                            : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:text-white hover:border-[#384f7c]'
                         }`}
                       >
-                        {sz.size || 'Taille unique'} ({sizeTotal} pcs)
+                        {sz.size || 'Unique'} ({sizeTotal} pcs)
                       </button>
                     );
                   })}
@@ -230,12 +219,12 @@ export default function QuickSaleModal({
               </div>
             )}
 
-            {/* Color selection for this size */}
+            {/* Color selection */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                {hasMultipleSizes ? '2. Sélectionner la Couleur :' : 'Sélectionner la Couleur :'}
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                {hasMultipleSizes ? '2. Choisir la Couleur :' : 'Choisir la Couleur :'}
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {currentSizeVariant?.colors.map((c) => {
                   const isSelected = selectedColor === c.color;
                   return (
@@ -243,14 +232,18 @@ export default function QuickSaleModal({
                       key={c.color}
                       type="button"
                       onClick={() => setSelectedColor(c.color)}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border ${
                         isSelected
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/30'
+                          : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:text-white hover:border-[#384f7c]'
                       }`}
                     >
+                      <span
+                        className="w-3 h-3 rounded-full border border-white/20 shrink-0"
+                        style={{ background: getColorSwatch(c.color) }}
+                      />
                       <span>{c.color}</span>
-                      <span className="px-1.5 py-0.2 rounded bg-black/40 text-[10px] font-bold">
+                      <span className="px-1.5 py-0.2 rounded-md bg-black/40 text-xs font-black">
                         {c.quantity} pcs
                       </span>
                     </button>
@@ -260,85 +253,35 @@ export default function QuickSaleModal({
             </div>
 
             {/* Stock status for chosen variant */}
-            <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs">
-              <span className="text-zinc-400">
-                Stock disponible pour {currentSizeVariant?.size ? `${currentSizeVariant.size} - ` : ''}
-                <strong className="text-zinc-200">{selectedColor}</strong> :
+            <div className="pt-2 border-t border-[#1e2c47] flex items-center justify-between text-xs">
+              <span className="text-slate-300">
+                Stock pour {currentSizeVariant?.size ? `${currentSizeVariant.size} - ` : ''}
+                <strong className="text-white font-bold">{selectedColor}</strong> :
               </span>
               <span
-                className={`font-black ${
-                  currentVariantStock > 0 ? 'text-emerald-400' : 'text-red-400'
+                className={`font-black text-sm ${
+                  currentVariantStock > 0 ? 'text-emerald-400' : 'text-rose-400'
                 }`}
               >
-                {currentVariantStock > 0 ? `${currentVariantStock} pcs` : 'Rupture (0 pc)'}
+                {currentVariantStock > 0 ? `🟢 ${currentVariantStock} disponible(s)` : '🔴 Rupture (0 pc)'}
               </span>
             </div>
           </div>
 
           {!isAdjustingWithoutSale ? (
             <>
-              {/* Sold Price Input & Profit Difference Calculator */}
-              <div className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-3">
-                <div className="flex items-center justify-between text-xs text-zinc-400 pb-2 border-b border-zinc-800/80">
-                  <span>Coût d’achat fournisseur :</span>
-                  <span className="font-semibold text-zinc-300">
-                    {formatCurrency(costPerUnit, currency)}
-                  </span>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-bold text-emerald-400">
-                      Prix de Vente Encaissé ({currSymbol}) *
-                    </label>
-                    <span className="text-[11px] text-zinc-400">
-                      Modifiable si remise ou prix négocié
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    required
-                    value={soldPrice}
-                    onChange={(e) => setSoldPrice(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-zinc-900 border border-emerald-500/50 rounded-xl px-3.5 py-2 text-base text-emerald-400 font-black focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-
-                {/* Profit Preview */}
-                <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-zinc-300 font-semibold">Bénéfice Net :</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`font-extrabold ${
-                        totalProfit >= 0 ? 'text-emerald-400' : 'text-red-400'
-                      }`}
-                    >
-                      {totalProfit >= 0 ? `+${totalProfit.toFixed(1)}` : totalProfit.toFixed(1)}{' '}
-                      {currSymbol}
-                    </span>
-                    {soldPrice > 0 && (
-                      <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[10px] text-zinc-300 font-bold">
-                        {marginPercent}% marge
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               {/* Quantity */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                <span className="text-xs font-bold text-zinc-300">Quantité Vendue :</span>
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#141d33] border border-[#22314e]">
+                <div>
+                  <span className="text-xs font-black uppercase text-slate-300 block">Quantité vendue</span>
+                  <span className="text-xs text-slate-400">Combien de pièces prend le client ?</span>
+                </div>
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     disabled={quantity <= 1}
-                    className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm flex items-center justify-center disabled:opacity-30 transition-colors"
+                    className="w-10 h-10 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-white font-black text-base flex items-center justify-center border border-[#2e4166] disabled:opacity-30 transition-colors"
                   >
                     -
                   </button>
@@ -352,25 +295,65 @@ export default function QuickSaleModal({
                         Math.min(currentVariantStock, Math.max(1, parseInt(e.target.value) || 1))
                       )
                     }
-                    className="w-12 bg-zinc-900 border border-zinc-800 rounded-lg text-center font-bold text-white text-sm py-1 focus:outline-none"
+                    className="w-14 bg-[#0e1628] border-2 border-emerald-500/60 rounded-xl text-center font-black text-white text-base py-1.5 focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.min(currentVariantStock, q + 1))}
                     disabled={quantity >= currentVariantStock}
-                    className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm flex items-center justify-center disabled:opacity-30 transition-colors"
+                    className="w-10 h-10 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-white font-black text-base flex items-center justify-center border border-[#2e4166] disabled:opacity-30 transition-colors"
                   >
                     +
                   </button>
                 </div>
               </div>
 
+              {/* Price & Profit */}
+              <div className="p-4 rounded-2xl bg-[#141d33] border border-[#22314e] space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black uppercase text-emerald-400">
+                    Prix de vente unitaire ({currSymbol})
+                  </label>
+                  <span className="text-xs text-slate-400">Modifiable en cas de remise</span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    required
+                    value={soldPrice}
+                    onChange={(e) => setSoldPrice(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-[#0e1628] border-2 border-emerald-500/70 rounded-2xl px-4 py-3 text-xl text-emerald-300 font-black focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                </div>
+
+                {/* Profit calculation */}
+                <div className="p-3 rounded-xl bg-[#0e1628] border border-[#1e2c47] flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-emerald-400" />
+                    <span className="text-slate-300 font-bold">Votre bénéfice net :</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-emerald-400 text-sm">
+                      +{totalProfit.toFixed(1)} {currSymbol}
+                    </span>
+                    {soldPrice > 0 && (
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-black border border-emerald-500/40">
+                        {marginPercent}% marge
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Payment Method */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">
-                  Moyen de Paiement :
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                  Moyen de paiement :
                 </label>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-4 gap-2">
                   {[
                     { id: 'cash', label: 'Espèces', icon: Banknote },
                     { id: 'card', label: 'Carte', icon: CreditCard },
@@ -384,13 +367,13 @@ export default function QuickSaleModal({
                         key={m.id}
                         type="button"
                         onClick={() => setPaymentMethod(m.id as any)}
-                        className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-[11px] font-bold transition-colors ${
+                        className={`p-2.5 rounded-2xl border flex flex-col items-center gap-1 text-xs font-bold transition-all ${
                           isSelected
-                            ? 'bg-zinc-800 border-emerald-500 text-white'
-                            : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
+                            ? 'bg-emerald-600 border-emerald-400 text-white shadow-md shadow-emerald-600/30'
+                            : 'bg-[#141d33] border-[#22314e] text-slate-300 hover:text-white hover:bg-[#1e2c47]'
                         }`}
                       >
-                        <Icon className="w-3.5 h-3.5" />
+                        <Icon className="w-4 h-4" />
                         <span>{m.label}</span>
                       </button>
                     );
@@ -399,72 +382,56 @@ export default function QuickSaleModal({
               </div>
 
               {/* Buyer & Notes */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <input
                   type="text"
-                  placeholder="Nom de l'adhérent / client..."
+                  placeholder="Nom de l'adhérent (optionnel)"
                   value={buyerName}
                   onChange={(e) => setBuyerName(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="bg-[#141d33] border border-[#22314e] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
                 />
                 <input
                   type="text"
-                  placeholder="Notes / Remarque..."
+                  placeholder="Remarque (ex: taille essayée au vestiaire)"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                  className="bg-[#141d33] border border-[#22314e] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
             </>
           ) : (
-            <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-800/40 text-xs text-amber-300">
-              <span className="font-bold">Mode Correction de Stock :</span> 1 pièce de la variante{' '}
-              <strong>
-                {currentSizeVariant?.size ? `${currentSizeVariant.size} - ` : ''}
-                {selectedColor}
-              </strong>{' '}
-              sera déduite sans enregistrer de vente ni de bénéfice commercial.
+            <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-600/50 text-xs text-amber-200">
+              <span className="font-bold">Mode Correction :</span> Le stock sera réduit de {quantity} pièce(s) sans générer de vente commerciale (perte ou casse).
             </div>
           )}
 
           {/* Toggle between Sale & Stock Correction */}
-          <div className="pt-1 flex items-center justify-between text-xs text-zinc-400">
+          <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
             <button
               type="button"
               onClick={() => setIsAdjustingWithoutSale(!isAdjustingWithoutSale)}
-              className="text-zinc-400 hover:text-white underline transition-colors"
+              className="text-slate-400 hover:text-white underline transition-colors"
             >
               {isAdjustingWithoutSale
-                ? '← Revenir à l’enregistrement de vente avec bénéfice'
-                : 'Juste ajuster le stock sans vente (casse / perte)'}
+                ? '← Revenir à la vente normale'
+                : 'Ajuster sans vente (casse / perte)'}
             </button>
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
-            >
-              Annuler
-            </button>
+          {/* Checkout Big Button */}
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading || currentVariantStock < quantity}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 ${
-                isAdjustingWithoutSale
-                  ? 'bg-amber-600 hover:bg-amber-500'
-                  : 'bg-emerald-600 hover:bg-emerald-500'
-              }`}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black text-base shadow-xl shadow-emerald-600/30 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-6 h-6 stroke-[3]" />
               <span>
                 {loading
-                  ? 'Validation...'
+                  ? 'Enregistrement...'
                   : isAdjustingWithoutSale
-                  ? 'Confirmer le Retrait'
-                  : `Encaisser ${formatCurrency(totalRevenue, currency)}`}
+                  ? `Confirmer la déduction (-${quantity} pcs)`
+                  : `Valider la Vente (${formatCurrency(totalRevenue, currency)})`}
               </span>
             </button>
           </div>
