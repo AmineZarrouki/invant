@@ -344,6 +344,7 @@ export default function Home() {
                 onNavigateToInventory={() => setActiveTab('inventory')}
                 onNavigateToPos={() => setActiveTab('pos')}
                 onNavigateToSales={() => setActiveTab('sales')}
+                onNavigateToSettings={() => setActiveTab('settings')}
                 onOpenAddModal={() => {
                   setEditingItem(null);
                   setIsAddModalOpen(true);

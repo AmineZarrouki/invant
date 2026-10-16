@@ -32,6 +32,7 @@ interface DashboardViewProps {
   onNavigateToInventory: () => void;
   onNavigateToPos: () => void;
   onNavigateToSales: () => void;
+  onNavigateToSettings?: () => void;
   onOpenAddModal?: () => void;
   onOpenHelpModal?: () => void;
 }
@@ -43,6 +44,7 @@ export default function DashboardView({
   onNavigateToInventory,
   onNavigateToPos,
   onNavigateToSales,
+  onNavigateToSettings,
   onOpenAddModal,
   onOpenHelpModal,
 }: DashboardViewProps) {
@@ -490,15 +492,17 @@ export default function DashboardView({
           {/* Quick link to settings */}
           <div className="bg-[#131c31] border border-[#22314e] rounded-3xl p-4 flex items-center justify-between">
             <div>
-              <h4 className="text-xs font-bold text-white">Besoin d'une sauvegarde de vos données ?</h4>
-              <p className="text-xs text-slate-400">Exportez votre stock en un clic dans les Réglages.</p>
+              <h4 className="text-xs font-bold text-white">Sauvegardes & Paramètres</h4>
+              <p className="text-xs text-slate-400">Exportez votre stock ou réinitialisez la base de données.</p>
             </div>
-            <button
-              onClick={() => onNavigateToSales()}
-              className="text-xs px-3 py-1.5 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-200 font-bold border border-[#2e4166] transition-colors whitespace-nowrap"
-            >
-              Historique
-            </button>
+            {onNavigateToSettings && (
+              <button
+                onClick={onNavigateToSettings}
+                className="text-xs px-3.5 py-2 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-200 hover:text-white font-bold border border-[#2e4166] transition-colors whitespace-nowrap shadow-sm"
+              >
+                Réglages ⚙️
+              </button>
+            )}
           </div>
         </div>
       </div>
