@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Sparkles,
   HelpCircle,
+  Cloud,
 } from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { formatCurrency, CurrencyCode } from '@/lib/currency';
@@ -38,6 +39,9 @@ interface InventoryViewProps {
   ) => void;
   onOpenDeletionsHistory?: () => void;
   deletionsCount?: number;
+  isCloud?: boolean;
+  storageProvider?: string;
+  onOpenCloudModal?: () => void;
 }
 
 export default function InventoryView({
@@ -51,6 +55,9 @@ export default function InventoryView({
   onAdjustStock,
   onOpenDeletionsHistory,
   deletionsCount = 0,
+  isCloud = false,
+  storageProvider = '',
+  onOpenCloudModal,
 }: InventoryViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -217,6 +224,27 @@ export default function InventoryView({
               <span className="hidden sm:inline">Tableau</span>
             </button>
           </div>
+
+          {onOpenCloudModal && (
+            <button
+              onClick={onOpenCloudModal}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black border transition-all shadow-sm cursor-pointer ${
+                isCloud
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+              }`}
+              title={
+                isCloud
+                  ? `Base Cloud Active (${storageProvider || 'Upstash'})`
+                  : 'Connecter une base Cloud 100% gratuite pour synchroniser vos appareils'
+              }
+            >
+              <Cloud className={`w-3.5 h-3.5 ${isCloud ? 'text-emerald-600' : 'text-blue-600'}`} />
+              <span className="hidden sm:inline">
+                {isCloud ? '🟢 Cloud Actif' : '☁️ Cloud Gratuit'}
+              </span>
+            </button>
+          )}
 
           {onOpenDeletionsHistory && (
             <button

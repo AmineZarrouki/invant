@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
-import { getEquipment, addEquipment, getSales, getDeletions, computeInventoryStats } from '@/lib/db';
+import { getEquipment, addEquipment, getSales, getDeletions, computeInventoryStats, getStorageStatus } from '@/lib/db';
 
 export async function GET() {
   try {
     const [equipment, sales, deletions] = await Promise.all([getEquipment(), getSales(), getDeletions()]);
     const stats = computeInventoryStats(equipment, sales, deletions);
-    return NextResponse.json({ success: true, equipment, stats });
+    const storageStatus = getStorageStatus();
+    return NextResponse.json({
+      success: true,
+      equipment,
+      stats,
+      isCloud: storageStatus.isCloud,
+      provider: storageStatus.provider,
+    });
   } catch (error) {
     console.error('API Inventory GET error:', error);
     return NextResponse.json({ success: false, error: 'Erreur lors du chargement de l’inventaire' }, { status: 500 });

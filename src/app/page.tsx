@@ -11,6 +11,7 @@ import EquipmentModal from '@/components/EquipmentModal';
 import QuickSaleModal from '@/components/QuickSaleModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import EasyHelpModal from '@/components/EasyHelpModal';
+import CloudConnectModal from '@/components/CloudConnectModal';
 import Toast, { ToastMessage } from '@/components/Toast';
 import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
@@ -38,6 +39,14 @@ function loadLocalCache<T>(key: string): T | null {
   }
 }
 
+function markUserEdits(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('kickboxing_has_user_edits', 'true');
+    localStorage.setItem('kickboxing_last_edit_time', String(Date.now()));
+  } catch {}
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'pos' | 'sales' | 'settings'>('dashboard');
   const [currency, setCurrency] = useState<CurrencyCode>('MAD');
@@ -47,12 +56,19 @@ export default function Home() {
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Cloud & Storage Engine State
+  const [storageStatus, setStorageStatus] = useState<{ provider: string; isCloud: boolean }>({
+    provider: 'Détection...',
+    isCloud: false,
+  });
+
   // Subtab for sales/deletions history
   const [historySubTab, setHistorySubTab] = useState<'sales' | 'deletions'>('sales');
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [saleItem, setSaleItem] = useState<Equipment | null>(null);
   const [itemToDelete, setItemToDelete] = useState<Equipment | null>(null);
@@ -78,6 +94,7 @@ export default function Home() {
     const cachedInv = loadLocalCache<Equipment[]>(CACHE_KEYS.INVENTORY);
     const cachedSales = loadLocalCache<Sale[]>(CACHE_KEYS.SALES);
     const cachedDel = loadLocalCache<DeletionLog[]>(CACHE_KEYS.DELETIONS);
+    const hasLocalEdits = typeof window !== 'undefined' && localStorage.getItem('kickboxing_has_user_edits') === 'true';
 
     if (cachedInv && cachedInv.length > 0) {
       setEquipment(cachedInv);
@@ -97,9 +114,33 @@ export default function Home() {
       const delData = await delRes.json();
 
       if (invData.success) {
-        setEquipment(invData.equipment);
-        setStats(invData.stats);
-        saveLocalCache(CACHE_KEYS.INVENTORY, invData.equipment);
+        const isCloudActive = Boolean(invData.isCloud);
+        setStorageStatus({
+          provider: invData.provider || (isCloudActive ? 'Upstash Redis Cloud' : 'Local / Serverless'),
+          isCloud: isCloudActive,
+        });
+
+        if (isCloudActive) {
+          // Cloud database is connected: server is single source of truth
+          setEquipment(invData.equipment);
+          setStats(invData.stats);
+          saveLocalCache(CACHE_KEYS.INVENTORY, invData.equipment);
+        } else {
+          // Serverless fallback: if user has local edits, NEVER let stale server seed wipe them!
+          if (hasLocalEdits && cachedInv && cachedInv.length > 0) {
+            setEquipment(cachedInv);
+            // Re-seed serverless tmp instance so stats and API routes match local edits
+            fetch('/api/backup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ equipment: cachedInv, sales: cachedSales || [] }),
+            }).catch(() => {});
+          } else {
+            setEquipment(invData.equipment);
+            setStats(invData.stats);
+            saveLocalCache(CACHE_KEYS.INVENTORY, invData.equipment);
+          }
+        }
       }
       if (salesData.success) {
         setSales(salesData.sales);
@@ -152,6 +193,7 @@ export default function Home() {
         const updated = equipment.map((i) => (i.id === editingItem.id ? data.item : i));
         setEquipment(updated);
         saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+        markUserEdits();
         setStats(data.stats);
         addToast('success', `✏️ "${data.item.name}" mis à jour avec succès`);
       } else {
@@ -167,6 +209,7 @@ export default function Home() {
         const updated = [data.item, ...equipment];
         setEquipment(updated);
         saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+        markUserEdits();
         setStats(data.stats);
         addToast('success', `✅ Nouvel équipement "${data.item.name}" ajouté avec succès`);
       }
@@ -190,6 +233,7 @@ export default function Home() {
       const updated = equipment.filter((i) => i.id !== id);
       setEquipment(updated);
       saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+      markUserEdits();
       if (data.deletedLog) {
         const updatedDel = [data.deletedLog, ...deletions];
         setDeletions(updatedDel);
@@ -214,6 +258,7 @@ export default function Home() {
       const updated = [data.item, ...equipment];
       setEquipment(updated);
       saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+      markUserEdits();
       const updatedDel = deletions.filter((d) => d.id !== deletionId);
       setDeletions(updatedDel);
       saveLocalCache(CACHE_KEYS.DELETIONS, updatedDel);
@@ -250,6 +295,7 @@ export default function Home() {
       const updated = [data.item, ...equipment];
       setEquipment(updated);
       saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+      markUserEdits();
       setStats(data.stats);
       addToast('success', `Copie créée: "${data.item.name}"`);
     } catch (err: any) {
@@ -274,6 +320,7 @@ export default function Home() {
       const updated = equipment.map((i) => (i.id === id ? data.item : i));
       setEquipment(updated);
       saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+      markUserEdits();
       setStats(data.stats);
       const sign = delta > 0 ? `+${delta}` : `${delta}`;
       const detail = variant?.color ? ` (${[variant.size, variant.color].filter(Boolean).join(' - ')})` : '';
@@ -310,6 +357,7 @@ export default function Home() {
       );
       setEquipment(updatedEq);
       saveLocalCache(CACHE_KEYS.INVENTORY, updatedEq);
+      markUserEdits();
       setStats(data.stats);
       addToast('success', `Vente enregistrée : ${data.sale.quantity}x ${data.sale.equipmentName}`);
     } catch (err: any) {
@@ -438,6 +486,9 @@ export default function Home() {
                   setHistorySubTab('deletions');
                 }}
                 deletionsCount={deletions.length}
+                isCloud={storageStatus.isCloud}
+                storageProvider={storageStatus.provider}
+                onOpenCloudModal={() => setIsCloudModalOpen(true)}
               />
             )}
 
@@ -514,6 +565,18 @@ export default function Home() {
         onOpenAddModal={() => {
           setEditingItem(null);
           setIsAddModalOpen(true);
+        }}
+      />
+
+      {/* Cloud Database Connect Modal */}
+      <CloudConnectModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
+        isCloud={storageStatus.isCloud}
+        currentProvider={storageStatus.provider}
+        onCloudConfigured={() => {
+          fetchData();
+          addToast('success', 'Base Cloud synchronisée avec succès !');
         }}
       />
 

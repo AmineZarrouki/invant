@@ -11,28 +11,50 @@ export interface StorageAdapter {
   set(key: string, value: any): Promise<boolean>;
   getProviderName(): string;
   isCloud(): boolean;
+  ping?(): Promise<boolean>;
+}
+
+export interface CloudCredentials {
+  url: string;
+  token: string;
 }
 
 /**
  * Cloud Storage Adapter using Upstash Redis / Vercel KV via pure REST API.
  * 100% Free, serverless-native, requires 0 extra npm packages.
  */
-class UpstashRedisAdapter implements StorageAdapter {
+export class UpstashRedisAdapter implements StorageAdapter {
   private url: string;
   private token: string;
 
   constructor(url: string, token: string) {
-    // Strip trailing slash if present
     this.url = url.replace(/\/+$/, '');
-    this.token = token;
+    this.token = token.trim();
   }
 
   getProviderName(): string {
-    return 'Upstash Redis / Vercel KV (Cloud)';
+    return 'Upstash Redis Cloud (100% Gratuit)';
   }
 
   isCloud(): boolean {
     return true;
+  }
+
+  async ping(): Promise<boolean> {
+    try {
+      const res = await fetch(`${this.url}/ping`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        cache: 'no-store',
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return Boolean(data && (data.result === 'PONG' || data.result === true || res.status === 200));
+    } catch (err) {
+      console.warn('[Upstash] Ping failed:', err);
+      return false;
+    }
   }
 
   async get(key: string): Promise<any | null> {
@@ -78,7 +100,7 @@ class UpstashRedisAdapter implements StorageAdapter {
           Authorization: `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: payload,
       });
 
       if (!res.ok) {
@@ -99,12 +121,11 @@ class UpstashRedisAdapter implements StorageAdapter {
  * to /tmp in serverless environments (Vercel, Netlify, AWS Lambda)
  * to prevent "EROFS: read-only file system" errors.
  */
-class FileSystemAdapter implements StorageAdapter {
+export class FileSystemAdapter implements StorageAdapter {
   private baseDir: string;
   private isFallbackTmp: boolean = false;
 
   constructor() {
-    // If running in Vercel or read-only serverless, prepare tmp fallback
     const isServerless = Boolean(
       process.env.VERCEL ||
       process.env.AWS_LAMBDA_FUNCTION_NAME ||
@@ -133,7 +154,6 @@ class FileSystemAdapter implements StorageAdapter {
     try {
       await fs.mkdir(this.baseDir, { recursive: true });
     } catch (err: any) {
-      // If primary baseDir is read-only (EROFS), switch permanently to tmpdir
       if (err.code === 'EROFS' || err.code === 'EACCES') {
         this.baseDir = path.join(os.tmpdir(), 'kickbox-data');
         this.isFallbackTmp = true;
@@ -154,13 +174,11 @@ class FileSystemAdapter implements StorageAdapter {
       const raw = await fs.readFile(filePath, 'utf-8');
       return JSON.parse(raw);
     } catch (err: any) {
-      // If in tmp fallback and file doesn't exist yet, try reading from project data/
       if (this.isFallbackTmp) {
         try {
           const projectPath = path.join(process.cwd(), 'data', `${key}.json`);
           const raw = await fs.readFile(projectPath, 'utf-8');
           const parsed = JSON.parse(raw);
-          // Seed tmp file for subsequent writes
           await fs.writeFile(filePath, raw, 'utf-8');
           return parsed;
         } catch {
@@ -179,7 +197,6 @@ class FileSystemAdapter implements StorageAdapter {
       await fs.writeFile(filePath, JSON.stringify(value, null, 2), 'utf-8');
       return true;
     } catch (err: any) {
-      // If failed due to read-only filesystem, switch to tmp and retry
       if (err.code === 'EROFS' || err.code === 'EACCES') {
         this.baseDir = path.join(os.tmpdir(), 'kickbox-data');
         this.isFallbackTmp = true;
@@ -194,10 +211,51 @@ class FileSystemAdapter implements StorageAdapter {
   }
 }
 
+// In-memory or file-based runtime cloud credentials
+let runtimeCredentials: CloudCredentials | null = null;
+const RUNTIME_CONFIG_FILE = path.join(os.tmpdir(), 'kickbox-cloud-config.json');
+
+export async function setRuntimeCloudCredentials(creds: CloudCredentials | null): Promise<boolean> {
+  runtimeCredentials = creds;
+  cachedAdapter = null; // Invalidate cached adapter
+
+  try {
+    if (creds && creds.url && creds.token) {
+      await fs.writeFile(RUNTIME_CONFIG_FILE, JSON.stringify(creds), 'utf-8');
+    } else {
+      await fs.unlink(RUNTIME_CONFIG_FILE).catch(() => {});
+    }
+    return true;
+  } catch (err) {
+    console.warn('[Storage] Could not persist runtime cloud config file:', err);
+    return false;
+  }
+}
+
+export async function getRuntimeCloudCredentials(): Promise<CloudCredentials | null> {
+  if (runtimeCredentials) return runtimeCredentials;
+
+  try {
+    const raw = await fs.readFile(RUNTIME_CONFIG_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.url && parsed.token) {
+      runtimeCredentials = parsed;
+      return parsed;
+    }
+  } catch {
+    // No runtime file found
+  }
+  return null;
+}
+
 // Singleton storage adapter instance
 let cachedAdapter: StorageAdapter | null = null;
 
-export function getStorageAdapter(): StorageAdapter {
+export function getStorageAdapter(customCreds?: CloudCredentials): StorageAdapter {
+  if (customCreds && customCreds.url && customCreds.token) {
+    return new UpstashRedisAdapter(customCreds.url, customCreds.token);
+  }
+
   if (cachedAdapter) return cachedAdapter;
 
   // 1. Check for Vercel KV / Upstash Redis environment variables
@@ -213,7 +271,13 @@ export function getStorageAdapter(): StorageAdapter {
     return cachedAdapter;
   }
 
-  // 2. Default to FileSystemAdapter with safe serverless fallback
+  // 2. Check for in-memory runtime credentials
+  if (runtimeCredentials && runtimeCredentials.url && runtimeCredentials.token) {
+    cachedAdapter = new UpstashRedisAdapter(runtimeCredentials.url, runtimeCredentials.token);
+    return cachedAdapter;
+  }
+
+  // 3. Default to FileSystemAdapter with safe serverless fallback
   cachedAdapter = new FileSystemAdapter();
   return cachedAdapter;
 }
