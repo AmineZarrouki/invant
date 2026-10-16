@@ -11,7 +11,6 @@ import EquipmentModal from '@/components/EquipmentModal';
 import QuickSaleModal from '@/components/QuickSaleModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import EasyHelpModal from '@/components/EasyHelpModal';
-import CloudConnectModal from '@/components/CloudConnectModal';
 import Toast, { ToastMessage } from '@/components/Toast';
 import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
@@ -68,7 +67,6 @@ export default function Home() {
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [saleItem, setSaleItem] = useState<Equipment | null>(null);
   const [itemToDelete, setItemToDelete] = useState<Equipment | null>(null);
@@ -480,9 +478,6 @@ export default function Home() {
                   setHistorySubTab('deletions');
                 }}
                 deletionsCount={deletions.length}
-                isCloud={storageStatus.isCloud}
-                storageProvider={storageStatus.provider}
-                onOpenCloudModal={() => setIsCloudModalOpen(true)}
               />
             )}
 
@@ -559,18 +554,6 @@ export default function Home() {
         onOpenAddModal={() => {
           setEditingItem(null);
           setIsAddModalOpen(true);
-        }}
-      />
-
-      {/* Cloud Database Connect Modal */}
-      <CloudConnectModal
-        isOpen={isCloudModalOpen}
-        onClose={() => setIsCloudModalOpen(false)}
-        isCloud={storageStatus.isCloud}
-        currentProvider={storageStatus.provider}
-        onCloudConfigured={() => {
-          fetchData();
-          addToast('success', 'Base Cloud synchronisée avec succès !');
         }}
       />
 
