@@ -9,6 +9,8 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       equipment,
+      sales,
+      deletions,
       stats,
       isCloud: storageStatus.isCloud,
       provider: storageStatus.provider,

@@ -5,7 +5,10 @@ import { UpstashRedisAdapter, setRuntimeCloudCredentials, getStorageAdapter } fr
 export async function GET() {
   try {
     const status = getStorageStatus();
-    return NextResponse.json({ success: true, ...status });
+    const isLockedByEnv = Boolean(
+      process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+    );
+    return NextResponse.json({ success: true, ...status, isLockedByEnv });
   } catch (error) {
     console.error('API storage-status GET error:', error);
     return NextResponse.json({ success: false, error: 'Erreur statut stockage' }, { status: 500 });
@@ -16,6 +19,20 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action, url, token } = body;
+
+    const isLockedByEnv = Boolean(
+      process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+    );
+
+    if (isLockedByEnv && (action === 'save' || action === 'disconnect')) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Action protégée : La base Cloud est verrouillée par les variables d’environnement Vercel.',
+        },
+        { status: 403 }
+      );
+    }
 
     if (action === 'test') {
       if (!url || !token) {

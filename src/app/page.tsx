@@ -103,15 +103,8 @@ export default function Home() {
     if (cachedDel) setDeletions(cachedDel);
 
     try {
-      const [invRes, salesRes, delRes] = await Promise.all([
-        fetch('/api/inventory'),
-        fetch('/api/sales'),
-        fetch('/api/deletions'),
-      ]);
-
+      const invRes = await fetch('/api/inventory');
       const invData = await invRes.json();
-      const salesData = await salesRes.json();
-      const delData = await delRes.json();
 
       if (invData.success) {
         const isCloudActive = Boolean(invData.isCloud);
@@ -129,7 +122,6 @@ export default function Home() {
           // Serverless fallback: if user has local edits, NEVER let stale server seed wipe them!
           if (hasLocalEdits && cachedInv && cachedInv.length > 0) {
             setEquipment(cachedInv);
-            // Re-seed serverless tmp instance so stats and API routes match local edits
             fetch('/api/backup', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -141,14 +133,16 @@ export default function Home() {
             saveLocalCache(CACHE_KEYS.INVENTORY, invData.equipment);
           }
         }
-      }
-      if (salesData.success) {
-        setSales(salesData.sales);
-        saveLocalCache(CACHE_KEYS.SALES, salesData.sales);
-      }
-      if (delData.success) {
-        setDeletions(delData.deletions);
-        saveLocalCache(CACHE_KEYS.DELETIONS, delData.deletions);
+
+        // Optimized single-flight: sync sales and deletions from same payload
+        if (Array.isArray(invData.sales)) {
+          setSales(invData.sales);
+          saveLocalCache(CACHE_KEYS.SALES, invData.sales);
+        }
+        if (Array.isArray(invData.deletions)) {
+          setDeletions(invData.deletions);
+          saveLocalCache(CACHE_KEYS.DELETIONS, invData.deletions);
+        }
       }
     } catch (err) {
       console.error('Fetch error:', err);

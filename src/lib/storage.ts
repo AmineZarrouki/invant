@@ -19,6 +19,17 @@ export interface CloudCredentials {
   token: string;
 }
 
+interface CacheEntry {
+  data: any;
+  cachedAt: number;
+}
+
+// In-memory cache & in-flight requests shared across calls in the instance
+const memoryCache = new Map<string, CacheEntry>();
+const inFlightRequests = new Map<string, Promise<any | null>>();
+const CACHE_TTL_MS = 25_000; // 25 seconds TTL for serverless instances
+const MAX_PAYLOAD_BYTES = 2 * 1024 * 1024; // 2 MB safety cap
+
 /**
  * Cloud Storage Adapter using Upstash Redis / Vercel KV via pure REST API.
  * 100% Free, serverless-native, requires 0 extra npm packages.
@@ -58,42 +69,73 @@ export class UpstashRedisAdapter implements StorageAdapter {
   }
 
   async get(key: string): Promise<any | null> {
-    try {
-      const res = await fetch(`${this.url}/get/${key}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-        cache: 'no-store',
-      });
-
-      if (!res.ok) {
-        console.warn(`[Upstash] GET ${key} failed with status ${res.status}`);
-        return null;
-      }
-
-      const data = await res.json();
-      if (!data || data.result === null || data.result === undefined) {
-        return null;
-      }
-
-      // If stored as JSON string, parse it; otherwise return raw result
-      if (typeof data.result === 'string') {
-        try {
-          return JSON.parse(data.result);
-        } catch {
-          return data.result;
-        }
-      }
-      return data.result;
-    } catch (err) {
-      console.error(`[Upstash] Error getting key "${key}":`, err);
-      return null;
+    // 1. Check in-memory cache for 0ms immediate response
+    const cached = memoryCache.get(key);
+    if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+      return cached.data;
     }
+
+    // 2. In-flight request deduplication (prevents concurrent duplicate requests)
+    if (inFlightRequests.has(key)) {
+      return await inFlightRequests.get(key);
+    }
+
+    const fetchPromise = (async () => {
+      try {
+        const res = await fetch(`${this.url}/get/${key}`, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+          cache: 'no-store',
+        });
+
+        if (!res.ok) {
+          console.warn(`[Upstash] GET ${key} failed with status ${res.status}`);
+          return null;
+        }
+
+        const data = await res.json();
+        if (!data || data.result === null || data.result === undefined) {
+          return null;
+        }
+
+        let parsed: any = data.result;
+        if (typeof data.result === 'string') {
+          try {
+            parsed = JSON.parse(data.result);
+          } catch {
+            parsed = data.result;
+          }
+        }
+
+        // Cache the successful result
+        memoryCache.set(key, { data: parsed, cachedAt: Date.now() });
+        return parsed;
+      } catch (err) {
+        console.error(`[Upstash] Error getting key "${key}":`, err);
+        return null;
+      } finally {
+        inFlightRequests.delete(key);
+      }
+    })();
+
+    inFlightRequests.set(key, fetchPromise);
+    return await fetchPromise;
   }
 
   async set(key: string, value: any): Promise<boolean> {
     try {
       const payload = typeof value === 'string' ? value : JSON.stringify(value);
+
+      // Security: Payload size validation
+      if (Buffer.byteLength(payload, 'utf8') > MAX_PAYLOAD_BYTES) {
+        console.error(`[Upstash] Payload for key "${key}" exceeds size limit of 2MB`);
+        return false;
+      }
+
+      // Write-through in-memory update for 0ms subsequent reads
+      memoryCache.set(key, { data: value, cachedAt: Date.now() });
+
       const res = await fetch(`${this.url}/set/${key}`, {
         method: 'POST',
         headers: {
@@ -105,11 +147,13 @@ export class UpstashRedisAdapter implements StorageAdapter {
 
       if (!res.ok) {
         console.error(`[Upstash] SET ${key} failed with status ${res.status}`);
+        memoryCache.delete(key);
         return false;
       }
       return true;
     } catch (err) {
       console.error(`[Upstash] Error setting key "${key}":`, err);
+      memoryCache.delete(key);
       return false;
     }
   }

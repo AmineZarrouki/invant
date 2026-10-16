@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Cloud,
   CheckCircle2,
@@ -35,6 +35,20 @@ export default function CloudConnectModal({
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [isLockedByEnv, setIsLockedByEnv] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/storage-status')
+        .then((r) => r.json())
+        .then((d) => {
+          if (d && d.isLockedByEnv) {
+            setIsLockedByEnv(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -198,7 +212,7 @@ export default function CloudConnectModal({
             </div>
           </div>
 
-          {isCloud && (
+          {isCloud && !isLockedByEnv && (
             <button
               onClick={handleDisconnect}
               className="text-xs font-bold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer border border-rose-200"
@@ -206,7 +220,27 @@ export default function CloudConnectModal({
               Déconnecter
             </button>
           )}
+
+          {isLockedByEnv && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-black border border-emerald-300 shadow-sm">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Protégé Serveur</span>
+            </div>
+          )}
         </div>
+
+        {/* Security badge if locked by environment */}
+        {isLockedByEnv && (
+          <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200 text-emerald-900 text-xs font-medium space-y-1.5 shadow-sm">
+            <div className="flex items-center gap-2 font-black text-emerald-950 uppercase tracking-wider">
+              <Lock className="w-4 h-4 text-emerald-700" />
+              <span>Sécurité Maximale Activée</span>
+            </div>
+            <p className="leading-relaxed">
+              Votre base Cloud est connectée et protégée par les variables d’environnement du serveur. Les accès sont strictement sécurisés et ne peuvent être altérés depuis le navigateur.
+            </p>
+          </div>
+        )}
 
         {/* Recommendation box */}
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
@@ -221,36 +255,38 @@ export default function CloudConnectModal({
           </p>
         </div>
 
-        {/* Method 1: Automatic on Vercel */}
-        <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-white shadow-sm">
-          <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-slate-800">
-            <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
-            <span>Méthode 1 : Automatique en 1 clic sur Vercel (Recommandé)</span>
-          </div>
-          <ol className="text-xs text-slate-600 space-y-1.5 pl-6 list-decimal font-medium leading-relaxed">
-            <li>Sur votre tableau de bord <strong>Vercel</strong>, ouvrez votre projet <code>invant</code>.</li>
-            <li>Cliquez sur l’onglet <strong>Storage</strong> puis <strong>Create Database</strong> $\rightarrow$ choisissez <strong>KV (Upstash)</strong>.</li>
-            <li>Cliquez sur <strong>Connect</strong>. Vercel relie automatiquement la base cloud gratuite sans copier aucun code !</li>
-          </ol>
-        </div>
-
-        {/* Method 2: Direct Credentials Form */}
-        <div className="border-2 border-blue-200 rounded-2xl p-4 sm:p-5 space-y-4 bg-gradient-to-b from-blue-50/40 to-white shadow-sm">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-blue-900">
-              <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">2</span>
-              <span>Méthode 2 : Connexion directe avec vos identifiants Upstash</span>
+        {!isLockedByEnv && (
+          <>
+            {/* Method 1: Automatic on Vercel */}
+            <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-white shadow-sm">
+              <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-slate-800">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">1</span>
+                <span>Méthode 1 : Automatique en 1 clic sur Vercel (Recommandé)</span>
+              </div>
+              <ol className="text-xs text-slate-600 space-y-1.5 pl-6 list-decimal font-medium leading-relaxed">
+                <li>Sur votre tableau de bord <strong>Vercel</strong>, ouvrez votre projet <code>invant</code>.</li>
+                <li>Cliquez sur l’onglet <strong>Storage</strong> puis <strong>Create Database</strong> $\rightarrow$ choisissez <strong>KV (Upstash)</strong>.</li>
+                <li>Cliquez sur <strong>Connect</strong>. Vercel relie automatiquement la base cloud gratuite sans copier aucun code !</li>
+              </ol>
             </div>
-            <a
-              href="https://console.upstash.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline"
-            >
-              <span>Créer une base gratuite sur upstash.com</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
+
+            {/* Method 2: Direct Credentials Form */}
+            <div className="border-2 border-blue-200 rounded-2xl p-4 sm:p-5 space-y-4 bg-gradient-to-b from-blue-50/40 to-white shadow-sm">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2 font-black text-xs uppercase tracking-wider text-blue-900">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">2</span>
+                  <span>Méthode 2 : Connexion directe avec vos identifiants Upstash</span>
+                </div>
+                <a
+                  href="https://console.upstash.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline"
+                >
+                  <span>Créer une base gratuite sur upstash.com</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
 
           <div className="space-y-3">
             <div>
@@ -314,6 +350,8 @@ export default function CloudConnectModal({
             </div>
           </div>
         </div>
+      </>
+    )}
 
         {/* Footer */}
         <div className="flex items-center justify-end border-t border-slate-100 pt-4">
