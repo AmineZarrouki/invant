@@ -78,21 +78,21 @@ export default function SettingsView({
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn text-[#f8fafc]">
+    <div className="space-y-6 animate-fadeIn text-slate-900">
       {/* Header */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          <Database className="w-6 h-6 text-red-500" />
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <Database className="w-6 h-6 text-blue-600" />
           <span>Gestion de la Base de Données JSON & Paramètres</span>
         </h2>
-        <p className="text-xs text-slate-300 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           Persistance des données, sauvegardes JSON, import/export et devises
         </p>
       </div>
 
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/80 text-emerald-200 text-xs flex items-center gap-2 shadow-md">
-          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 shadow-sm font-semibold">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -100,19 +100,19 @@ export default function SettingsView({
       {/* Grid: Actions & Configuration */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Export JSON Card */}
-        <div className="p-5 rounded-2xl bg-[#131c31] border border-[#22314e] shadow-md flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 flex flex-col justify-between">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mb-3">
               <Download className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Sauvegarde Complète JSON</h3>
-            <p className="text-xs text-slate-300 mt-1">
+            <h3 className="text-sm font-bold text-slate-900">Sauvegarde Complète JSON</h3>
+            <p className="text-xs text-slate-500 mt-1">
               Téléchargez un fichier JSON contenant tout votre inventaire actuel ainsi que l’historique des ventes.
             </p>
           </div>
           <button
             onClick={handleDownloadBackup}
-            className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-950/50 active:scale-95"
+            className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Télécharger backup.json</span>
@@ -120,38 +120,38 @@ export default function SettingsView({
         </div>
 
         {/* Import JSON Card */}
-        <div className="p-5 rounded-2xl bg-[#131c31] border border-[#22314e] shadow-md flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 flex flex-col justify-between">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-400 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center mb-3">
               <Upload className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Restaurer un fichier JSON</h3>
-            <p className="text-xs text-slate-300 mt-1">
+            <h3 className="text-sm font-bold text-slate-900">Restaurer un fichier JSON</h3>
+            <p className="text-xs text-slate-500 mt-1">
               Importez un fichier JSON sauvegardé pour restaurer ou mettre à jour le catalogue de matériels.
             </p>
           </div>
-          <label className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-100 text-xs font-bold transition-all border border-[#2e4166] cursor-pointer active:scale-95 shadow-sm">
-            <Upload className="w-4 h-4" />
+          <label className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200 cursor-pointer active:scale-95 shadow-sm">
+            <Upload className="w-4 h-4 text-slate-600" />
             <span>Sélectionner un JSON</span>
             <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
           </label>
         </div>
 
         {/* Reset Database Card */}
-        <div className="p-5 rounded-2xl bg-[#131c31] border border-[#22314e] shadow-md flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 flex flex-col justify-between">
           <div>
-            <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mb-3">
               <RotateCcw className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Réinitialiser les Données</h3>
-            <p className="text-xs text-slate-300 mt-1">
+            <h3 className="text-sm font-bold text-slate-900">Réinitialiser les Données</h3>
+            <p className="text-xs text-slate-500 mt-1">
               Remet à zéro l’inventaire avec le stock officiel kickboxing (Venum, Pakka, Fairtex, Baklee, BS, etc.).
             </p>
           </div>
           <button
             onClick={handleReset}
             disabled={resetting}
-            className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all shadow-md shadow-red-950/50 disabled:opacity-40 active:scale-95"
+            className="mt-4 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-500/20 disabled:opacity-40 active:scale-95 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
             <span>{resetting ? 'Réinitialisation...' : 'Restaurer Matériel Initial'}</span>
@@ -160,9 +160,9 @@ export default function SettingsView({
       </div>
 
       {/* Currency Preference */}
-      <div className="p-5 rounded-2xl bg-[#131c31] border border-[#22314e] shadow-md">
-        <h3 className="text-sm font-bold text-white mb-1">Devise d’Affichage</h3>
-        <p className="text-xs text-slate-300 mb-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
+        <h3 className="text-sm font-bold text-slate-900 mb-1">Devise d’Affichage</h3>
+        <p className="text-xs text-slate-500 mb-4">
           Choisissez la devise pour l’affichage des prix, des coûts d’achat, des marges et du chiffre d’affaires.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -170,14 +170,14 @@ export default function SettingsView({
             <button
               key={c}
               onClick={() => setCurrency(c)}
-              className={`p-3.5 rounded-xl border text-left transition-all ${
+              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                 currency === c
-                  ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-600/20'
-                  : 'bg-[#0e1628] border-[#22314e] text-slate-300 hover:text-white hover:bg-[#18233d]'
+                  ? 'bg-blue-50 text-blue-900 border-blue-600 shadow-sm ring-2 ring-blue-500/20'
+                  : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
               <div className="text-xs font-bold">{CURRENCY_CONFIG[c].label}</div>
-              <div className="text-xs text-slate-300 mt-1 font-semibold">
+              <div className="text-xs text-slate-500 mt-1 font-semibold">
                 Symbole: {CURRENCY_CONFIG[c].symbol}
               </div>
             </button>
@@ -186,35 +186,35 @@ export default function SettingsView({
       </div>
 
       {/* Live JSON Inspector (Collapsible for advanced users only) */}
-      <details className="p-5 rounded-2xl bg-[#131c31] border border-[#22314e] space-y-4 shadow-md group">
-        <summary className="cursor-pointer text-xs font-bold text-slate-400 hover:text-slate-200 flex items-center justify-between list-none">
+      <details className="p-5 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 group">
+        <summary className="cursor-pointer text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center justify-between list-none">
           <div className="flex items-center gap-2">
-            <FileCode className="w-4 h-4 text-amber-400" />
-            <span className="font-bold text-slate-300">
+            <FileCode className="w-4 h-4 text-blue-600" />
+            <span className="font-bold text-slate-700">
               Outils informatiques avancés (Afficher les fichiers JSON bruts)
             </span>
           </div>
-          <span className="text-xs text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
         </summary>
 
-        <div className="pt-4 border-t border-[#1e2c47] space-y-3">
+        <div className="pt-4 border-t border-slate-200 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-300 font-medium">
+            <span className="text-xs text-slate-600 font-medium">
               Contenu brut stocké dans le fichier :
             </span>
-            <div className="flex items-center bg-[#0e1628] p-1 rounded-xl border border-[#22314e] text-xs">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
               <button
                 onClick={() => setActiveJsonTab('inventory')}
-                className={`px-3 py-1 rounded-lg font-bold transition-colors ${
-                  activeJsonTab === 'inventory' ? 'bg-red-600 text-white' : 'text-slate-400'
+                className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                  activeJsonTab === 'inventory' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Stock ({equipment.length})
               </button>
               <button
                 onClick={() => setActiveJsonTab('sales')}
-                className={`px-3 py-1 rounded-lg font-bold transition-colors ${
-                  activeJsonTab === 'sales' ? 'bg-red-600 text-white' : 'text-slate-400'
+                className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                  activeJsonTab === 'sales' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Ventes ({sales.length})
@@ -222,7 +222,7 @@ export default function SettingsView({
             </div>
           </div>
 
-          <div className="bg-[#0e1628] rounded-xl p-4 border border-[#22314e] max-h-80 overflow-y-auto text-xs font-mono text-slate-200">
+          <div className="bg-slate-900 rounded-xl p-4 border border-slate-800 max-h-80 overflow-y-auto text-xs font-mono text-slate-200">
             <pre>
               {JSON.stringify(
                 activeJsonTab === 'inventory' ? equipment.slice(0, 10) : sales.slice(0, 10),

@@ -1,6 +1,6 @@
 import { EquipmentCategory } from '@/types/inventory';
 
-/** Professional, high-visibility category configuration */
+/** Professional, high-visibility category configuration for crisp White & Blue UI */
 export const CATEGORY_CONFIG: Record<
   EquipmentCategory,
   {
@@ -16,60 +16,60 @@ export const CATEGORY_CONFIG: Record<
     label: 'Gants de Boxe',
     badge: 'Gants',
     icon: '🥊',
-    badgeBg: 'bg-red-500/15',
-    badgeText: 'text-red-300',
-    badgeBorder: 'border-red-500/40',
+    badgeBg: 'bg-blue-50',
+    badgeText: 'text-blue-700',
+    badgeBorder: 'border-blue-200',
   },
   protege_tibias: {
     label: 'Protège-Tibias',
     badge: 'Tibias',
     icon: '🦵',
-    badgeBg: 'bg-sky-500/15',
-    badgeText: 'text-sky-300',
-    badgeBorder: 'border-sky-500/40',
+    badgeBg: 'bg-sky-50',
+    badgeText: 'text-sky-700',
+    badgeBorder: 'border-sky-200',
   },
   bandes: {
     label: 'Bandes de Boxe',
     badge: 'Bandes',
     icon: '🎗️',
-    badgeBg: 'bg-amber-500/15',
-    badgeText: 'text-amber-300',
-    badgeBorder: 'border-amber-500/40',
+    badgeBg: 'bg-indigo-50',
+    badgeText: 'text-indigo-700',
+    badgeBorder: 'border-indigo-200',
   },
   protege_dents: {
     label: 'Protège-Dents',
     badge: 'Dents',
     icon: '🦷',
-    badgeBg: 'bg-emerald-500/15',
-    badgeText: 'text-emerald-300',
-    badgeBorder: 'border-emerald-500/40',
+    badgeBg: 'bg-emerald-50',
+    badgeText: 'text-emerald-700',
+    badgeBorder: 'border-emerald-200',
   },
   coquilles: {
     label: 'Coquilles de Protection',
     badge: 'Coquilles',
     icon: '🛡️',
-    badgeBg: 'bg-purple-500/15',
-    badgeText: 'text-purple-300',
-    badgeBorder: 'border-purple-500/40',
+    badgeBg: 'bg-purple-50',
+    badgeText: 'text-purple-700',
+    badgeBorder: 'border-purple-200',
   },
   autres: {
     label: 'Autres Accessoires',
     badge: 'Accessoires',
     icon: '⚡',
-    badgeBg: 'bg-slate-500/15',
-    badgeText: 'text-slate-300',
-    badgeBorder: 'border-slate-500/40',
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-700',
+    badgeBorder: 'border-slate-200',
   },
 };
 
-/** High-contrast stock status tokens */
+/** High-contrast stock status tokens for light professional theme */
 export function getStockStatus(stock: number, minAlert: number) {
   if (stock === 0) {
     return {
       label: 'Rupture',
-      badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/50 font-bold',
-      textClass: 'text-rose-400 font-extrabold',
-      dotColor: '#f43f5e',
+      badgeClass: 'bg-rose-50 text-rose-700 border-rose-200 font-bold',
+      textClass: 'text-rose-600 font-black',
+      dotColor: '#e11d48',
       isOut: true,
       isLow: false,
     };
@@ -77,18 +77,18 @@ export function getStockStatus(stock: number, minAlert: number) {
   if (stock <= minAlert) {
     return {
       label: 'Stock Faible',
-      badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/50 font-bold',
-      textClass: 'text-amber-300 font-extrabold',
-      dotColor: '#f59e0b',
+      badgeClass: 'bg-amber-50 text-amber-800 border-amber-200 font-bold',
+      textClass: 'text-amber-700 font-black',
+      dotColor: '#d97706',
       isOut: false,
       isLow: true,
     };
   }
   return {
     label: 'En Stock',
-    badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 font-bold',
-    textClass: 'text-emerald-400 font-extrabold',
-    dotColor: '#10b981',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold',
+    textClass: 'text-emerald-700 font-black',
+    dotColor: '#059669',
     isOut: false,
     isLow: false,
   };
@@ -107,7 +107,7 @@ export const STANDARD_COLORS: ColorPreset[] = [
   { value: 'Noir', label: 'Noir (Black)', swatch: '#0f172a', group: 'Classique' },
   { value: 'Blanc', label: 'Blanc (White)', swatch: '#f8fafc', group: 'Classique' },
   { value: 'Rouge', label: 'Rouge (Red)', swatch: '#ef4444', group: 'Classique' },
-  { value: 'Bleu', label: 'Bleu Royal (Blue)', swatch: '#3b82f6', group: 'Classique' },
+  { value: 'Bleu', label: 'Bleu Royal (Blue)', swatch: '#2563eb', group: 'Classique' },
   { value: 'Gris', label: 'Gris Anthracite', swatch: '#64748b', group: 'Classique' },
 
   // Combinaisons Bicolores
@@ -144,13 +144,13 @@ export const STANDARD_COLORS: ColorPreset[] = [
   {
     value: 'Bleu / Blanc',
     label: 'Bleu & Blanc',
-    swatch: 'linear-gradient(135deg, #3b82f6 50%, #f8fafc 50%)',
+    swatch: 'linear-gradient(135deg, #2563eb 50%, #f8fafc 50%)',
     group: 'Combinaisons Bicolores',
   },
   {
     value: 'Noir / Assorti',
     label: 'Noir / Assorti (Mixte)',
-    swatch: 'linear-gradient(135deg, #0f172a 33%, #ef4444 33%, #ef4444 66%, #3b82f6 66%)',
+    swatch: 'linear-gradient(135deg, #0f172a 33%, #ef4444 33%, #ef4444 66%, #2563eb 66%)',
     group: 'Combinaisons Bicolores',
   },
 
@@ -187,10 +187,10 @@ export function getColorSwatch(colorName: string): string {
   const lower = colorName.toLowerCase();
   if (lower.includes('gold') || lower.includes('or')) return '#eab308';
   if (lower.includes('rouge') || lower.includes('red')) return '#ef4444';
-  if (lower.includes('bleu') || lower.includes('blue')) return '#3b82f6';
+  if (lower.includes('bleu') || lower.includes('blue')) return '#2563eb';
   if (lower.includes('blanc') || lower.includes('white')) return '#f8fafc';
   if (lower.includes('noir') || lower.includes('black')) return '#0f172a';
-  if (lower.includes('vert') || lower.includes('green')) return '#22c55e';
+  if (lower.includes('vert') || lower.includes('green')) return '#16a34a';
   if (lower.includes('gris') || lower.includes('grey')) return '#64748b';
   if (lower.includes('rose') || lower.includes('pink')) return '#ec4899';
   if (lower.includes('orange')) return '#f97316';

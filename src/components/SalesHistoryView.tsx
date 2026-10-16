@@ -134,35 +134,47 @@ export default function SalesHistoryView({
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn text-[#f8fafc]">
+    <div className="space-y-6 animate-fadeIn text-slate-900">
       {/* Subtab Navigation: Sales vs Deletions Journal */}
-      <div className="flex items-center gap-2 p-1.5 bg-[#131c31] border border-[#22314e] rounded-2xl w-fit shadow-md">
+      <div className="flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-2xl w-fit shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
         <button
           onClick={() => setSubTab('sales')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             currentSubTab === 'sales'
-              ? 'bg-[#1e2c47] text-white shadow-sm border border-[#2e4166]'
-              : 'text-slate-300 hover:text-white hover:bg-[#18233d]'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          <History className="w-4 h-4 text-emerald-400" />
+          <History className="w-4 h-4" />
           <span>Toutes les Ventes</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-[#0e1628] text-emerald-300 border border-emerald-500/30 font-bold">
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-bold shadow-sm ${
+              currentSubTab === 'sales'
+                ? 'bg-white/20 text-white'
+                : 'bg-slate-100 text-slate-700'
+            }`}
+          >
             {sales.length}
           </span>
         </button>
 
         <button
           onClick={() => setSubTab('deletions')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
             currentSubTab === 'deletions'
-              ? 'bg-[#1e2c47] text-white shadow-sm border border-[#2e4166]'
-              : 'text-slate-300 hover:text-white hover:bg-[#18233d]'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          <RotateCcw className="w-4 h-4 text-red-400" />
+          <RotateCcw className="w-4 h-4" />
           <span>Corbeille (Matériel Supprimé)</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-red-950 text-red-200 border border-red-800/80 font-bold">
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full font-bold shadow-sm ${
+              currentSubTab === 'deletions'
+                ? 'bg-white/20 text-white'
+                : 'bg-rose-50 text-rose-700 border border-rose-200'
+            }`}
+          >
             {deletions.length}
           </span>
         </button>
@@ -179,11 +191,11 @@ export default function SalesHistoryView({
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                <History className="w-6 h-6 text-red-500" />
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <History className="w-6 h-6 text-blue-600" />
                 <span>Historique des Ventes & Transactions</span>
               </h2>
-              <p className="text-xs text-slate-300 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Journal complet des ventes, réintégration automatique en stock en cas d’annulation
               </p>
             </div>
@@ -191,48 +203,48 @@ export default function SalesHistoryView({
             <button
               onClick={exportSalesCSV}
               disabled={sales.length === 0}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-100 text-xs font-bold transition-colors border border-[#2e4166] disabled:opacity-40 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors border border-slate-200 disabled:opacity-40 shadow-sm cursor-pointer"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 text-slate-500" />
               <span>Exporter CSV</span>
             </button>
           </div>
 
           {/* Quick Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-[#131c31] border border-[#22314e] shadow-md">
-              <span className="text-xs uppercase font-bold text-slate-300">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:shadow-lg transition-all">
+              <span className="text-xs uppercase font-bold text-slate-500">
                 Total Ventes (Filtrées)
               </span>
-              <div className="text-2xl font-black text-white mt-1">
+              <div className="text-2xl font-black text-slate-900 mt-1">
                 {filteredSales.length} opérations
               </div>
-              <p className="text-xs text-slate-400 mt-1">{totalUnits} articles vendus au dojo</p>
+              <p className="text-xs text-slate-500 mt-1">{totalUnits} articles vendus au dojo</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#131c31] border border-[#22314e] shadow-md">
-              <span className="text-xs uppercase font-bold text-emerald-400">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:shadow-lg transition-all">
+              <span className="text-xs uppercase font-bold text-blue-600">
                 Chiffre d’Affaires
               </span>
-              <div className="text-2xl font-black text-emerald-400 mt-1">
+              <div className="text-2xl font-black text-blue-600 mt-1">
                 {formatCurrency(totalRevenue, currency)}
               </div>
-              <p className="text-xs text-slate-400 mt-1">Encaissé sur la sélection</p>
+              <p className="text-xs text-slate-500 mt-1">Encaissé sur la sélection</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#131c31] border border-[#22314e] shadow-md">
-              <span className="text-xs uppercase font-bold text-slate-300">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:shadow-lg transition-all">
+              <span className="text-xs uppercase font-bold text-emerald-600">
                 Marge Nette Réalisée
               </span>
-              <div className="text-2xl font-black text-emerald-400 mt-1">
+              <div className="text-2xl font-black text-emerald-600 mt-1">
                 +{formatCurrency(totalProfit, currency)}
               </div>
-              <p className="text-xs text-slate-400 mt-1">Bénéfice calculé après coût matériel</p>
+              <p className="text-xs text-slate-500 mt-1">Bénéfice calculé après coût matériel</p>
             </div>
           </div>
 
           {/* Search & Filters */}
-          <div className="p-4 rounded-2xl bg-[#131c31] border border-[#22314e] flex flex-col sm:flex-row gap-3 shadow-md">
+          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row gap-3 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
             <div className="flex-1 relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -240,14 +252,14 @@ export default function SalesHistoryView({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Rechercher par article, client, taille..."
-                className="w-full bg-[#0e1628] border border-[#263756] rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-red-500 font-medium"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white font-medium shadow-inner"
               />
             </div>
 
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
-              className="bg-[#0e1628] border border-[#263756] rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-red-500 cursor-pointer"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer shadow-sm"
             >
               <option value="all">Tous les modes de paiement</option>
               <option value="cash">Espèces</option>
@@ -256,35 +268,35 @@ export default function SalesHistoryView({
             </select>
           </div>
 
-          {/* Sales Table */}
+          {/* Sales Table with Distinct Dividing Lines */}
           {filteredSales.length === 0 ? (
-            <div className="bg-[#131c31] border border-[#22314e] rounded-2xl p-12 text-center text-slate-400 shadow-md">
-              <History className="w-10 h-10 mx-auto text-slate-500 mb-2 opacity-50" />
-              <p className="text-sm font-semibold text-slate-300">
+            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-500 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
+              <History className="w-10 h-10 mx-auto text-slate-400 mb-2 opacity-50" />
+              <p className="text-sm font-semibold text-slate-700">
                 Aucune vente ne correspond à ces critères.
               </p>
             </div>
           ) : (
-            <div className="bg-[#131c31] border border-[#22314e] rounded-2xl overflow-hidden shadow-lg">
+            <div className="bg-white border-2 border-slate-200 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/80 ring-1 ring-slate-900/5">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-[#22314e] bg-[#0e1628] text-xs font-extrabold text-slate-300 uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Date & Heure</th>
-                      <th className="py-3.5 px-4">Article Vendu</th>
-                      <th className="py-3.5 px-3">Qté</th>
-                      <th className="py-3.5 px-3">Prix Unit.</th>
-                      <th className="py-3.5 px-3">Montant Total</th>
-                      <th className="py-3.5 px-3">Bénéfice</th>
-                      <th className="py-3.5 px-3">Client</th>
-                      <th className="py-3.5 px-3">Paiement</th>
-                      <th className="py-3.5 px-4 text-right">Action</th>
+                    <tr className="border-b-2 border-slate-300 bg-slate-100/80 text-xs font-black text-slate-700 uppercase tracking-wider">
+                      <th className="py-4 px-4 border-r border-slate-200/80">Date & Heure</th>
+                      <th className="py-4 px-4 border-r border-slate-200/80">Article Vendu</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Qté</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Prix Unit.</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Montant Total</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Bénéfice</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Client</th>
+                      <th className="py-4 px-3 border-r border-slate-200/80">Paiement</th>
+                      <th className="py-4 px-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1e2c47] text-xs">
+                  <tbody className="divide-y-2 divide-slate-200 text-xs">
                     {filteredSales.map((sale) => (
-                      <tr key={sale.id} className="hover:bg-[#18233d]/70 transition-colors">
-                        <td className="py-3.5 px-4 text-slate-300 whitespace-nowrap">
+                      <tr key={sale.id} className="border-b-2 border-slate-200 hover:bg-blue-50/40 transition-colors">
+                        <td className="py-4 px-4 text-slate-500 whitespace-nowrap border-r border-slate-200/60 font-medium">
                           {new Date(sale.date).toLocaleDateString('fr-FR', {
                             day: '2-digit',
                             month: 'short',
@@ -292,39 +304,39 @@ export default function SalesHistoryView({
                             minute: '2-digit',
                           })}
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="font-bold text-white">{sale.equipmentName}</div>
-                          <div className="text-xs text-slate-400 mt-0.5">
+                        <td className="py-4 px-4 border-r border-slate-200/60">
+                          <div className="font-bold text-slate-900">{sale.equipmentName}</div>
+                          <div className="text-xs text-slate-500 mt-0.5 font-medium">
                             {sale.brand} • {sale.size} • {sale.color}
                           </div>
                         </td>
-                        <td className="py-3.5 px-3">
-                          <span className="font-black text-white px-2 py-0.5 rounded bg-[#0e1628] border border-[#22314e]">
+                        <td className="py-4 px-3 border-r border-slate-200/60">
+                          <span className="font-black text-slate-900 px-2 py-0.5 rounded bg-slate-100 border border-slate-200 shadow-sm">
                             {sale.quantity}x
                           </span>
                         </td>
-                        <td className="py-3.5 px-3 text-slate-200">
+                        <td className="py-4 px-3 text-slate-600 font-semibold border-r border-slate-200/60">
                           {formatCurrency(sale.unitPrice, currency)}
                         </td>
-                        <td className="py-3.5 px-3 font-black text-emerald-400">
+                        <td className="py-4 px-3 font-black text-blue-600 border-r border-slate-200/60">
                           {formatCurrency(sale.totalPrice, currency)}
                         </td>
-                        <td className="py-3.5 px-3 font-bold text-emerald-300">
+                        <td className="py-4 px-3 font-bold text-emerald-700 border-r border-slate-200/60">
                           +{formatCurrency(sale.profit, currency)}
                         </td>
-                        <td className="py-3.5 px-3 text-slate-100 font-semibold">
+                        <td className="py-4 px-3 text-slate-800 font-semibold border-r border-slate-200/60">
                           {sale.buyerName || 'Client'}
                         </td>
-                        <td className="py-3.5 px-3">
-                          <span className="capitalize px-2 py-0.5 rounded text-xs font-bold bg-[#0e1628] text-slate-200 border border-[#22314e]">
+                        <td className="py-4 px-3 border-r border-slate-200/60">
+                          <span className="capitalize px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-sm">
                             {sale.paymentMethod}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-4 px-4 text-right">
                           <button
                             onClick={() => handleRefund(sale)}
                             disabled={loadingRefundId === sale.id}
-                            className="flex items-center gap-1 ml-auto px-2.5 py-1 rounded-lg bg-[#1e2c47] hover:bg-rose-950/80 hover:text-rose-200 text-slate-300 text-xs font-bold transition-colors border border-[#2e4166] disabled:opacity-40"
+                            className="flex items-center gap-1 ml-auto px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-600 text-xs font-bold transition-colors border border-slate-200 disabled:opacity-40 cursor-pointer shadow-sm"
                             title="Annuler cette vente et remettre le stock"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />

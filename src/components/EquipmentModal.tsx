@@ -545,14 +545,14 @@ export default function EquipmentModal({
     return (
       <div
         key={colorItem.id}
-        className="p-3 rounded-xl bg-[#101828] border border-[#23314d] space-y-2 hover:border-slate-600 transition-colors"
+        className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 hover:border-slate-300 transition-colors"
       >
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           {/* Color Selection via Dropdown (no need to type) */}
           <div className="flex-1 flex items-center gap-2">
             {/* Visual Swatch Circle */}
             <div
-              className="w-6 h-6 rounded-full shrink-0 border border-slate-500 shadow-sm"
+              className="w-6 h-6 rounded-full shrink-0 border border-slate-300 shadow-sm"
               style={{ background: swatch }}
               title={colorItem.color}
             />
@@ -567,7 +567,7 @@ export default function EquipmentModal({
                     onUpdate({ color: e.target.value, isCustom: false });
                   }
                 }}
-                className="w-full bg-[#162138] border border-[#2d3e63] rounded-lg px-3 py-2 text-xs font-bold text-slate-100 focus:outline-none focus:border-rose-500 cursor-pointer"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer shadow-sm"
               >
                 <optgroup label="Couleurs Classiques">
                   {STANDARD_COLORS.filter((c) => c.group === 'Classique').map((c) => (
@@ -590,7 +590,7 @@ export default function EquipmentModal({
                     </option>
                   ))}
                 </optgroup>
-                <option value="__custom__" className="text-rose-400 font-bold">
+                <option value="__custom__" className="text-blue-600 font-bold">
                   + Autre couleur (saisie personnalisée)...
                 </option>
               </select>
@@ -603,12 +603,12 @@ export default function EquipmentModal({
                   value={colorItem.color}
                   onChange={(e) => onUpdate({ color: e.target.value })}
                   placeholder="Tapez le nom de la couleur..."
-                  className="w-full bg-[#162138] border border-rose-500/80 rounded-lg px-3 py-2 text-xs font-bold text-white focus:outline-none"
+                  className="w-full bg-white border border-blue-500 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => onUpdate({ isCustom: false, color: 'Noir' })}
-                  className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold whitespace-nowrap"
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold whitespace-nowrap"
                   title="Revenir à la liste déroulante"
                 >
                   Liste
@@ -619,34 +619,34 @@ export default function EquipmentModal({
 
           {/* Flexible Quantity Controls: Type 1, 10, 100 or use quick stepper/boosters */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-300">Quantité :</span>
+            <span className="text-xs font-bold text-slate-600">Quantité :</span>
 
             {/* Stepper -1 */}
             <button
               type="button"
               onClick={() => onUpdate({ quantity: Math.max(0, colorItem.quantity - 1) })}
-              className="w-7 h-7 rounded-lg bg-[#1a253e] hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold text-xs transition-colors"
+              className="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-colors"
             >
-              <Minus className="w-3 h-3" />
+              <Minus className="w-3.5 h-3.5" />
             </button>
 
-            {/* Direct Editable Quantity Input: User can type 1, 10, 100, 500, etc. */}
+            {/* Direct Editable Quantity Input */}
             <input
               type="number"
               min="0"
               required
               value={colorItem.quantity}
               onChange={(e) => onUpdate({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
-              className="w-16 bg-[#162138] border border-[#2e4066] rounded-lg px-2 py-1 text-sm text-white font-black text-center focus:outline-none focus:border-rose-500"
+              className="w-16 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm text-slate-900 font-black text-center focus:outline-none focus:border-blue-600 shadow-sm"
             />
 
             {/* Stepper +1 */}
             <button
               type="button"
               onClick={() => onUpdate({ quantity: colorItem.quantity + 1 })}
-              className="w-7 h-7 rounded-lg bg-[#1a253e] hover:bg-slate-700 text-slate-200 flex items-center justify-center font-bold text-xs transition-colors"
+              className="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-xs transition-colors"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3.5 h-3.5" />
             </button>
 
             {/* Quick boost shortcuts: +10, +50, +100 */}
@@ -656,7 +656,7 @@ export default function EquipmentModal({
                   key={step}
                   type="button"
                   onClick={() => onUpdate({ quantity: colorItem.quantity + step })}
-                  className="px-2 py-1 rounded-md bg-[#18233a] hover:bg-rose-950/60 hover:text-rose-300 border border-[#2a3a5a] text-xs font-bold text-slate-300 transition-colors"
+                  className="px-2 py-1 rounded-md bg-white hover:bg-blue-50 hover:text-blue-700 border border-slate-200 text-xs font-bold text-slate-700 transition-colors shadow-sm"
                   title={`Ajouter +${step} pièces`}
                 >
                   +{step}
@@ -668,7 +668,7 @@ export default function EquipmentModal({
             <button
               type="button"
               onClick={onRemove}
-              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors ml-1"
+              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1"
               title="Supprimer cette couleur"
             >
               <Trash2 className="w-4 h-4" />
@@ -680,29 +680,29 @@ export default function EquipmentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="bg-[#0e1628] border border-[#202c46] rounded-2xl w-full max-w-3xl shadow-2xl my-8 overflow-hidden text-slate-100 animate-scaleUp ring-1 ring-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-2xl shadow-slate-900/15 my-8 overflow-hidden text-slate-900 animate-scaleUp ring-1 ring-slate-900/10">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#202c46] bg-[#121b30]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500/20 to-red-600/20 border border-rose-500/40 text-rose-400 flex items-center justify-center font-bold text-lg shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold text-lg shadow-sm">
               {activeCategoryCfg?.icon || '📦'}
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
                 <span>{initialData ? 'Modifier l’Équipement' : 'Nouveau Matériel Kickboxing'}</span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
                   {totalCalculatedQuantity} pcs au total
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Choix des couleurs par liste déroulante et réglage libre des quantités (1, 10, 100 pcs...).
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -711,15 +711,15 @@ export default function EquipmentModal({
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[82vh] overflow-y-auto">
           {error && (
-            <div className="p-4 rounded-xl bg-rose-950/50 border border-rose-800 text-rose-200 text-xs flex items-center gap-3 font-semibold">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-3 font-semibold">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500" />
               <span>{error}</span>
             </div>
           )}
 
           {/* STEP 1: CATEGORY SELECTION */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
               1. Catégorie d’Équipement
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -732,8 +732,8 @@ export default function EquipmentModal({
                     onClick={() => handleCategoryChange(t.id)}
                     className={`p-3 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
                       isSelected
-                        ? 'bg-[#18233c] border-rose-500 text-white shadow-md ring-2 ring-rose-500/30'
-                        : 'bg-[#101828] border-[#22304d] text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                        ? 'bg-blue-50 border-blue-600 text-blue-900 shadow-sm ring-2 ring-blue-500/20 font-bold'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900'
                     }`}
                   >
                     <span className="text-2xl">{t.icon}</span>
@@ -747,7 +747,7 @@ export default function EquipmentModal({
           {/* STEP 2: GENERAL DETAILS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Marque / Fabricant *
               </label>
               <input
@@ -761,12 +761,12 @@ export default function EquipmentModal({
                   }
                 }}
                 placeholder="ex: Venum, Fairtex, Pakka, Baklee"
-                className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Modèle / Gamme
               </label>
               <input
@@ -779,18 +779,18 @@ export default function EquipmentModal({
                   }
                 }}
                 placeholder="ex: Challenger, BX1010, SHPA20"
-                className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-slate-200">
+              <label className="text-xs font-bold text-slate-700">
                 Désignation Commerciale du Produit *
               </label>
               {!isNameManuallyEdited && (
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="text-xs text-blue-600 font-semibold flex items-center gap-1">
                   <Sparkles className="w-3.5 h-3.5" /> Nom auto-généré
                 </span>
               )}
@@ -804,25 +804,25 @@ export default function EquipmentModal({
                 setIsNameManuallyEdited(true);
               }}
               placeholder="ex: Gants Venum Challenger"
-              className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-4 py-2.5 text-sm text-white font-extrabold placeholder-slate-500 focus:outline-none focus:border-rose-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-extrabold placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
             />
           </div>
 
           {/* STEP 3: TAILLES ET COULEURS PAR SELECT AVEC QUANTITÉS FLEXIBLES */}
-          <div className="p-5 rounded-2xl bg-[#0f172a] border border-[#202d48] space-y-4 shadow-inner">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#202d48] pb-4">
+          <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
               <div>
-                <h4 className="text-sm font-black text-white flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-rose-500" />
+                <h4 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-blue-600" />
                   <span>Gestion des Tailles, Couleurs & Quantités</span>
                 </h4>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Sélectionnez les couleurs dans la liste déroulante et ajustez les quantités (1, 10, 100 pcs...).
                 </p>
               </div>
 
               {/* Toggle Has Sizes */}
-              <label className="flex items-center gap-2.5 cursor-pointer bg-[#141e33] border border-[#283756] px-3.5 py-2 rounded-xl hover:border-slate-500 transition-colors">
+              <label className="flex items-center gap-2.5 cursor-pointer bg-white border border-slate-200 px-3.5 py-2 rounded-xl hover:border-slate-300 transition-colors shadow-sm">
                 <input
                   type="checkbox"
                   checked={hasSizes}
@@ -845,17 +845,17 @@ export default function EquipmentModal({
                       ]);
                     }
                   }}
-                  className="w-4 h-4 rounded border-slate-600 text-rose-600 focus:ring-0 bg-[#0c1220]"
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 bg-white"
                 />
-                <span className="text-xs font-bold text-slate-200">
+                <span className="text-xs font-bold text-slate-800">
                   Cet équipement a des tailles (ex: 12oz, M, L)
                 </span>
               </label>
             </div>
 
             {/* Quick Bulk Preset Selector */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-[#141e33] border border-[#23314d]">
-              <span className="text-xs font-bold text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
+              <span className="text-xs font-bold text-slate-700">
                 Quantité par défaut pour nouvelles couleurs :
               </span>
               <div className="flex items-center gap-1.5">
@@ -866,8 +866,8 @@ export default function EquipmentModal({
                     onClick={() => setNewColorDefaultQty(preset)}
                     className={`px-3 py-1 rounded-lg text-xs font-extrabold transition-all ${
                       newColorDefaultQty === preset
-                        ? 'bg-rose-600 text-white shadow-sm ring-1 ring-rose-400'
-                        : 'bg-[#1b2742] text-slate-300 hover:text-white border border-[#2a3b5e]'
+                        ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                     }`}
                   >
                     {preset} pcs
@@ -882,7 +882,7 @@ export default function EquipmentModal({
                 {/* Size preset chips for quick addition */}
                 {activeCategoryCfg && activeCategoryCfg.defaultSizes.length > 0 && (
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-slate-400">
+                    <span className="text-xs font-bold text-slate-500">
                       Tailles suggérées :
                     </span>
                     {activeCategoryCfg.defaultSizes.map((szPreset) => (
@@ -890,7 +890,7 @@ export default function EquipmentModal({
                         key={szPreset}
                         type="button"
                         onClick={() => addSize(szPreset)}
-                        className="px-3 py-1 rounded-lg bg-[#141e33] hover:bg-slate-700 border border-[#283756] text-xs text-slate-200 font-bold transition-colors"
+                        className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-700 font-bold transition-colors shadow-sm"
                       >
                         + {szPreset}
                       </button>
@@ -903,25 +903,25 @@ export default function EquipmentModal({
                   {sizesState.map((sizeEntry) => (
                     <div
                       key={sizeEntry.id}
-                      className="p-4 rounded-xl bg-[#131c31] border border-[#253454] space-y-3 shadow-sm"
+                      className="p-4 rounded-xl bg-white border border-slate-200 space-y-3 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5"
                     >
                       {/* Size row */}
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 flex-1 max-w-sm">
-                          <span className="text-xs font-extrabold text-rose-400">Taille :</span>
+                          <span className="text-xs font-extrabold text-blue-600">Taille :</span>
                           <input
                             type="text"
                             required
                             value={sizeEntry.size}
                             onChange={(e) => updateSizeName(sizeEntry.id, e.target.value)}
                             placeholder="ex: 12 oz, S, M, 4,5m"
-                            className="bg-[#0e1628] border border-[#2c3d61] rounded-lg px-3 py-1.5 text-xs text-white font-extrabold focus:outline-none focus:border-rose-500 flex-1"
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-extrabold focus:outline-none focus:border-blue-600 flex-1"
                           />
                         </div>
 
                         {/* Quick bulk apply to this size */}
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-400 font-semibold hidden sm:inline">
+                          <span className="text-xs text-slate-500 font-semibold hidden sm:inline">
                             Remplir tout à :
                           </span>
                           <div className="flex items-center gap-1">
@@ -930,7 +930,7 @@ export default function EquipmentModal({
                                 key={qty}
                                 type="button"
                                 onClick={() => applyBulkQuantityToSize(sizeEntry.id, qty)}
-                                className="px-2 py-0.5 rounded bg-[#1c2944] hover:bg-slate-700 text-xs font-bold text-slate-300 border border-[#2e4168]"
+                                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 border border-slate-200"
                                 title={`Définir ${qty} pcs pour toutes les couleurs de ${sizeEntry.size}`}
                               >
                                 {qty}
@@ -938,9 +938,9 @@ export default function EquipmentModal({
                             ))}
                           </div>
 
-                          <span className="text-xs text-slate-300 font-bold pl-2 border-l border-slate-700">
+                          <span className="text-xs text-slate-600 font-bold pl-2 border-l border-slate-200">
                             Total :{' '}
-                            <strong className="text-emerald-400">
+                            <strong className="text-blue-700 font-black">
                               {sizeEntry.colors.reduce((s, c) => s + (Number(c.quantity) || 0), 0)} pcs
                             </strong>
                           </span>
@@ -948,7 +948,7 @@ export default function EquipmentModal({
                           <button
                             type="button"
                             onClick={() => removeSize(sizeEntry.id)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-colors ml-1"
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors ml-1"
                             title="Supprimer cette taille"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -957,8 +957,8 @@ export default function EquipmentModal({
                       </div>
 
                       {/* Colors of this size */}
-                      <div className="space-y-2 pt-2 border-t border-[#23314d]">
-                        <span className="text-xs font-bold text-slate-300 block">
+                      <div className="space-y-2 pt-2 border-t border-slate-200">
+                        <span className="text-xs font-bold text-slate-700 block">
                           Couleurs sélectionnées pour la taille "{sizeEntry.size || 'Sans nom'}" :
                         </span>
 
@@ -977,9 +977,9 @@ export default function EquipmentModal({
                           <button
                             type="button"
                             onClick={() => addColorToSize(sizeEntry.id, 'Noir', newColorDefaultQty)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a2642] hover:bg-slate-700 text-slate-200 text-xs font-bold border border-[#2b3c62] transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-colors"
                           >
-                            <Plus className="w-3.5 h-3.5 text-rose-400" />
+                            <Plus className="w-3.5 h-3.5 text-blue-600" />
                             <span>Ajouter une couleur ({newColorDefaultQty} pcs)</span>
                           </button>
                         </div>
@@ -992,9 +992,9 @@ export default function EquipmentModal({
                 <button
                   type="button"
                   onClick={() => addSize()}
-                  className="w-full py-3 rounded-xl border border-dashed border-[#2f4268] hover:border-rose-500 bg-[#121b30] hover:bg-[#16213a] text-slate-200 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-300 hover:border-blue-500 bg-white hover:bg-blue-50/50 text-slate-700 hover:text-blue-600 text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
                 >
-                  <Plus className="w-4 h-4 text-rose-500" />
+                  <Plus className="w-4 h-4 text-blue-600" />
                   <span>Ajouter une autre taille</span>
                 </button>
               </div>
@@ -1002,18 +1002,18 @@ export default function EquipmentModal({
               /* CASE B: WITHOUT SIZES (COULEURS SEULEMENT) */
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 block">
+                  <span className="text-xs font-bold text-slate-700 block">
                     Couleurs disponibles :
                   </span>
 
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
                     <span>Remplir tout à :</span>
                     {[10, 50, 100].map((qty) => (
                       <button
                         key={qty}
                         type="button"
                         onClick={() => applyBulkQuantityToDirect(qty)}
-                        className="px-2 py-0.5 rounded bg-[#1c2944] hover:bg-slate-700 text-xs font-bold text-slate-300 border border-[#2e4168]"
+                        className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 border border-slate-200"
                       >
                         {qty} pcs
                       </button>
@@ -1034,33 +1034,33 @@ export default function EquipmentModal({
                 <button
                   type="button"
                   onClick={() => addDirectColor('Noir', newColorDefaultQty)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#18233a] hover:bg-slate-700 text-slate-200 text-xs font-bold border border-[#2a3b5c] transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-colors shadow-sm"
                 >
-                  <Plus className="w-4 h-4 text-rose-400" />
+                  <Plus className="w-4 h-4 text-blue-600" />
                   <span>Ajouter une couleur ({newColorDefaultQty} pcs)</span>
                 </button>
               </div>
             )}
 
             {/* Total Stock Summary Banner */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#141f36] border border-[#26375a]">
-              <span className="text-xs font-bold text-slate-300">
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+              <span className="text-xs font-bold text-blue-900">
                 Stock total calculé (somme de toutes les couleurs) :
               </span>
-              <span className="text-base font-black text-emerald-400">
+              <span className="text-base font-black text-blue-700">
                 {totalCalculatedQuantity} pièces
               </span>
             </div>
           </div>
 
           {/* STEP 4: ALERT LIMIT & PRICING */}
-          <div className="p-4 rounded-2xl bg-[#0f172a] border border-[#202d48] space-y-3">
-            <h4 className="text-xs font-black uppercase text-slate-300 tracking-wider">
+          <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 space-y-3">
+            <h4 className="text-xs font-black uppercase text-slate-700 tracking-wider">
               Tarification & Alertes
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-emerald-400 mb-1.5">
+                <label className="block text-xs font-bold text-emerald-700 mb-1.5">
                   Prix de Vente Client ({currSymbol}) *
                 </label>
                 <input
@@ -1071,13 +1071,13 @@ export default function EquipmentModal({
                   value={sellingPrice}
                   onChange={(e) => setSellingPrice(parseFloat(e.target.value) || 0)}
                   placeholder="Ce que l'adhérent paie"
-                  className="w-full bg-[#121a2d] border border-emerald-500/70 rounded-xl px-3.5 py-2.5 text-sm text-emerald-300 font-black focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border-2 border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-emerald-800 font-black focus:outline-none focus:border-emerald-600 shadow-sm"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Montant payé par l'élève</p>
+                <p className="text-[11px] text-slate-500 mt-1">Montant payé par l'élève</p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Prix d’Achat Fournisseur ({currSymbol})
                 </label>
                 <input
@@ -1087,13 +1087,13 @@ export default function EquipmentModal({
                   value={costPrice}
                   onChange={(e) => setCostPrice(parseFloat(e.target.value) || 0)}
                   placeholder="Ce que vous avez payé"
-                  className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-bold focus:outline-none focus:border-blue-600 shadow-sm"
                 />
-                <div className="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
+                <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
                   <span>Gain net :</span>
                   <span
                     className={`font-black ${
-                      profitMargin >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                      profitMargin >= 0 ? 'text-emerald-700' : 'text-rose-600'
                     }`}
                   >
                     {profitMargin >= 0 ? `+${profitMargin.toFixed(1)}` : profitMargin.toFixed(1)}{' '}
@@ -1104,7 +1104,7 @@ export default function EquipmentModal({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Alerter quand le stock descend à :
                 </label>
                 <input
@@ -1112,22 +1112,22 @@ export default function EquipmentModal({
                   min="0"
                   value={minStockAlert}
                   onChange={(e) => setMinStockAlert(parseInt(e.target.value) || 0)}
-                  className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-bold focus:outline-none focus:border-blue-600 shadow-sm"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Devient jaune quand il reste ce nombre</p>
+                <p className="text-[11px] text-slate-500 mt-1">Devient jaune quand il reste ce nombre</p>
               </div>
             </div>
           </div>
 
           {/* STEP 5: OPTIONAL DETAILS (BARCODE & DESCRIPTION) */}
-          <details className="rounded-2xl bg-[#0f172a] border border-[#202d48] p-4 group">
-            <summary className="text-xs font-bold text-slate-400 hover:text-slate-200 cursor-pointer flex items-center justify-between list-none">
+          <details className="rounded-2xl bg-slate-50 border border-slate-200 p-4 group">
+            <summary className="text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer flex items-center justify-between list-none">
               <span>➕ Détails avancés (Code-barres, notes...) · Facultatif</span>
-              <span className="text-xs text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+              <span className="text-xs text-slate-400 group-open:rotate-180 transition-transform">▼</span>
             </summary>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t border-[#1e2c47]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-200">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Code-Barres ou Référence interne
                 </label>
                 <input
@@ -1135,12 +1135,12 @@ export default function EquipmentModal({
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
                   placeholder="ex: GNT-VNM-001 (laisser vide si pas besoin)"
-                  className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Description / Remarques
                 </label>
                 <input
@@ -1148,25 +1148,25 @@ export default function EquipmentModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="ex: Matière cuir synthétique..."
-                  className="w-full bg-[#121a2d] border border-[#23314d] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 shadow-sm"
                 />
               </div>
             </div>
           </details>
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#202c46]">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs shadow-md transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{loading ? 'Enregistrement...' : 'Enregistrer le Matériel'}</span>

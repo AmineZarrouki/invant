@@ -312,7 +312,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-[#f8fafc] flex flex-col font-sans selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
@@ -330,9 +330,9 @@ export default function Home() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {loading ? (
-          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-zinc-400">
-            <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm font-semibold">Chargement de la base de données kickboxing...</p>
+          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-slate-500">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm font-bold text-slate-700">Chargement de votre stock kickboxing...</p>
           </div>
         ) : (
           <>

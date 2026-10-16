@@ -52,10 +52,10 @@ export default function DashboardView({
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh] text-slate-400">
+      <div className="flex items-center justify-center min-h-[50vh] text-slate-500">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-sm font-bold text-slate-200">Chargement de votre stock...</p>
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-bold text-slate-700">Chargement de votre stock...</p>
         </div>
       </div>
     );
@@ -69,20 +69,20 @@ export default function DashboardView({
   const totalAlerts = stats.lowStockCount + stats.outOfStockCount;
 
   return (
-    <div className="space-y-6 animate-fadeIn text-[#f8fafc]">
+    <div className="space-y-6 animate-fadeIn text-slate-900">
       {/* 1. TOP FRIENDLY ACTION HUB: 3 BIG BUTTONS */}
-      <div className="rounded-3xl bg-gradient-to-b from-[#151f38] to-[#101828] border border-[#243555] p-5 sm:p-6 shadow-xl">
+      <div className="rounded-3xl bg-white border border-slate-200 p-5 sm:p-6 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Bonjour & Bienvenue 👋
               </span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm">
                 Prêt à l'emploi
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1">
               Que souhaitez-vous faire maintenant ? Cliquez sur une action ci-dessous :
             </p>
           </div>
@@ -90,9 +90,9 @@ export default function DashboardView({
           {onOpenHelpModal && (
             <button
               onClick={onOpenHelpModal}
-              className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs transition-colors"
+              className="self-start sm:self-auto flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-xs transition-colors shadow-sm cursor-pointer"
             >
-              <HelpCircle className="w-4 h-4 shrink-0" />
+              <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
               <span>Comment ça marche ?</span>
             </button>
           )}
@@ -103,20 +103,20 @@ export default function DashboardView({
           {/* Action 1: Vendre */}
           <button
             onClick={onNavigateToPos}
-            className="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/60 to-[#0e1628] border-2 border-emerald-500/50 hover:border-emerald-400 hover:scale-[1.02] text-left transition-all shadow-lg group active:scale-95"
+            className="p-5 rounded-2xl bg-emerald-50/70 border-2 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50 text-left transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 shadow-emerald-600/10 ring-1 ring-emerald-500/10 group active:scale-95 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/40 group-hover:bg-emerald-500">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 group-hover:bg-emerald-700 transition-colors">
                 <ShoppingBag className="w-6 h-6" />
               </div>
-              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm">
                 1 clic
               </span>
             </div>
-            <h3 className="text-base font-black text-white group-hover:text-emerald-300 transition-colors">
+            <h3 className="text-base font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
               🛒 Vendre un Article
             </h3>
-            <p className="text-xs text-slate-300 mt-1 font-medium leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">
               Encaisser un élève (gants, protège-tibias, bandes). Le stock diminue tout seul.
             </p>
           </button>
@@ -124,20 +124,20 @@ export default function DashboardView({
           {/* Action 2: Voir le Stock */}
           <button
             onClick={onNavigateToInventory}
-            className="p-5 rounded-2xl bg-gradient-to-br from-blue-950/60 to-[#0e1628] border-2 border-blue-500/50 hover:border-blue-400 hover:scale-[1.02] text-left transition-all shadow-lg group active:scale-95"
+            className="p-5 rounded-2xl bg-blue-50/70 border-2 border-blue-200 hover:border-blue-500 hover:bg-blue-50 text-left transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 shadow-blue-600/10 ring-1 ring-blue-500/10 group active:scale-95 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-600/40 group-hover:bg-blue-500">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-600/30 group-hover:bg-blue-700 transition-colors">
                 <Boxes className="w-6 h-6" />
               </div>
-              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/40">
+              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
                 {stats.totalItemsCount} pièces
               </span>
             </div>
-            <h3 className="text-base font-black text-white group-hover:text-blue-300 transition-colors">
+            <h3 className="text-base font-black text-slate-900 group-hover:text-blue-800 transition-colors">
               📦 Consulter le Stock
             </h3>
-            <p className="text-xs text-slate-300 mt-1 font-medium leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">
               Voir la liste de tout le matériel disponible par taille, marque et couleur.
             </p>
           </button>
@@ -145,150 +145,150 @@ export default function DashboardView({
           {/* Action 3: Ajouter Matériel */}
           <button
             onClick={onOpenAddModal}
-            className="p-5 rounded-2xl bg-gradient-to-br from-rose-950/60 to-[#0e1628] border-2 border-rose-500/50 hover:border-rose-400 hover:scale-[1.02] text-left transition-all shadow-lg group active:scale-95"
+            className="p-5 rounded-2xl bg-indigo-50/70 border-2 border-indigo-200 hover:border-indigo-500 hover:bg-indigo-50 text-left transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 shadow-indigo-600/10 ring-1 ring-indigo-500/10 group active:scale-95 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 flex items-center justify-center text-white shadow-md shadow-rose-600/40 group-hover:from-red-500 group-hover:to-rose-500">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/30 group-hover:bg-indigo-700 transition-colors">
                 <Plus className="w-6 h-6 stroke-[3]" />
               </div>
-              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40">
+              <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-sm">
                 Nouveau
               </span>
             </div>
-            <h3 className="text-base font-black text-white group-hover:text-rose-300 transition-colors">
+            <h3 className="text-base font-black text-slate-900 group-hover:text-indigo-800 transition-colors">
               ➕ Ajouter du Matériel
             </h3>
-            <p className="text-xs text-slate-300 mt-1 font-medium leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">
               Enregistrer une nouvelle livraison ou un nouvel équipement dans votre club.
             </p>
           </button>
         </div>
 
         {/* Collapsible beginner tip */}
-        <div className="mt-4 pt-3.5 border-t border-[#1e2c47]">
+        <div className="mt-4 pt-3.5 border-t border-slate-100">
           <button
             onClick={() => setShowTips(!showTips)}
-            className="w-full flex items-center justify-between text-xs font-bold text-slate-400 hover:text-slate-200"
+            className="w-full flex items-center justify-between text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer"
           >
-            <span className="flex items-center gap-1.5 text-amber-300">
-              <Sparkles className="w-3.5 h-3.5" />
+            <span className="flex items-center gap-1.5 text-blue-700">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span>Astuce rapide : comment fonctionne votre stock ?</span>
             </span>
-            {showTips ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {showTips ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
           </button>
 
           {showTips && (
-            <div className="mt-2.5 p-3 rounded-xl bg-[#0d1424] border border-[#1e2c47] text-xs text-slate-300 space-y-1.5 leading-relaxed">
+            <div className="mt-2.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5 leading-relaxed shadow-sm">
               <p>
-                • <strong>Vert 🟢</strong> = Tout va bien, vous avez du stock en rayon.
+                • <strong className="text-emerald-700">Vert 🟢</strong> = Tout va bien, vous avez du stock disponible au club.
               </p>
               <p>
-                • <strong>Jaune 🟡</strong> = Attention, il ne reste que quelques pièces. Pensez à réapprovisionner.
+                • <strong className="text-amber-700">Jaune 🟡</strong> = Attention, il ne reste que quelques pièces. Pensez à réapprovisionner.
               </p>
               <p>
-                • <strong>Rouge 🔴</strong> = Rupture complète (0 pièce restante).
+                • <strong className="text-rose-700">Rouge 🔴</strong> = Rupture complète (0 pièce restante).
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* 2. SIMPLE, HIGH-CONTRAST STATS (NO JARGON) */}
+      {/* 2. SIMPLE, HIGH-CONTRAST STATS (WHITE & BLUE) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Stock */}
-        <div className="rounded-2xl bg-[#131c31] border border-[#22314e] p-5 shadow-md hover:border-slate-600 transition-colors">
+        <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:border-blue-300 hover:shadow-xl hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500">
               Total en Stock
             </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
-              <PackageCheck className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-sm">
+              <PackageCheck className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-black text-white">{stats.totalItemsCount}</span>
-            <span className="text-xs text-slate-300 font-bold">pièces au club</span>
+            <span className="text-3xl font-black text-slate-900">{stats.totalItemsCount}</span>
+            <span className="text-xs text-slate-600 font-bold">pièces au club</span>
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Réparties sur <span className="text-white font-bold">{stats.uniqueProductsCount}</span> articles différents
+          <p className="text-xs text-slate-500 mt-2 font-medium">
+            Réparties sur <span className="text-slate-900 font-bold">{stats.uniqueProductsCount}</span> articles différents
           </p>
         </div>
 
         {/* Revenue */}
-        <div className="rounded-2xl bg-[#131c31] border border-[#22314e] p-5 shadow-md hover:border-emerald-600 transition-colors">
+        <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:border-emerald-300 hover:shadow-xl hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500">
               Total des Ventes
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-              <Coins className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shadow-sm">
+              <Coins className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-emerald-400">
+          <div className="text-3xl font-black text-emerald-600">
             {formatCurrency(stats.totalSalesRevenue, currency)}
           </div>
-          <div className="text-xs text-slate-300 mt-2 flex items-center justify-between font-medium">
+          <div className="text-xs text-slate-600 mt-2 flex items-center justify-between font-medium">
             <span>
               Bénéfice net :{' '}
-              <strong className="text-emerald-300 font-black">
+              <strong className="text-emerald-700 font-black">
                 +{formatCurrency(stats.totalProfitEarned, currency)}
               </strong>
             </span>
-            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs font-black border border-emerald-500/40">
+            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-xs font-black border border-emerald-200 shadow-sm">
               {profitMarginPercent}% marge
             </span>
           </div>
         </div>
 
         {/* Total Stock Value */}
-        <div className="rounded-2xl bg-[#131c31] border border-[#22314e] p-5 shadow-md hover:border-slate-600 transition-colors">
+        <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 hover:border-indigo-300 hover:shadow-xl hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500">
               Valeur du Matériel
             </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-              <TrendingUp className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shadow-sm">
+              <TrendingUp className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-white">
+          <div className="text-3xl font-black text-slate-900">
             {formatCurrency(stats.totalInventoryValue, currency)}
           </div>
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Prix total de tout le matériel s’il est vendu au club
+          <p className="text-xs text-slate-500 mt-2 font-medium">
+            Valeur totale de vente de tout le matériel réuni
           </p>
         </div>
 
         {/* Stock Alerts */}
         <div
-          className={`rounded-2xl p-5 border shadow-md transition-colors ${
+          className={`rounded-2xl p-5 border shadow-md transition-all ${
             totalAlerts > 0
-              ? 'bg-[#18192a] border-amber-500/60'
-              : 'bg-[#131c31] border-[#22314e]'
+              ? 'bg-amber-50/70 border-amber-300 shadow-amber-200/50 ring-1 ring-amber-400/20 hover:shadow-xl hover:-translate-y-0.5'
+              : 'bg-white border-slate-200 shadow-slate-200/80 ring-1 ring-slate-900/5 hover:shadow-xl hover:-translate-y-0.5'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+            <span className="text-xs font-black uppercase tracking-wider text-amber-800">
               Alertes de Stock
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-              <AlertTriangle className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold shadow-sm">
+              <AlertTriangle className="w-5 h-5" />
             </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className={`text-3xl font-black ${totalAlerts > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            <span className={`text-3xl font-black ${totalAlerts > 0 ? 'text-amber-700' : 'text-emerald-600'}`}>
               {totalAlerts}
             </span>
-            <span className="text-xs text-slate-300 font-bold">
+            <span className="text-xs text-slate-600 font-bold">
               {totalAlerts === 0 ? 'Tout est plein' : 'article(s) à recommander'}
             </span>
           </div>
-          <p className="text-xs text-slate-300 mt-2 font-medium">
+          <p className="text-xs text-slate-600 mt-2 font-medium">
             {stats.outOfStockCount > 0 ? (
-              <span className="text-rose-400 font-black">
+              <span className="text-rose-600 font-black">
                 ⚠️ {stats.outOfStockCount} en rupture totale (0 pc)
               </span>
             ) : (
-              <span className="text-emerald-400 font-bold">✓ Aucune rupture totale</span>
+              <span className="text-emerald-700 font-bold">✓ Aucune rupture totale</span>
             )}
           </p>
         </div>
@@ -296,27 +296,27 @@ export default function DashboardView({
 
       {/* 3. URGENT RESTOCK BAR (IF ARTICLES ARE LOW) */}
       {stats.lowStockItems.length > 0 && (
-        <div className="rounded-3xl bg-[#141b2e] border-2 border-amber-500/50 p-5 shadow-xl">
+        <div className="rounded-3xl bg-amber-50/80 border-2 border-amber-200 p-5 shadow-md shadow-amber-200/50 ring-1 ring-amber-400/20">
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 border border-amber-200 flex items-center justify-center font-bold shadow-sm">
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white flex items-center gap-2">
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
                   <span>Articles à Réapprovisionner ({stats.lowStockItems.length})</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-black shadow-sm">
                     Action requise
                   </span>
                 </h3>
-                <p className="text-xs text-slate-300">
-                  Cliquez directement sur <strong className="text-emerald-400 font-bold">"+5 pcs"</strong> pour ajouter 5 pièces sans ouvrir de formulaire.
+                <p className="text-xs text-slate-600">
+                  Cliquez directement sur <strong className="text-emerald-700 font-bold">"+5 pcs"</strong> pour ajouter 5 pièces sans ouvrir de formulaire.
                 </p>
               </div>
             </div>
             <button
               onClick={onNavigateToInventory}
-              className="text-xs font-black text-slate-200 hover:text-white px-3.5 py-2 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] border border-[#2e4166] transition-colors"
+              className="text-xs font-black text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 transition-colors shadow-sm cursor-pointer"
             >
               Voir tout dans le Stock →
             </button>
@@ -330,19 +330,19 @@ export default function DashboardView({
               return (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-2xl bg-[#0e1628] border border-[#1e2c47] flex items-center justify-between gap-3 shadow-sm hover:border-amber-500/40 transition-colors"
+                  className="p-3.5 rounded-2xl bg-white border border-amber-200 flex items-center justify-between gap-3 shadow-md shadow-amber-100/50 hover:border-amber-400 hover:shadow-lg transition-all"
                 >
                   <div className="min-w-0">
-                    <h4 className="text-xs font-black text-white truncate">{item.name}</h4>
-                    <p className="text-xs text-slate-400 truncate mt-0.5">
+                    <h4 className="text-xs font-black text-slate-900 truncate">{item.name}</h4>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">
                       {item.brand} {item.model ? `· ${item.model}` : ''}
                     </p>
                     <div className="mt-1">
                       <span
-                        className={`text-xs font-black px-2 py-0.5 rounded-md ${
+                        className={`text-xs font-black px-2 py-0.5 rounded-md shadow-sm ${
                           isZero
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : 'bg-amber-50 text-amber-800 border border-amber-200'
                         }`}
                       >
                         {isZero ? '🔴 0 pc restante' : `🟡 Reste ${currentStock} pcs`}
@@ -352,7 +352,7 @@ export default function DashboardView({
 
                   <button
                     onClick={() => onQuickRestock(item.id, 5)}
-                    className="flex items-center gap-1 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition-transform active:scale-95 shadow-md shadow-emerald-600/20 whitespace-nowrap"
+                    className="flex items-center gap-1 px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-transform active:scale-95 shadow-md shadow-emerald-600/20 whitespace-nowrap cursor-pointer"
                     title="Ajouter 5 pièces directement"
                   >
                     <PlusCircle className="w-4 h-4" />
@@ -368,37 +368,37 @@ export default function DashboardView({
       {/* 4. MAIN GRID: TOP SOLD LEADERBOARD & CATEGORY OVERVIEW */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Most Sold Items (7 Cols) */}
-        <div className="lg:col-span-7 bg-[#131c31] border border-[#22314e] rounded-3xl p-5 sm:p-6 shadow-xl">
+        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center font-bold shadow-sm">
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">🏆 Les Articles les Plus Demandés</h3>
-                <p className="text-xs text-slate-300">Ce que vos élèves achètent le plus souvent</p>
+                <h3 className="text-base font-black text-slate-900">🏆 Les Articles les Plus Demandés</h3>
+                <p className="text-xs text-slate-500">Ce que vos élèves achètent le plus souvent</p>
               </div>
             </div>
             <button
               onClick={onNavigateToSales}
-              className="text-xs text-slate-300 hover:text-white flex items-center gap-1 font-bold transition-colors"
+              className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold transition-colors cursor-pointer"
             >
               Historique complet <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {stats.topSoldItems.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center">
-              <span className="w-12 h-12 rounded-2xl bg-[#0e1628] border border-[#22314e] flex items-center justify-center text-slate-400 mb-3">
+            <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center">
+              <span className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 mb-3 shadow-inner">
                 <ShoppingBag className="w-6 h-6" />
               </span>
-              <p className="text-sm font-bold text-slate-200">Aucune vente enregistrée pour le moment</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm">
+              <p className="text-sm font-bold text-slate-800">Aucune vente enregistrée pour le moment</p>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
                 Dès que vous vendrez une paire de gants ou des bandes, le classement et vos gains nets apparaîtront ici automatiquement !
               </p>
               <button
                 onClick={onNavigateToPos}
-                className="mt-4 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                className="mt-4 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all cursor-pointer"
               >
                 Faire ma première vente maintenant
               </button>
@@ -411,17 +411,17 @@ export default function DashboardView({
                 return (
                   <div
                     key={item.equipmentId}
-                    className="p-3.5 rounded-2xl bg-[#0e1628] border border-[#1e2c47] hover:border-[#2e4166] transition-colors"
+                    className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 hover:border-blue-300 shadow-sm transition-all"
                   >
                     <div className="flex items-center justify-between gap-3 mb-2">
                       <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-xl bg-[#1e2c47] text-white border border-[#2e4166] flex items-center justify-center text-xs font-black">
+                        <span className="w-7 h-7 rounded-xl bg-white text-slate-800 border border-slate-200 font-black flex items-center justify-center text-xs shadow-sm">
                           #{idx + 1}
                         </span>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-white">{item.name}</h4>
-                          <div className="text-xs text-slate-400 mt-0.5">
-                            <span className="font-bold text-slate-300">{item.brand}</span>
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900">{item.name}</h4>
+                          <div className="text-xs text-slate-500 mt-0.5">
+                            <span className="font-bold text-slate-700">{item.brand}</span>
                             <span> · </span>
                             <span>{CATEGORY_CONFIG[item.category]?.badge || item.category}</span>
                           </div>
@@ -429,22 +429,22 @@ export default function DashboardView({
                       </div>
 
                       <div className="text-right">
-                        <div className="text-sm font-black text-emerald-400">
+                        <div className="text-sm font-black text-emerald-600">
                           {formatCurrency(item.totalRevenue, currency)}
                         </div>
-                        <div className="text-xs text-slate-300 font-medium">
-                          <strong className="text-white font-bold">{item.unitsSold}</strong> vendus ·{' '}
-                          <span className="text-emerald-400 font-bold">
-                            +{formatCurrency(item.profitEarned, currency)} bénéfice
+                        <div className="text-xs text-slate-600 font-medium">
+                          <strong className="text-slate-900 font-bold">{item.unitsSold}</strong> vendus ·{' '}
+                          <span className="text-emerald-700 font-bold">
+                            +{formatCurrency(item.profitEarned, currency)} net
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Progress bar */}
-                    <div className="w-full bg-[#1e2c47] rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden shadow-inner">
                       <div
-                        className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${Math.max(10, ratio)}%` }}
                       ></div>
                     </div>
@@ -457,14 +457,14 @@ export default function DashboardView({
 
         {/* Category Breakdown (5 Cols) */}
         <div className="lg:col-span-5 space-y-5">
-          <div className="bg-[#131c31] border border-[#22314e] rounded-3xl p-5 sm:p-6 shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-2xl bg-[#1e2c47] border border-[#2e4166] flex items-center justify-center text-slate-200">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold shadow-sm">
                 <BarChart3 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-black text-white">📦 Votre Matériel par Famille</h3>
-                <p className="text-xs text-slate-300">Quantités disponibles au club</p>
+                <h3 className="text-base font-black text-slate-900">📦 Votre Matériel par Famille</h3>
+                <p className="text-xs text-slate-500">Quantités disponibles au club</p>
               </div>
             </div>
 
@@ -472,15 +472,15 @@ export default function DashboardView({
               {stats.categoryDistribution.map((cat) => (
                 <div key={cat.category} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-200">{cat.label}</span>
-                    <div className="flex items-center gap-2 text-slate-300 text-xs">
-                      <span className="font-bold text-white">{cat.unitsInStock} pcs</span>
-                      <span className="text-slate-400">({cat.percentage}%)</span>
+                    <span className="font-bold text-slate-700">{cat.label}</span>
+                    <div className="flex items-center gap-2 text-slate-600 text-xs">
+                      <span className="font-bold text-slate-900">{cat.unitsInStock} pcs</span>
+                      <span className="text-slate-500">({cat.percentage}%)</span>
                     </div>
                   </div>
-                  <div className="w-full bg-[#0e1628] rounded-full h-2.5 overflow-hidden border border-[#1e2c47]">
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200 shadow-inner">
                     <div
-                      className="bg-gradient-to-r from-red-600 to-rose-500 h-2.5 rounded-full"
+                      className="bg-blue-600 h-2.5 rounded-full"
                       style={{ width: `${cat.percentage}%` }}
                     ></div>
                   </div>
@@ -490,15 +490,15 @@ export default function DashboardView({
           </div>
 
           {/* Quick link to settings */}
-          <div className="bg-[#131c31] border border-[#22314e] rounded-3xl p-4 flex items-center justify-between">
+          <div className="bg-white border border-slate-200 rounded-3xl p-4 flex items-center justify-between shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
             <div>
-              <h4 className="text-xs font-bold text-white">Sauvegardes & Paramètres</h4>
-              <p className="text-xs text-slate-400">Exportez votre stock ou réinitialisez la base de données.</p>
+              <h4 className="text-xs font-bold text-slate-900">Sauvegardes & Paramètres</h4>
+              <p className="text-xs text-slate-500">Exportez votre stock ou réinitialisez la base de données.</p>
             </div>
             {onNavigateToSettings && (
               <button
                 onClick={onNavigateToSettings}
-                className="text-xs px-3.5 py-2 rounded-xl bg-[#1e2c47] hover:bg-[#283b5e] text-slate-200 hover:text-white font-bold border border-[#2e4166] transition-colors whitespace-nowrap shadow-sm"
+                className="text-xs px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-200 transition-colors whitespace-nowrap shadow-sm cursor-pointer"
               >
                 Réglages ⚙️
               </button>
@@ -508,54 +508,54 @@ export default function DashboardView({
       </div>
 
       {/* 5. RECENT SALES ACTIVITY */}
-      <div className="bg-[#131c31] border border-[#22314e] rounded-3xl p-5 sm:p-6 shadow-xl">
+      <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <Clock className="w-5 h-5 text-slate-400" />
-            <h3 className="text-sm sm:text-base font-black text-white">
+            <h3 className="text-sm sm:text-base font-black text-slate-900">
               Dernières Ventes Enregistrées au Club
             </h3>
           </div>
           <button
             onClick={onNavigateToSales}
-            className="text-xs font-bold text-slate-300 hover:text-white"
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
           >
             Voir tout l'historique →
           </button>
         </div>
 
         {stats.recentSales.length === 0 ? (
-          <p className="text-xs text-slate-400 italic py-4">Aucune vente enregistrée pour le moment.</p>
+          <p className="text-xs text-slate-500 italic py-4">Aucune vente enregistrée pour le moment.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {stats.recentSales.slice(0, 4).map((sale) => (
               <div
                 key={sale.id}
-                className="p-3.5 rounded-2xl bg-[#0e1628] border border-[#1e2c47] flex flex-col justify-between"
+                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 flex flex-col justify-between transition-all"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
                     <span>
                       {new Date(sale.date).toLocaleDateString('fr-FR', {
                         day: '2-digit',
                         month: 'short',
                       })}
                     </span>
-                    <span className="capitalize px-2 py-0.5 rounded-md bg-[#1e2c47] text-slate-200 text-xs font-bold border border-[#2e4166]">
+                    <span className="capitalize px-2 py-0.5 rounded-md bg-white text-slate-700 text-xs font-bold border border-slate-200 shadow-sm">
                       {sale.paymentMethod}
                     </span>
                   </div>
-                  <h4 className="text-xs font-bold text-white line-clamp-1">{sale.equipmentName}</h4>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Quantité : <strong className="text-white">{sale.quantity}x</strong> · {sale.buyerName || 'Client'}
+                  <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{sale.equipmentName}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Quantité : <strong className="text-slate-800">{sale.quantity}x</strong> · {sale.buyerName || 'Client'}
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-[#1e2c47] flex items-center justify-between text-xs font-bold">
-                  <span className="text-emerald-400 text-sm font-black">
+                <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-bold">
+                  <span className="text-emerald-600 text-sm font-black">
                     +{formatCurrency(sale.totalPrice, currency)}
                   </span>
-                  <span className="text-emerald-300 font-bold">
-                    Prof: +{formatCurrency(sale.profit, currency)}
+                  <span className="text-emerald-700 font-bold">
+                    Net: +{formatCurrency(sale.profit, currency)}
                   </span>
                 </div>
               </div>

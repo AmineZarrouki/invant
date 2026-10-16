@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0b0f19;
-  --foreground: #f8fafc;
-  --card: #111827;
-  --card-border: #1f293d;
-  --input-bg: #151d30;
-  --input-border: #28354d;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-border: #e2e8f0;
+  --input-bg: #f8fafc;
+  --input-border: #cbd5e1;
 }
 
 @theme inline {
@@ -17,31 +17,31 @@
 }
 
 body {
-  background-color: #0b0f19;
+  background-color: #f8fafc;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.4) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.5) 0px, transparent 50%);
-  color: #f8fafc;
+    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(241, 245, 249, 0.6) 0px, transparent 50%);
+  color: #0f172a;
   font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* Custom scrollbars - modern, high contrast, smooth */
+/* Custom scrollbars - clean light theme */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #28354d;
+  background: #cbd5e1;
   border-radius: 9999px;
-  border: 1px solid #151d30;
+  border: 1px solid #e2e8f0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b4d6e;
+  background: #94a3b8;
 }
 
 .no-scrollbar::-webkit-scrollbar {
