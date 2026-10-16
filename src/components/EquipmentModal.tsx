@@ -31,6 +31,41 @@ interface EquipmentModalProps {
 }
 
 // Category Configuration & Presets
+export const GLOVE_STANDARD_SIZES = [
+  '4 oz',
+  '6 oz',
+  '8 oz',
+  '10 oz',
+  '12 oz',
+  '14 oz',
+  '16 oz',
+  '18 oz',
+  '20 oz',
+  '22 oz',
+];
+
+export const ALL_GLOVE_SIZES_RANGE = [
+  '4 oz',
+  '5 oz',
+  '6 oz',
+  '7 oz',
+  '8 oz',
+  '9 oz',
+  '10 oz',
+  '11 oz',
+  '12 oz',
+  '13 oz',
+  '14 oz',
+  '15 oz',
+  '16 oz',
+  '17 oz',
+  '18 oz',
+  '19 oz',
+  '20 oz',
+  '21 oz',
+  '22 oz',
+];
+
 const EQUIPMENT_TYPES: Array<{
   id: EquipmentCategory;
   name: string;
@@ -44,8 +79,8 @@ const EQUIPMENT_TYPES: Array<{
     name: 'Gants de Boxe',
     icon: '🥊',
     defaultBrand: 'Venum',
-    defaultSizes: ['10 oz', '12 oz', '14 oz', '16 oz'],
-    description: 'Tailles en Oz (10oz, 12oz, 14oz...), modèles compétition et entraînement.',
+    defaultSizes: GLOVE_STANDARD_SIZES,
+    description: 'Tailles en Oz de 4 oz à 22 oz (enfants, entraînement, sparring et poids lourds).',
   },
   {
     id: 'bandes',
@@ -334,6 +369,15 @@ export default function EquipmentModal({
 
   // Size manipulation
   const addSize = (sizePreset?: string) => {
+    if (sizePreset) {
+      const alreadyExists = sizesState.some(
+        (s) => s.size.trim().toLowerCase() === sizePreset.trim().toLowerCase()
+      );
+      if (alreadyExists) {
+        alert(`La taille "${sizePreset}" est déjà présente dans la liste.`);
+        return;
+      }
+    }
     const newId = `sz-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`;
     setSizesState((prev) => [
       ...prev,
@@ -350,6 +394,31 @@ export default function EquipmentModal({
         ],
       },
     ]);
+  };
+
+  /** Adds all standard glove sizes from 4 oz to 22 oz in one click without duplicating */
+  const addAllStandardGloveSizes = () => {
+    const existing = new Set(sizesState.map((s) => s.size.trim().toLowerCase()));
+    const missing = GLOVE_STANDARD_SIZES.filter(
+      (sz) => !existing.has(sz.toLowerCase())
+    );
+    if (missing.length === 0) {
+      alert('Toutes les tailles standard de 4 oz à 22 oz sont déjà présentes.');
+      return;
+    }
+    const newEntries: SizeEntryState[] = missing.map((sz, idx) => ({
+      id: `sz-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
+      size: sz,
+      colors: [
+        {
+          id: `c-${Date.now()}-${idx}`,
+          color: 'Noir',
+          isCustom: false,
+          quantity: newColorDefaultQty,
+        },
+      ],
+    }));
+    setSizesState((prev) => [...prev, ...newEntries]);
   };
 
   const removeSize = (sizeId: string) => {
@@ -488,6 +557,14 @@ export default function EquipmentModal({
               quantity: Math.max(0, Number(c.quantity) || 0),
             })),
         }));
+
+      // Sort naturally so sizes (e.g. 4 oz, 6 oz, 8 oz, ..., 22 oz) appear in clean ascending order
+      finalSizes.sort((a, b) => {
+        const numA = parseInt(a.size || '') || 0;
+        const numB = parseInt(b.size || '') || 0;
+        if (numA && numB) return numA - numB;
+        return (a.size || '').localeCompare(b.size || '');
+      });
     } else {
       finalSizes = [
         {
@@ -880,23 +957,64 @@ export default function EquipmentModal({
             {hasSizes ? (
               <div className="space-y-4">
                 {/* Size preset chips for quick addition */}
-                {activeCategoryCfg && activeCategoryCfg.defaultSizes.length > 0 && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-slate-500">
-                      Tailles suggérées :
+                <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-sm space-y-2.5">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-xs font-black uppercase text-slate-700 tracking-wider">
+                      {category === 'gants' ? 'Tailles de Gants disponibles (4 oz à 22 oz) :' : 'Tailles suggérées :'}
                     </span>
-                    {activeCategoryCfg.defaultSizes.map((szPreset) => (
+                    {category === 'gants' && (
                       <button
-                        key={szPreset}
                         type="button"
-                        onClick={() => addSize(szPreset)}
-                        className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs text-slate-700 font-bold transition-colors shadow-sm"
+                        onClick={addAllStandardGloveSizes}
+                        className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 text-xs font-black transition-all shadow-sm cursor-pointer"
+                        title="Ajouter automatiquement toutes les tailles standard de 4 oz à 22 oz"
                       >
-                        + {szPreset}
+                        ⚡ Tout ajouter (4 à 22 oz)
                       </button>
-                    ))}
+                    )}
                   </div>
-                )}
+
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {activeCategoryCfg && activeCategoryCfg.defaultSizes.map((szPreset) => {
+                      const isAlreadyAdded = sizesState.some(
+                        (s) => s.size.trim().toLowerCase() === szPreset.toLowerCase()
+                      );
+                      return (
+                        <button
+                          key={szPreset}
+                          type="button"
+                          onClick={() => addSize(szPreset)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all shadow-sm cursor-pointer border ${
+                            isAlreadyAdded
+                              ? 'bg-blue-50 text-blue-800 border-blue-300'
+                              : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          {isAlreadyAdded ? `✓ ${szPreset}` : `+ ${szPreset}`}
+                        </button>
+                      );
+                    })}
+
+                    {category === 'gants' && (
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            addSize(e.target.value);
+                          }
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-white text-xs font-bold text-slate-700 border border-slate-300 focus:outline-none focus:border-blue-600 shadow-sm cursor-pointer"
+                      >
+                        <option value="">+ Autre taille (4 à 22 oz)...</option>
+                        {ALL_GLOVE_SIZES_RANGE.map((sz) => (
+                          <option key={sz} value={sz}>
+                            + {sz}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </div>
 
                 {/* List of sizes */}
                 <div className="space-y-3">
@@ -907,15 +1025,43 @@ export default function EquipmentModal({
                     >
                       {/* Size row */}
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 flex-1 max-w-sm">
-                          <span className="text-xs font-extrabold text-blue-600">Taille :</span>
+                        <div className="flex items-center gap-2 flex-1 max-w-md">
+                          <span className="text-xs font-extrabold text-blue-600 shrink-0">Taille :</span>
+                          {category === 'gants' && (
+                            <select
+                              value={ALL_GLOVE_SIZES_RANGE.includes(sizeEntry.size) ? sizeEntry.size : '__custom__'}
+                              onChange={(e) => {
+                                if (e.target.value !== '__custom__') {
+                                  updateSizeName(sizeEntry.id, e.target.value);
+                                }
+                              }}
+                              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-black text-blue-900 focus:outline-none focus:border-blue-600 shadow-sm cursor-pointer"
+                            >
+                              <option value="__custom__">Choisir (4 - 22 oz)...</option>
+                              <optgroup label="Tailles Paires (Standards)">
+                                {GLOVE_STANDARD_SIZES.map((s) => (
+                                  <option key={s} value={s}>
+                                    {s}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="Toutes les Tailles (4 à 22 oz)">
+                                {ALL_GLOVE_SIZES_RANGE.map((s) => (
+                                  <option key={s} value={s}>
+                                    {s}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </select>
+                          )}
                           <input
                             type="text"
                             required
+                            list="all-glove-sizes-datalist"
                             value={sizeEntry.size}
                             onChange={(e) => updateSizeName(sizeEntry.id, e.target.value)}
-                            placeholder="ex: 12 oz, S, M, 4,5m"
-                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-extrabold focus:outline-none focus:border-blue-600 flex-1"
+                            placeholder={category === 'gants' ? 'ex: 12 oz' : 'ex: 12 oz, S, M, 4,5m'}
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 font-extrabold focus:outline-none focus:border-blue-600 flex-1 min-w-[70px]"
                           />
                         </div>
 
@@ -1172,6 +1318,13 @@ export default function EquipmentModal({
               <span>{loading ? 'Enregistrement...' : 'Enregistrer le Matériel'}</span>
             </button>
           </div>
+
+          {/* Datalist for all glove sizes (4 oz to 22 oz) */}
+          <datalist id="all-glove-sizes-datalist">
+            {ALL_GLOVE_SIZES_RANGE.map((sz) => (
+              <option key={sz} value={sz} />
+            ))}
+          </datalist>
         </form>
       </div>
     </div>

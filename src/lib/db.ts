@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import {
   Equipment,
   Sale,
@@ -10,38 +8,7 @@ import {
   getEquipmentTotalStock,
 } from '@/types/inventory';
 import { INITIAL_EQUIPMENT, INITIAL_SALES } from './initialData';
-
-const DATA_DIR = path.join(process.cwd(), 'data');
-const INVENTORY_FILE = path.join(DATA_DIR, 'inventory.json');
-const SALES_FILE = path.join(DATA_DIR, 'sales.json');
-const DELETIONS_FILE = path.join(DATA_DIR, 'deletions.json');
-
-// Ensure data folder and json files exist
-async function ensureDbInitialized() {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch {
-    // Already exists
-  }
-
-  try {
-    await fs.access(INVENTORY_FILE);
-  } catch {
-    await saveEquipmentList(INITIAL_EQUIPMENT);
-  }
-
-  try {
-    await fs.access(SALES_FILE);
-  } catch {
-    await fs.writeFile(SALES_FILE, JSON.stringify(INITIAL_SALES, null, 2), 'utf-8');
-  }
-
-  try {
-    await fs.access(DELETIONS_FILE);
-  } catch {
-    await fs.writeFile(DELETIONS_FILE, JSON.stringify([], null, 2), 'utf-8');
-  }
-}
+import { getStorageAdapter } from './storage';
 
 /**
  * Normalizes an equipment object to ensure sizes and colors are properly structured.
@@ -93,25 +60,26 @@ function normalizeEquipment(item: any): Equipment {
 }
 
 export async function getEquipment(): Promise<Equipment[]> {
-  await ensureDbInitialized();
   try {
-    const raw = await fs.readFile(INVENTORY_FILE, 'utf-8');
-    const parsed: any[] = JSON.parse(raw);
-    return parsed.map(normalizeEquipment);
+    const adapter = getStorageAdapter();
+    const raw = await adapter.get('inventory');
+    if (!raw || !Array.isArray(raw) || raw.length === 0) {
+      await adapter.set('inventory', INITIAL_EQUIPMENT);
+      return INITIAL_EQUIPMENT.map(normalizeEquipment);
+    }
+    return raw.map(normalizeEquipment);
   } catch (err) {
-    console.error('Error reading inventory.json, falling back to seed:', err);
+    console.error('Error in getEquipment, falling back to seed:', err);
     return INITIAL_EQUIPMENT.map(normalizeEquipment);
   }
 }
 
 /**
- * Saves equipment list to inventory.json.
- * IMPORTANT: As requested, the JSON file stores quantity per color of each size,
+ * Saves equipment list via storage adapter.
+ * IMPORTANT: The stored JSON stores quantity per color of each size,
  * NOT a top-level total stock for the overall product.
  */
 export async function saveEquipmentList(items: Equipment[]): Promise<void> {
-  await ensureDbInitialized();
-  // Strip top-level 'stock' property so inventory.json only contains sizes with colors & quantities
   const jsonReady = items.map((item) => {
     const { stock, ...rest } = item;
     return {
@@ -137,23 +105,28 @@ export async function saveEquipmentList(items: Equipment[]): Promise<void> {
     };
   });
 
-  await fs.writeFile(INVENTORY_FILE, JSON.stringify(jsonReady, null, 2), 'utf-8');
+  const adapter = getStorageAdapter();
+  await adapter.set('inventory', jsonReady);
 }
 
 export async function getSales(): Promise<Sale[]> {
-  await ensureDbInitialized();
   try {
-    const raw = await fs.readFile(SALES_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const adapter = getStorageAdapter();
+    const raw = await adapter.get('sales');
+    if (!raw || !Array.isArray(raw)) {
+      await adapter.set('sales', INITIAL_SALES);
+      return INITIAL_SALES;
+    }
+    return raw;
   } catch (err) {
-    console.error('Error reading sales.json, falling back to seed:', err);
+    console.error('Error in getSales, falling back to seed:', err);
     return INITIAL_SALES;
   }
 }
 
 export async function saveSalesList(sales: Sale[]): Promise<void> {
-  await ensureDbInitialized();
-  await fs.writeFile(SALES_FILE, JSON.stringify(sales, null, 2), 'utf-8');
+  const adapter = getStorageAdapter();
+  await adapter.set('sales', sales);
 }
 
 export async function addEquipment(item: Omit<Equipment, 'id' | 'createdAt' | 'updatedAt' | 'stock'>): Promise<Equipment> {
@@ -210,19 +183,22 @@ export async function updateEquipment(id: string, updates: Partial<Equipment>): 
 }
 
 export async function getDeletions(): Promise<DeletionLog[]> {
-  await ensureDbInitialized();
   try {
-    const raw = await fs.readFile(DELETIONS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const adapter = getStorageAdapter();
+    const raw = await adapter.get('deletions');
+    if (!raw || !Array.isArray(raw)) {
+      return [];
+    }
+    return raw;
   } catch (err) {
-    console.error('Error reading deletions.json:', err);
+    console.error('Error in getDeletions:', err);
     return [];
   }
 }
 
 export async function saveDeletionsList(logs: DeletionLog[]): Promise<void> {
-  await ensureDbInitialized();
-  await fs.writeFile(DELETIONS_FILE, JSON.stringify(logs, null, 2), 'utf-8');
+  const adapter = getStorageAdapter();
+  await adapter.set('deletions', logs);
 }
 
 export async function deleteEquipment(id: string, reason?: string): Promise<{ success: boolean; deletedLog?: DeletionLog }> {
@@ -616,10 +592,18 @@ export function computeInventoryStats(
 }
 
 export async function resetDatabase(): Promise<{ equipment: Equipment[]; sales: Sale[]; deletions: DeletionLog[] }> {
-  await ensureDbInitialized();
-  await saveEquipmentList(INITIAL_EQUIPMENT);
-  await fs.writeFile(SALES_FILE, JSON.stringify(INITIAL_SALES, null, 2), 'utf-8');
-  await fs.writeFile(DELETIONS_FILE, JSON.stringify([], null, 2), 'utf-8');
+  const adapter = getStorageAdapter();
+  await adapter.set('inventory', INITIAL_EQUIPMENT);
+  await adapter.set('sales', INITIAL_SALES);
+  await adapter.set('deletions', []);
   const eqWithStock = INITIAL_EQUIPMENT.map(normalizeEquipment);
   return { equipment: eqWithStock, sales: INITIAL_SALES, deletions: [] };
+}
+
+export function getStorageStatus(): { provider: string; isCloud: boolean } {
+  const adapter = getStorageAdapter();
+  return {
+    provider: adapter.getProviderName(),
+    isCloud: adapter.isCloud(),
+  };
 }

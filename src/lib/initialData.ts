@@ -228,6 +228,30 @@ export const INITIAL_EQUIPMENT: Equipment[] = [
           { color: 'Noir / Or', quantity: 1 },
         ],
       },
+      {
+        size: '16 oz',
+        colors: [
+          { color: 'Noir / Or', quantity: 2 },
+        ],
+      },
+      {
+        size: '18 oz',
+        colors: [
+          { color: 'Noir', quantity: 2 },
+        ],
+      },
+      {
+        size: '20 oz',
+        colors: [
+          { color: 'Noir', quantity: 1 },
+        ],
+      },
+      {
+        size: '22 oz',
+        colors: [
+          { color: 'Noir', quantity: 1 },
+        ],
+      },
     ],
     createdAt: '2026-10-01T08:00:00.000Z',
     updatedAt: '2026-10-01T08:00:00.000Z',

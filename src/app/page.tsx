@@ -15,6 +15,29 @@ import Toast, { ToastMessage } from '@/components/Toast';
 import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
 
+const CACHE_KEYS = {
+  INVENTORY: 'kickboxing_inventory_cache',
+  SALES: 'kickboxing_sales_cache',
+  DELETIONS: 'kickboxing_deletions_cache',
+};
+
+function saveLocalCache<T>(key: string, data: T): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch {}
+}
+
+function loadLocalCache<T>(key: string): T | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'pos' | 'sales' | 'settings'>('dashboard');
   const [currency, setCurrency] = useState<CurrencyCode>('MAD');
@@ -49,8 +72,19 @@ export default function Home() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Fetch initial data
+  // Fetch initial data (loads cached data immediately, then syncs with API)
   const fetchData = useCallback(async () => {
+    // 1. Immediately hydrate from cache so user sees their data with 0 latency
+    const cachedInv = loadLocalCache<Equipment[]>(CACHE_KEYS.INVENTORY);
+    const cachedSales = loadLocalCache<Sale[]>(CACHE_KEYS.SALES);
+    const cachedDel = loadLocalCache<DeletionLog[]>(CACHE_KEYS.DELETIONS);
+
+    if (cachedInv && cachedInv.length > 0) {
+      setEquipment(cachedInv);
+    }
+    if (cachedSales) setSales(cachedSales);
+    if (cachedDel) setDeletions(cachedDel);
+
     try {
       const [invRes, salesRes, delRes] = await Promise.all([
         fetch('/api/inventory'),
@@ -65,16 +99,21 @@ export default function Home() {
       if (invData.success) {
         setEquipment(invData.equipment);
         setStats(invData.stats);
+        saveLocalCache(CACHE_KEYS.INVENTORY, invData.equipment);
       }
       if (salesData.success) {
         setSales(salesData.sales);
+        saveLocalCache(CACHE_KEYS.SALES, salesData.sales);
       }
       if (delData.success) {
         setDeletions(delData.deletions);
+        saveLocalCache(CACHE_KEYS.DELETIONS, delData.deletions);
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      addToast('error', 'Erreur de connexion à la base de données');
+      if (!cachedInv || cachedInv.length === 0) {
+        addToast('error', 'Erreur de connexion. Mode local actif.');
+      }
     } finally {
       setLoading(false);
     }
@@ -110,7 +149,9 @@ export default function Home() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        setEquipment((prev) => prev.map((i) => (i.id === editingItem.id ? data.item : i)));
+        const updated = equipment.map((i) => (i.id === editingItem.id ? data.item : i));
+        setEquipment(updated);
+        saveLocalCache(CACHE_KEYS.INVENTORY, updated);
         setStats(data.stats);
         addToast('success', `✏️ "${data.item.name}" mis à jour avec succès`);
       } else {
@@ -123,7 +164,9 @@ export default function Home() {
         const data = await res.json();
         if (!data.success) throw new Error(data.error);
 
-        setEquipment((prev) => [data.item, ...prev]);
+        const updated = [data.item, ...equipment];
+        setEquipment(updated);
+        saveLocalCache(CACHE_KEYS.INVENTORY, updated);
         setStats(data.stats);
         addToast('success', `✅ Nouvel équipement "${data.item.name}" ajouté avec succès`);
       }
@@ -144,9 +187,13 @@ export default function Home() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      setEquipment((prev) => prev.filter((i) => i.id !== id));
+      const updated = equipment.filter((i) => i.id !== id);
+      setEquipment(updated);
+      saveLocalCache(CACHE_KEYS.INVENTORY, updated);
       if (data.deletedLog) {
-        setDeletions((prev) => [data.deletedLog, ...prev]);
+        const updatedDel = [data.deletedLog, ...deletions];
+        setDeletions(updatedDel);
+        saveLocalCache(CACHE_KEYS.DELETIONS, updatedDel);
       }
       setStats(data.stats);
       addToast('info', `🗑️ "${name}" supprimé et archivé dans le journal des suppressions`);
@@ -164,8 +211,12 @@ export default function Home() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      setEquipment((prev) => [data.item, ...prev]);
-      setDeletions((prev) => prev.filter((d) => d.id !== deletionId));
+      const updated = [data.item, ...equipment];
+      setEquipment(updated);
+      saveLocalCache(CACHE_KEYS.INVENTORY, updated);
+      const updatedDel = deletions.filter((d) => d.id !== deletionId);
+      setDeletions(updatedDel);
+      saveLocalCache(CACHE_KEYS.DELETIONS, updatedDel);
       setStats(data.stats);
       addToast('success', `🔄 "${data.item.name}" restauré avec succès dans l'inventaire actif !`);
     } catch (err: any) {
@@ -196,7 +247,9 @@ export default function Home() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      setEquipment((prev) => [data.item, ...prev]);
+      const updated = [data.item, ...equipment];
+      setEquipment(updated);
+      saveLocalCache(CACHE_KEYS.INVENTORY, updated);
       setStats(data.stats);
       addToast('success', `Copie créée: "${data.item.name}"`);
     } catch (err: any) {
@@ -218,7 +271,9 @@ export default function Home() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      setEquipment((prev) => prev.map((i) => (i.id === id ? data.item : i)));
+      const updated = equipment.map((i) => (i.id === id ? data.item : i));
+      setEquipment(updated);
+      saveLocalCache(CACHE_KEYS.INVENTORY, updated);
       setStats(data.stats);
       const sign = delta > 0 ? `+${delta}` : `${delta}`;
       const detail = variant?.color ? ` (${[variant.size, variant.color].filter(Boolean).join(' - ')})` : '';
@@ -247,10 +302,14 @@ export default function Home() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
 
-      setSales((prev) => [data.sale, ...prev]);
-      setEquipment((prev) =>
-        prev.map((i) => (i.id === data.updatedEquipment.id ? data.updatedEquipment : i))
+      const updatedSales = [data.sale, ...sales];
+      setSales(updatedSales);
+      saveLocalCache(CACHE_KEYS.SALES, updatedSales);
+      const updatedEq = equipment.map((i) =>
+        i.id === data.updatedEquipment.id ? data.updatedEquipment : i
       );
+      setEquipment(updatedEq);
+      saveLocalCache(CACHE_KEYS.INVENTORY, updatedEq);
       setStats(data.stats);
       addToast('success', `Vente enregistrée : ${data.sale.quantity}x ${data.sale.equipmentName}`);
     } catch (err: any) {
@@ -284,6 +343,9 @@ export default function Home() {
       setSales(data.sales);
       setDeletions(data.deletions || []);
       setStats(data.stats);
+      saveLocalCache(CACHE_KEYS.INVENTORY, data.equipment);
+      saveLocalCache(CACHE_KEYS.SALES, data.sales);
+      saveLocalCache(CACHE_KEYS.DELETIONS, data.deletions || []);
       addToast('success', 'Base de données réinitialisée au stock officiel kickboxing !');
     } catch (err: any) {
       addToast('error', err.message || 'Erreur de réinitialisation');
@@ -304,6 +366,8 @@ export default function Home() {
       setEquipment(data.equipment);
       setSales(data.sales);
       setStats(data.stats);
+      saveLocalCache(CACHE_KEYS.INVENTORY, data.equipment);
+      saveLocalCache(CACHE_KEYS.SALES, data.sales);
       addToast('success', 'Import JSON complété avec succès !');
     } catch (err: any) {
       addToast('error', err.message || 'Erreur lors de l’importation');
