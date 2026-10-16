@@ -11,6 +11,7 @@ import EquipmentModal from '@/components/EquipmentModal';
 import QuickSaleModal from '@/components/QuickSaleModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import EasyHelpModal from '@/components/EasyHelpModal';
+import PinLockScreen from '@/components/PinLockScreen';
 import Toast, { ToastMessage } from '@/components/Toast';
 import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
@@ -70,6 +71,70 @@ export default function Home() {
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [saleItem, setSaleItem] = useState<Equipment | null>(null);
   const [itemToDelete, setItemToDelete] = useState<Equipment | null>(null);
+
+  // Security PIN Lock & 10-minute Inactivity Tracking
+  const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [lockReason, setLockReason] = useState<'initial' | 'inactivity' | 'manual'>('initial');
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check initial session from sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = sessionStorage.getItem('kickbox_auth_token');
+      const lastActive = Number(sessionStorage.getItem('kickbox_last_active') || 0);
+      const now = Date.now();
+
+      if (token && lastActive && now - lastActive < INACTIVITY_TIMEOUT_MS) {
+        setIsUnlocked(true);
+        sessionStorage.setItem('kickbox_last_active', String(now));
+      } else {
+        setIsUnlocked(false);
+        if (token && lastActive && now - lastActive >= INACTIVITY_TIMEOUT_MS) {
+          setLockReason('inactivity');
+        }
+      }
+    }
+    setAuthChecked(true);
+  }, [INACTIVITY_TIMEOUT_MS]);
+
+  // Continuous Inactivity Tracking (resets on user interactions, locks after 10 min)
+  useEffect(() => {
+    if (!isUnlocked) return;
+
+    const updateActivity = () => {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('kickbox_last_active', String(Date.now()));
+      }
+    };
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach((evt) => window.addEventListener(evt, updateActivity, { passive: true }));
+
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined') {
+        const lastActive = Number(sessionStorage.getItem('kickbox_last_active') || Date.now());
+        if (Date.now() - lastActive >= INACTIVITY_TIMEOUT_MS) {
+          sessionStorage.removeItem('kickbox_auth_token');
+          setLockReason('inactivity');
+          setIsUnlocked(false);
+        }
+      }
+    }, 4000);
+
+    return () => {
+      events.forEach((evt) => window.removeEventListener(evt, updateActivity));
+      clearInterval(interval);
+    };
+  }, [isUnlocked, INACTIVITY_TIMEOUT_MS]);
+
+  const handleManualLock = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('kickbox_auth_token');
+    }
+    setLockReason('manual');
+    setIsUnlocked(false);
+  };
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -429,6 +494,7 @@ export default function Home() {
           setIsAddModalOpen(true);
         }}
         onOpenHelpModal={() => setIsHelpModalOpen(true)}
+        onLockSession={handleManualLock}
       />
 
       {/* Main Content Area */}
@@ -559,6 +625,17 @@ export default function Home() {
 
       {/* Toast Notifications */}
       <Toast toasts={toasts} onDismiss={removeToast} />
+
+      {/* 6-Digit PIN Security Screen (with 10-minute inactivity lockout) */}
+      {!isUnlocked && authChecked && (
+        <PinLockScreen
+          onUnlock={() => {
+            setIsUnlocked(true);
+            setLockReason('initial');
+          }}
+          lockReason={lockReason}
+        />
+      )}
 
     </div>
   );

@@ -9,6 +9,7 @@ import {
   Flame,
   Coins,
   HelpCircle,
+  Lock,
 } from 'lucide-react';
 import { CurrencyCode, CURRENCY_CONFIG } from '@/lib/currency';
 import { InventoryStats } from '@/types/inventory';
@@ -21,6 +22,7 @@ interface NavbarProps {
   setCurrency: (c: CurrencyCode) => void;
   onOpenAddModal: () => void;
   onOpenHelpModal?: () => void;
+  onLockSession?: () => void;
 }
 
 const TABS = [
@@ -37,6 +39,7 @@ export default function Navbar({
   setCurrency,
   onOpenAddModal,
   onOpenHelpModal,
+  onLockSession,
 }: NavbarProps) {
   const lowStockCount = stats ? stats.lowStockCount + stats.outOfStockCount : 0;
 
@@ -124,6 +127,18 @@ export default function Navbar({
                 ))}
               </select>
             </div>
+
+            {/* Quick Lock Button */}
+            {onLockSession && (
+              <button
+                onClick={onLockSession}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 font-bold text-xs transition-colors shadow-sm cursor-pointer"
+                title="Verrouiller la session (code PIN)"
+              >
+                <Lock className="w-3.5 h-3.5 text-slate-600" />
+                <span className="hidden sm:inline">Verrouiller</span>
+              </button>
+            )}
 
             {/* Big Quick Add Button */}
             <button
