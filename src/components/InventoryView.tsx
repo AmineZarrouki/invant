@@ -132,24 +132,31 @@ export default function InventoryView({
     [filteredItems]
   );
 
+  const baseCategoryKeys = [
+    'gants',
+    'protege_tibias',
+    'bandes',
+    'protege_dents',
+    'coquilles',
+    'protections',
+    'textile',
+    'tenue_competition',
+    'pantalon_combat',
+    'textile_competition',
+    'short_combat',
+    'tenue_entrainement',
+    'autres',
+  ];
+
   const categoryPills = [
     { id: 'all', label: 'Tous les articles', icon: '🥊' },
-    ...Object.entries(CATEGORY_CONFIG).map(([id, cfg]) => ({
-      id,
-      label: cfg.label,
-      icon:
-        id === 'gants'
-          ? '🥊'
-          : id === 'bandes'
-          ? '🎗️'
-          : id === 'protege_tibias'
-          ? '🦵'
-          : id === 'protege_dents'
-          ? '🦷'
-          : id === 'coquilles'
-          ? '🛡️'
-          : '⚡',
-    })),
+    ...baseCategoryKeys
+      .filter((id) => CATEGORY_CONFIG[id])
+      .map((id) => ({
+        id,
+        label: CATEGORY_CONFIG[id].label,
+        icon: CATEGORY_CONFIG[id].icon || '⚡',
+      })),
   ];
 
   // Helper when clicking quick restock on card
@@ -371,7 +378,7 @@ export default function InventoryView({
                   {/* Category & Status */}
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm">
-                      {item.brand || 'Dojo'} · {categoryLabel}
+                      {item.brand ? `${item.brand} · ${categoryLabel}` : categoryLabel}
                     </span>
 
                     <span
@@ -545,7 +552,7 @@ export default function InventoryView({
                           <div className="text-xs text-slate-500 font-medium">Modèle: {item.model}</div>
                         )}
                       </td>
-                      <td className="py-4 px-3 text-slate-700 font-bold border-r border-slate-200/60">{item.brand}</td>
+                      <td className="py-4 px-3 text-slate-700 font-bold border-r border-slate-200/60">{item.brand || '—'}</td>
                       <td className="py-4 px-3 border-r border-slate-200/60">
                         <div className="space-y-1">
                           {item.sizes?.map((sz, i) => (

@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Equipment, EquipmentCategory, SizeVariant } from '@/types/inventory';
 import { CurrencyCode, CURRENCY_CONFIG } from '@/lib/currency';
-import { STANDARD_COLORS, getColorSwatch } from '@/lib/categoryColors';
+import { STANDARD_COLORS, getColorSwatch, CATEGORY_CONFIG } from '@/lib/categoryColors';
 
 interface EquipmentModalProps {
   isOpen: boolean;
@@ -115,12 +115,180 @@ const EQUIPMENT_TYPES: Array<{
     description: 'Slip avec poche ou cup anatomique rigide, tailles S, M, L, XL.',
   },
   {
+    id: 'protections',
+    name: 'Protections',
+    icon: '🛡️',
+    defaultBrand: '',
+    defaultSizes: ['Unique', 'S', 'M', 'L', 'XL'],
+    description: 'Casques, protège-chevilles, coudières et protections diverses.',
+  },
+  {
+    id: 'textile',
+    name: 'Textile',
+    icon: '👕',
+    defaultBrand: '',
+    defaultSizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    description: 'T-shirts, débardeurs, sweats et vêtements de sport.',
+  },
+  {
+    id: 'tenue_competition',
+    name: 'Tenue de compétition',
+    icon: '🥋',
+    defaultBrand: 'Full Contact',
+    defaultSizes: ['S', 'M', 'L', 'XL'],
+    description: 'Ensembles 2 pièces et uniformes de compétition homologués.',
+  },
+  {
+    id: 'pantalon_combat',
+    name: 'Pantalon de combat',
+    icon: '👖',
+    defaultBrand: 'Full Contact',
+    defaultSizes: ['S', 'M', 'L', 'XL'],
+    description: 'Pantalons kickboxing, full contact et arts martiaux.',
+  },
+  {
+    id: 'textile_competition',
+    name: 'Textile de compétition',
+    icon: '🎽',
+    defaultBrand: '',
+    defaultSizes: ['S', 'M', 'L', 'XL'],
+    description: 'Maillots sans manches, hauts bicolores de combat.',
+  },
+  {
+    id: 'short_combat',
+    name: 'Short de combat',
+    icon: '🩳',
+    defaultBrand: '',
+    defaultSizes: ['S', 'M', 'L', 'XL'],
+    description: 'Shorts Muay Thai, Kickboxing et MMA.',
+  },
+  {
+    id: 'tenue_entrainement',
+    name: 'Tenue d’entraînement',
+    icon: '🏋️',
+    defaultBrand: '',
+    defaultSizes: ['S', 'M', 'L', 'XL'],
+    description: 'Ensembles d’entraînement, rashguards et survêtements.',
+  },
+  {
     id: 'autres',
     name: 'Autres Accessoires',
     icon: '⚡',
-    defaultBrand: 'Dojo Pro',
+    defaultBrand: '',
     defaultSizes: ['Unique', 'S', 'M', 'L'],
     description: 'Casques, paos, pattes d’ours, cordes à sauter, chevillères.',
+  },
+];
+
+export interface EquipmentPreset {
+  id: string;
+  badge: string;
+  name: string;
+  category: EquipmentCategory;
+  brand: string;
+  model?: string;
+  barcode?: string;
+  description?: string;
+  hasSizes: boolean;
+  sizes: Array<{ size: string; colors: Array<{ color: string; quantity: number }> }>;
+  directColors?: Array<{ color: string; quantity: number }>;
+}
+
+export const EQUIPMENT_PRESETS: EquipmentPreset[] = [
+  {
+    id: 'preset-protege-chevilles',
+    badge: '1. Protège-chevilles',
+    name: 'Protège-chevilles',
+    category: 'protections',
+    brand: '',
+    description: 'Vendu par : paire',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: 'Rouge', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-tshirt',
+    badge: '2. T-shirt',
+    name: 'T-shirt',
+    category: 'textile',
+    brand: '',
+    description: '',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: '', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-ensemble-full-contact',
+    badge: '3. Ensemble Full Contact',
+    name: 'Ensemble Full Contact',
+    category: 'tenue_competition',
+    brand: 'Full Contact',
+    description: 'Vendu par : ensemble de 2 pièces',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: 'Noir / rouge', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-pantalon-kickboxing',
+    badge: '4. Pantalon Kickboxing Full Contact',
+    name: 'Pantalon Kickboxing Full Contact',
+    category: 'pantalon_combat',
+    brand: 'Full Contact',
+    description: '',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: '', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-maillot-sans-manches',
+    badge: '5. Maillot sans manches',
+    name: 'Maillot sans manches',
+    category: 'textile_competition',
+    brand: '',
+    description: '',
+    hasSizes: true,
+    sizes: [
+      {
+        size: 'À renseigner',
+        colors: [
+          { color: 'Rouge / blanc', quantity: 0 },
+          { color: 'Bleu / blanc', quantity: 0 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'preset-short-muay-thai',
+    badge: '6. Short de Muay Thai',
+    name: 'Short de Muay Thai',
+    category: 'short_combat',
+    brand: '',
+    description: '',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: 'Noir / blanc / gris', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-ensemble-ufc',
+    badge: '7. Ensemble UFC',
+    name: 'Ensemble UFC',
+    category: 'tenue_entrainement',
+    brand: '',
+    description: 'Vendu par : ensemble de 2 pièces',
+    hasSizes: true,
+    sizes: [{ size: 'À renseigner', colors: [{ color: 'Noir / rouge', quantity: 0 }] }],
+  },
+  {
+    id: 'preset-casque-integral',
+    badge: '8. Casque intégral',
+    name: 'Casque intégral',
+    category: 'protections',
+    brand: '',
+    model: 'HGVE29',
+    barcode: 'HGVE29',
+    description: 'Référence : HGVE29',
+    hasSizes: true,
+    sizes: [
+      { size: 'S', colors: [{ color: 'Blanc', quantity: 0 }] },
+      { size: 'M', colors: [{ color: 'Blanc', quantity: 0 }] },
+      { size: 'L', colors: [{ color: 'Blanc', quantity: 0 }] },
+      { size: 'XL', colors: [{ color: 'Blanc', quantity: 0 }] },
+    ],
   },
 ];
 
@@ -173,29 +341,52 @@ export default function EquipmentModal({
   const generateSuggestedName = (cat: EquipmentCategory, br: string, mod: string) => {
     const brandStr = br ? br.trim() : '';
     const modelStr = mod ? mod.trim() : '';
-
-    if (cat === 'gants') {
-      return `Gants de Boxe ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
-    }
-    if (cat === 'bandes') {
-      return `Bandes de Boxe ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
-    }
-    if (cat === 'protege_tibias') {
-      return `Protège-Tibias ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
-    }
-    if (cat === 'protege_dents') {
-      return `Protège-Dents ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
-    }
-    if (cat === 'coquilles') {
-      return `Coquille ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
-    }
-    return `Équipement ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
+    const cfg = CATEGORY_CONFIG[cat];
+    const catLabel = cfg?.badge || cfg?.label || 'Équipement';
+    return `${catLabel} ${brandStr} ${modelStr}`.replace(/\s+/g, ' ').trim();
   };
 
   const isColorInPresets = (cName: string) => {
+    if (!cName) return true;
     return STANDARD_COLORS.some(
       (p) => p.value.toLowerCase() === (cName || '').trim().toLowerCase()
     );
+  };
+
+  // Quick-fill with one of the 8 predefined templates
+  const applyPreset = (preset: EquipmentPreset) => {
+    setCategory(preset.category);
+    setName(preset.name);
+    setBrand(preset.brand || '');
+    setModel(preset.model || '');
+    setBarcode(preset.barcode || '');
+    setDescription(preset.description || '');
+    setIsNameManuallyEdited(true);
+    setCostPrice(0);
+    setSellingPrice(0);
+    setMinStockAlert(3);
+    setHasSizes(preset.hasSizes);
+
+    if (preset.hasSizes && preset.sizes && preset.sizes.length > 0) {
+      setSizesState(
+        preset.sizes.map((sz, sIdx) => ({
+          id: `sz-preset-${sIdx}-${Date.now()}`,
+          size: sz.size || '',
+          colors: sz.colors.map((c, cIdx) => ({
+            id: `c-preset-${sIdx}-${cIdx}-${Date.now()}`,
+            color: c.color || '',
+            isCustom: !isColorInPresets(c.color || ''),
+            quantity: c.quantity || 0,
+          })),
+        }))
+      );
+    } else {
+      setHasSizes(false);
+      setDirectColorsState([
+        { id: `c-preset-${Date.now()}`, color: '', isCustom: false, quantity: 0 },
+      ]);
+    }
+    setError(null);
   };
 
   // Initialize form on open
@@ -225,8 +416,8 @@ export default function EquipmentModal({
               size: sz.size || '',
               colors: (sz.colors || []).map((c) => ({
                 id: `c-${Math.random().toString(36).substring(2, 7)}`,
-                color: c.color || 'Noir',
-                isCustom: !isColorInPresets(c.color || 'Noir'),
+                color: c.color || '',
+                isCustom: !isColorInPresets(c.color || ''),
                 quantity: Number(c.quantity) || 0,
               })),
             }))
@@ -234,14 +425,14 @@ export default function EquipmentModal({
         } else {
           const allColors = (initialData.sizes[0]?.colors || []).map((c) => ({
             id: `c-${Math.random().toString(36).substring(2, 7)}`,
-            color: c.color || 'Noir',
-            isCustom: !isColorInPresets(c.color || 'Noir'),
+            color: c.color || '',
+            isCustom: !isColorInPresets(c.color || ''),
             quantity: Number(c.quantity) || 0,
           }));
           setDirectColorsState(
             allColors.length > 0
               ? allColors
-              : [{ id: 'c-1', color: 'Noir', isCustom: false, quantity: 10 }]
+              : [{ id: 'c-1', color: '', isCustom: false, quantity: 10 }]
           );
         }
       }
@@ -342,6 +533,36 @@ export default function EquipmentModal({
           id: 'sz-1',
           size: 'M',
           colors: [{ id: 'c-1', color: 'Noir', isCustom: false, quantity: 15 }],
+        },
+      ]);
+    } else if (newCat === 'protections') {
+      newModel = '';
+      setSizesState([
+        {
+          id: 'sz-1',
+          size: 'Unique',
+          colors: [{ id: 'c-1', color: 'Rouge', isCustom: false, quantity: 10 }],
+        },
+      ]);
+    } else if (
+      newCat === 'textile' ||
+      newCat === 'tenue_competition' ||
+      newCat === 'pantalon_combat' ||
+      newCat === 'textile_competition' ||
+      newCat === 'short_combat' ||
+      newCat === 'tenue_entrainement'
+    ) {
+      newModel = '';
+      setSizesState([
+        {
+          id: 'sz-1',
+          size: 'M',
+          colors: [{ id: 'c-1', color: 'Noir', isCustom: false, quantity: 5 }],
+        },
+        {
+          id: 'sz-2',
+          size: 'L',
+          colors: [{ id: 'c-2', color: 'Noir', isCustom: false, quantity: 5 }],
         },
       ]);
     } else {
@@ -551,7 +772,7 @@ export default function EquipmentModal({
         .map((sz) => ({
           size: sz.size.trim() || 'Unique',
           colors: sz.colors
-            .filter((c) => c.color.trim())
+            .filter((c) => c.color !== undefined)
             .map((c) => ({
               color: c.color.trim(),
               quantity: Math.max(0, Number(c.quantity) || 0),
@@ -569,7 +790,7 @@ export default function EquipmentModal({
       finalSizes = [
         {
           colors: directColorsState
-            .filter((c) => c.color.trim())
+            .filter((c) => c.color !== undefined)
             .map((c) => ({
               color: c.color.trim(),
               quantity: Math.max(0, Number(c.quantity) || 0),
@@ -582,7 +803,7 @@ export default function EquipmentModal({
       finalSizes.length === 0 ||
       finalSizes.every((sz) => !sz.colors || sz.colors.length === 0)
     ) {
-      setError('Veuillez ajouter au moins une couleur avec une quantité pour ce matériel.');
+      setError('Veuillez ajouter au moins une ligne de variante avec une quantité pour ce matériel.');
       return;
     }
 
@@ -593,7 +814,7 @@ export default function EquipmentModal({
       await onSave({
         name: name.trim(),
         category,
-        brand: brand.trim() || 'Générique',
+        brand: brand.trim(),
         model: model.trim() || undefined,
         sizes: finalSizes,
         minStockAlert: Number(minStockAlert) || 3,
@@ -646,6 +867,7 @@ export default function EquipmentModal({
                 }}
                 className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer shadow-sm"
               >
+                <option value="">Couleur non spécifiée (laisser vide)</option>
                 <optgroup label="Couleurs Classiques">
                   {STANDARD_COLORS.filter((c) => c.group === 'Classique').map((c) => (
                     <option key={c.value} value={c.value}>
@@ -794,12 +1016,60 @@ export default function EquipmentModal({
             </div>
           )}
 
+          {/* QUICK PRESETS (8 ARTICLES TYPES) */}
+          {!initialData && (
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-slate-50 to-indigo-50/90 border border-blue-200/70 shadow-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                    <Sparkles className="w-3 h-3" />
+                  </div>
+                  <span className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                    Modèles suggérés & remplissage rapide (8 articles)
+                  </span>
+                </div>
+                <span className="text-[11px] text-blue-700 font-bold hidden sm:inline">
+                  Cliquez pour pré-remplir la fiche
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {EQUIPMENT_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => applyPreset(preset)}
+                    className="p-2.5 rounded-xl bg-white hover:bg-blue-600 text-slate-800 hover:text-white border border-slate-200 hover:border-blue-600 transition-all text-left shadow-xs flex flex-col justify-between group active:scale-95"
+                    title={`Pré-remplir avec : ${preset.name}`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-xs font-black truncate">{preset.name}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-1 mt-1 text-[10px]">
+                      <span className="px-1.5 py-0.5 rounded-md bg-slate-100 group-hover:bg-blue-500 font-bold truncate">
+                        {CATEGORY_CONFIG[preset.category]?.badge || preset.category}
+                      </span>
+                      {preset.brand ? (
+                        <span className="text-slate-500 group-hover:text-blue-100 font-semibold truncate">
+                          {preset.brand}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 group-hover:text-blue-200 italic">
+                          Sans marque
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* STEP 1: CATEGORY SELECTION */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
               1. Catégorie d’Équipement
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2">
               {EQUIPMENT_TYPES.map((t) => {
                 const isSelected = category === t.id;
                 return (
@@ -824,12 +1094,12 @@ export default function EquipmentModal({
           {/* STEP 2: GENERAL DETAILS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Marque / Fabricant *
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                <span>Marque / Fabricant</span>
+                <span className="text-[10px] font-normal text-slate-400">(optionnel si sans marque)</span>
               </label>
               <input
                 type="text"
-                required
                 value={brand}
                 onChange={(e) => {
                   setBrand(e.target.value);
@@ -837,7 +1107,7 @@ export default function EquipmentModal({
                     setName(generateSuggestedName(category, e.target.value, model));
                   }
                 }}
-                placeholder="ex: Venum, Fairtex, Pakka, Baklee"
+                placeholder="ex: Venum, Fairtex, Full Contact (ou laisser vide)"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>

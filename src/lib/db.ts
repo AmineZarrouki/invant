@@ -9,6 +9,7 @@ import {
 } from '@/types/inventory';
 import { INITIAL_EQUIPMENT, INITIAL_SALES } from './initialData';
 import { getStorageAdapter } from './storage';
+import { CATEGORY_CONFIG } from './categoryColors';
 
 /**
  * Normalizes an equipment object to ensure sizes and colors are properly structured.
@@ -22,17 +23,17 @@ function normalizeEquipment(item: any): Equipment {
       sizes = [
         {
           size: item.size || 'Unique',
-          colors: [{ color: item.color || 'Standard', quantity: Number(item.stock) || 0 }],
+          colors: [{ color: item.color !== undefined ? item.color : '', quantity: Number(item.stock) || 0 }],
         },
       ];
     } else {
-      sizes = [{ colors: [{ color: 'Standard', quantity: Number(item.stock) || 0 }] }];
+      sizes = [{ colors: [{ color: '', quantity: Number(item.stock) || 0 }] }];
     }
   } else {
     sizes = sizes.map((sz) => ({
-      ...(sz.size ? { size: sz.size.trim() } : {}),
+      ...(sz.size !== undefined ? { size: sz.size.trim() } : {}),
       colors: (sz.colors || []).map((c: any) => ({
-        color: (c.color || 'Standard').trim(),
+        color: (c.color !== undefined ? c.color : '').trim(),
         quantity: Math.max(0, Number(c.quantity) || 0),
       })),
     }));
@@ -42,7 +43,7 @@ function normalizeEquipment(item: any): Equipment {
     id: item.id,
     name: item.name,
     category: item.category,
-    brand: item.brand || 'Générique',
+    brand: item.brand !== undefined ? item.brand : '',
     model: item.model || '',
     sizes,
     minStockAlert: Number(item.minStockAlert) || 3,
@@ -467,14 +468,31 @@ export function computeInventoryStats(
   let outOfStockCount = 0;
   const lowStockItems: Equipment[] = [];
 
-  const categoryMap: Record<EquipmentCategory, { unitsInStock: number; totalValue: number; label: string }> = {
-    gants: { unitsInStock: 0, totalValue: 0, label: 'Gants de Boxe' },
-    protege_tibias: { unitsInStock: 0, totalValue: 0, label: 'Protège-Tibias' },
-    bandes: { unitsInStock: 0, totalValue: 0, label: 'Bandes de Boxe' },
-    protege_dents: { unitsInStock: 0, totalValue: 0, label: 'Protège-Dents' },
-    coquilles: { unitsInStock: 0, totalValue: 0, label: 'Coquilles' },
-    autres: { unitsInStock: 0, totalValue: 0, label: 'Autres' },
-  };
+  const categoryMap: Record<string, { unitsInStock: number; totalValue: number; label: string }> = {};
+
+  // Pre-seed default categories
+  const defaultKeys = [
+    'gants',
+    'protege_tibias',
+    'bandes',
+    'protege_dents',
+    'coquilles',
+    'protections',
+    'textile',
+    'tenue_competition',
+    'pantalon_combat',
+    'textile_competition',
+    'short_combat',
+    'tenue_entrainement',
+    'autres',
+  ];
+  defaultKeys.forEach((key) => {
+    categoryMap[key] = {
+      unitsInStock: 0,
+      totalValue: 0,
+      label: CATEGORY_CONFIG[key]?.label || key,
+    };
+  });
 
   const brandMap: Record<string, { unitsInStock: number; totalValue: number }> = {};
 
@@ -495,10 +513,16 @@ export function computeInventoryStats(
       lowStockItems.push(item);
     }
 
-    if (categoryMap[item.category]) {
-      categoryMap[item.category].unitsInStock += qty;
-      categoryMap[item.category].totalValue += qty * sell;
+    const catKey = item.category || 'autres';
+    if (!categoryMap[catKey]) {
+      categoryMap[catKey] = {
+        unitsInStock: 0,
+        totalValue: 0,
+        label: CATEGORY_CONFIG[catKey]?.label || catKey,
+      };
     }
+    categoryMap[catKey].unitsInStock += qty;
+    categoryMap[catKey].totalValue += qty * sell;
 
     const brand = item.brand || 'Autre';
     if (!brandMap[brand]) {

@@ -267,6 +267,13 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                 { id: 'bandes', label: 'Bandes', icon: '🎗️' },
                 { id: 'protege_dents', label: 'Dents', icon: '🦷' },
                 { id: 'coquilles', label: 'Coquilles', icon: '🛡️' },
+                { id: 'protections', label: 'Protections', icon: '🛡️' },
+                { id: 'textile', label: 'Textile', icon: '👕' },
+                { id: 'tenue_competition', label: 'Tenue Compétition', icon: '🥋' },
+                { id: 'pantalon_combat', label: 'Pantalon Combat', icon: '👖' },
+                { id: 'textile_competition', label: 'Textile Compétition', icon: '🎽' },
+                { id: 'short_combat', label: 'Short Combat', icon: '🩳' },
+                { id: 'tenue_entrainement', label: 'Tenue Entraînement', icon: '🏋️' },
                 { id: 'autres', label: 'Autres', icon: '⚡' },
               ].map((cat) => (
                 <button
@@ -303,7 +310,9 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                 >
                   <div>
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
-                      <span className="font-bold text-slate-700">{item.brand || 'Dojo'}</span>
+                      <span className="font-bold text-slate-700">
+                        {item.brand || CATEGORY_CONFIG[item.category]?.badge || 'Matériel'}
+                      </span>
                       <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 font-black border border-emerald-200 shadow-sm">
                         🟢 {item.stock ?? 0} dispo
                       </span>

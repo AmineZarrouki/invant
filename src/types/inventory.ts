@@ -4,7 +4,16 @@ export type EquipmentCategory =
   | 'protege_tibias'
   | 'protege_dents'
   | 'coquilles'
-  | 'autres';
+  | 'protections'
+  | 'textile'
+  | 'tenue_competition'
+  | 'pantalon_combat'
+  | 'textile_competition'
+  | 'short_combat'
+  | 'tenue_entrainement'
+  | 'autres'
+  | (string & {});
+
 
 export interface ColorStock {
   color: string;

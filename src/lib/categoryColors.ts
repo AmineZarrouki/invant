@@ -52,6 +52,62 @@ export const CATEGORY_CONFIG: Record<
     badgeText: 'text-purple-700',
     badgeBorder: 'border-purple-200',
   },
+  protections: {
+    label: 'Protections',
+    badge: 'Protections',
+    icon: '🛡️',
+    badgeBg: 'bg-teal-50',
+    badgeText: 'text-teal-700',
+    badgeBorder: 'border-teal-200',
+  },
+  textile: {
+    label: 'Textile',
+    badge: 'Textile',
+    icon: '👕',
+    badgeBg: 'bg-violet-50',
+    badgeText: 'text-violet-700',
+    badgeBorder: 'border-violet-200',
+  },
+  tenue_competition: {
+    label: 'Tenue de compétition',
+    badge: 'Tenue Compétition',
+    icon: '🥋',
+    badgeBg: 'bg-amber-50',
+    badgeText: 'text-amber-700',
+    badgeBorder: 'border-amber-200',
+  },
+  pantalon_combat: {
+    label: 'Pantalon de combat',
+    badge: 'Pantalon Combat',
+    icon: '👖',
+    badgeBg: 'bg-indigo-50',
+    badgeText: 'text-indigo-700',
+    badgeBorder: 'border-indigo-200',
+  },
+  textile_competition: {
+    label: 'Textile de compétition',
+    badge: 'Textile Compétition',
+    icon: '🎽',
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    badgeBorder: 'border-rose-200',
+  },
+  short_combat: {
+    label: 'Short de combat',
+    badge: 'Short Combat',
+    icon: '🩳',
+    badgeBg: 'bg-cyan-50',
+    badgeText: 'text-cyan-700',
+    badgeBorder: 'border-cyan-200',
+  },
+  tenue_entrainement: {
+    label: 'Tenue d’entraînement',
+    badge: 'Tenue Entraînement',
+    icon: '🏋️',
+    badgeBg: 'bg-orange-50',
+    badgeText: 'text-orange-700',
+    badgeBorder: 'border-orange-200',
+  },
   autres: {
     label: 'Autres Accessoires',
     badge: 'Accessoires',
@@ -61,6 +117,16 @@ export const CATEGORY_CONFIG: Record<
     badgeBorder: 'border-slate-200',
   },
 };
+
+// Aliases for French labels and alternative casing
+CATEGORY_CONFIG['Protections'] = CATEGORY_CONFIG['protections'];
+CATEGORY_CONFIG['Textile'] = CATEGORY_CONFIG['textile'];
+CATEGORY_CONFIG['Tenue de compétition'] = CATEGORY_CONFIG['tenue_competition'];
+CATEGORY_CONFIG['Pantalon de combat'] = CATEGORY_CONFIG['pantalon_combat'];
+CATEGORY_CONFIG['Textile de compétition'] = CATEGORY_CONFIG['textile_competition'];
+CATEGORY_CONFIG['Short de combat'] = CATEGORY_CONFIG['short_combat'];
+CATEGORY_CONFIG['Tenue d’entraînement'] = CATEGORY_CONFIG['tenue_entrainement'];
+CATEGORY_CONFIG["Tenue d'entraînement"] = CATEGORY_CONFIG['tenue_entrainement'];
 
 /** High-contrast stock status tokens for light professional theme */
 export function getStockStatus(stock: number, minAlert: number) {
@@ -145,6 +211,18 @@ export const STANDARD_COLORS: ColorPreset[] = [
     value: 'Bleu / Blanc',
     label: 'Bleu & Blanc',
     swatch: 'linear-gradient(135deg, #2563eb 50%, #f8fafc 50%)',
+    group: 'Combinaisons Bicolores',
+  },
+  {
+    value: 'Rouge / Blanc',
+    label: 'Rouge & Blanc',
+    swatch: 'linear-gradient(135deg, #ef4444 50%, #f8fafc 50%)',
+    group: 'Combinaisons Bicolores',
+  },
+  {
+    value: 'Noir / Blanc / Gris',
+    label: 'Noir / Blanc / Gris',
+    swatch: 'linear-gradient(135deg, #0f172a 33%, #f8fafc 33%, #f8fafc 66%, #64748b 66%)',
     group: 'Combinaisons Bicolores',
   },
   {
