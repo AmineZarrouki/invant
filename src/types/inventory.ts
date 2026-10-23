@@ -132,3 +132,76 @@ export interface InventoryStats {
   recentSales: Sale[];
   lowStockItems: Equipment[];
 }
+
+export interface PackItem {
+  equipmentId: string;
+  equipmentName: string;
+  category: EquipmentCategory;
+  brand?: string;
+  model?: string;
+  size?: string;
+  color?: string;
+  quantity: number;
+  originalPrice: number; // Regular unit selling price
+  packPrice: number; // Customized price of this specific element in the pack
+  costPrice: number;
+}
+
+export interface CartItem {
+  cartLineId: string;
+  equipment: Equipment;
+  size?: string;
+  color?: string;
+  quantity: number;
+  unitPrice: number; // Prix personnalisé de cet article dans le panier (modifiable par l'utilisateur !)
+  originalPrice: number; // Prix de vente standard
+  costPrice: number;
+  maxStock: number;
+}
+
+export interface EquipmentPack {
+  id: string;
+  name: string;
+  description?: string;
+  items: PackItem[];
+  totalOriginalPrice: number; // Sum of (originalPrice * quantity)
+  totalPackPrice: number; // Sum of (packPrice * quantity)
+  discountAmount: number; // totalOriginalPrice - totalPackPrice
+  discountPercentage: number;
+  barcode?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Helper function to calculate maximum available packs based on constituent items stock */
+export function getPackAvailableStock(pack: EquipmentPack, equipmentList: Equipment[]): number {
+  if (!pack.items || pack.items.length === 0) return 0;
+
+  const limits: number[] = [];
+
+  for (const item of pack.items) {
+    const eq = equipmentList.find((e) => e.id === item.equipmentId);
+    if (!eq) {
+      limits.push(0);
+      continue;
+    }
+
+    let available = 0;
+    if (item.size && item.color) {
+      const sz = eq.sizes?.find((s) => (s.size || '').toLowerCase() === item.size?.toLowerCase());
+      const cl = sz?.colors?.find((c) => (c.color || '').toLowerCase() === item.color?.toLowerCase());
+      available = cl ? Number(cl.quantity) || 0 : 0;
+    } else if (item.size) {
+      const sz = eq.sizes?.find((s) => (s.size || '').toLowerCase() === item.size?.toLowerCase());
+      available = sz?.colors?.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0) || 0;
+    } else {
+      available = getEquipmentTotalStock(eq);
+    }
+
+    const neededPerPack = Math.max(1, Number(item.quantity) || 1);
+    limits.push(Math.floor(available / neededPerPack));
+  }
+
+  return limits.length > 0 ? Math.min(...limits) : 0;
+}
+

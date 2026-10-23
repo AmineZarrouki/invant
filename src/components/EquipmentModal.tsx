@@ -979,10 +979,10 @@ export default function EquipmentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-2xl shadow-slate-900/15 my-8 overflow-hidden text-slate-900 animate-scaleUp ring-1 ring-slate-900/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl shadow-2xl shadow-slate-900/15 overflow-hidden text-slate-900 animate-scaleUp ring-1 ring-slate-900/10 flex flex-col max-h-[92vh] sm:max-h-[88vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold text-lg shadow-sm">
               {activeCategoryCfg?.icon || '📦'}

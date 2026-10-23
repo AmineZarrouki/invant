@@ -89,8 +89,8 @@ export default function DeleteConfirmModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-lg bg-white border border-rose-200 rounded-2xl shadow-2xl overflow-hidden animate-scaleUp text-slate-900 ring-1 ring-rose-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-white border border-rose-200 rounded-3xl shadow-2xl overflow-hidden animate-scaleUp text-slate-900 ring-1 ring-rose-100 max-h-[92vh] flex flex-col">
         {/* Progress Bar of the 5s Timer */}
         <div className="h-1.5 w-full bg-slate-100">
           <div
@@ -129,7 +129,7 @@ export default function DeleteConfirmModal({
         </div>
 
         {/* Modal Content */}
-        <div className="p-5 sm:p-6 space-y-4">
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
           {/* Equipment Info Card */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-md shadow-slate-200/80 ring-1 ring-slate-900/5 space-y-2">
             <div className="flex items-center justify-between">

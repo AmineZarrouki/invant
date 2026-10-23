@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Layers,
   Sparkles,
+  ShoppingCart,
 } from 'lucide-react';
 import { Equipment } from '@/types/inventory';
 import { CurrencyCode, CURRENCY_CONFIG, formatCurrency } from '@/lib/currency';
@@ -37,6 +38,10 @@ interface QuickSaleModalProps {
     delta: number,
     variant?: { size?: string; color?: string }
   ) => Promise<void>;
+  onAddToCart?: (
+    equipment: Equipment,
+    variant?: { size?: string; color?: string; quantity?: number; unitPrice?: number; maxStock?: number }
+  ) => void;
   currency: CurrencyCode;
 }
 
@@ -46,6 +51,7 @@ export default function QuickSaleModal({
   equipment,
   onConfirmSale,
   onDirectAdjustStock,
+  onAddToCart,
   currency,
 }: QuickSaleModalProps) {
   const [selectedSizeIndex, setSelectedSizeIndex] = useState<number>(0);
@@ -149,33 +155,53 @@ export default function QuickSaleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="bg-white border-2 border-blue-200 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden text-slate-900 animate-scaleUp my-6">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border-2 border-blue-200 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden text-slate-900 animate-scaleUp flex flex-col max-h-[90vh] sm:max-h-[85vh]">
+        {/* Header - Sticky at top with Item Model prominently displayed */}
+        <div className="flex items-start justify-between px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50/70 to-slate-50 shrink-0 gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shrink-0 mt-0.5 shadow-md shadow-emerald-500/20">
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900">
-                {isAdjustingWithoutSale ? 'Correction de stock (Perte/Casse)' : 'Enregistrer une Vente'}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                <span className="text-[10px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-xs">
+                  {equipment.brand || 'Matériel'}
+                </span>
+                {/* USER REQUEST: Model clearly visible at the top */}
+                {equipment.model && (
+                  <span className="text-[11px] font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-300 shadow-xs">
+                    Modèle : {equipment.model}
+                  </span>
+                )}
+                {equipment.barcode && (
+                  <span className="text-[10px] font-mono text-slate-500">
+                    #{equipment.barcode}
+                  </span>
+                )}
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Total stock: {equipment.stock ?? 0} pcs
+                </span>
+              </div>
+
+              <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                {equipment.name}
               </h3>
-              <p className="text-xs text-slate-500">
-                {equipment.brand} • {equipment.name}
+              <p className="text-xs text-slate-500 font-medium">
+                {isAdjustingWithoutSale ? 'Correction de stock (Perte/Casse)' : 'Vente directe ou ajout au Panier'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        {/* Form Content - Scrollable if tall on mobile */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 font-bold">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -416,20 +442,42 @@ export default function QuickSaleModal({
             </button>
           </div>
 
-          {/* Checkout Big Button */}
-          <div className="pt-2">
+          {/* Checkout Buttons */}
+          <div className="pt-2 space-y-2">
+            {!isAdjustingWithoutSale && onAddToCart && (
+              <button
+                type="button"
+                disabled={loading || currentVariantStock < quantity || !equipment}
+                onClick={() => {
+                  if (!equipment) return;
+                  onAddToCart(equipment, {
+                    size: currentSizeVariant?.size,
+                    color: selectedColor,
+                    quantity,
+                    unitPrice: soldPrice,
+                    maxStock: currentVariantStock,
+                  });
+                  onClose();
+                }}
+                className="w-full py-3 px-4 rounded-2xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 hover:border-indigo-600 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-xs"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>Ajouter au Panier & continuer ({formatCurrency(totalRevenue, currency)})</span>
+              </button>
+            )}
+
             <button
               type="submit"
               disabled={loading || currentVariantStock < quantity}
-              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base shadow-md shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm sm:text-base shadow-md shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Check className="w-6 h-6 stroke-[3]" />
+              <Check className="w-5 h-5 stroke-[3]" />
               <span>
                 {loading
                   ? 'Enregistrement...'
                   : isAdjustingWithoutSale
                   ? `Confirmer la déduction (-${quantity} pcs)`
-                  : `Valider la Vente (${formatCurrency(totalRevenue, currency)})`}
+                  : `Vendre Directement (${formatCurrency(totalRevenue, currency)})`}
               </span>
             </button>
           </div>

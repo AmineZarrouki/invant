@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getEquipment, addEquipment, getSales, getDeletions, computeInventoryStats, getStorageStatus } from '@/lib/db';
+import { getEquipment, addEquipment, getSales, getDeletions, getPacks, computeInventoryStats, getStorageStatus } from '@/lib/db';
 
 export async function GET() {
   try {
-    const [equipment, sales, deletions] = await Promise.all([getEquipment(), getSales(), getDeletions()]);
+    const [equipment, sales, deletions, packs] = await Promise.all([
+      getEquipment(),
+      getSales(),
+      getDeletions(),
+      getPacks(),
+    ]);
     const stats = computeInventoryStats(equipment, sales, deletions);
     const storageStatus = getStorageStatus();
     return NextResponse.json({
       success: true,
       equipment,
+      packs,
       sales,
       deletions,
       stats,

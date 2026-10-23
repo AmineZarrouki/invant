@@ -12,14 +12,19 @@ import QuickSaleModal from '@/components/QuickSaleModal';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import EasyHelpModal from '@/components/EasyHelpModal';
 import PinLockScreen from '@/components/PinLockScreen';
+import PackModal from '@/components/PackModal';
+import PackSaleModal from '@/components/PackSaleModal';
+import CartDrawer from '@/components/CartDrawer';
 import Toast, { ToastMessage } from '@/components/Toast';
-import { Equipment, Sale, InventoryStats, DeletionLog } from '@/types/inventory';
+import { Equipment, Sale, InventoryStats, DeletionLog, EquipmentPack, CartItem } from '@/types/inventory';
 import { CurrencyCode, formatCurrency } from '@/lib/currency';
 
 const CACHE_KEYS = {
   INVENTORY: 'kickboxing_inventory_cache',
   SALES: 'kickboxing_sales_cache',
   DELETIONS: 'kickboxing_deletions_cache',
+  PACKS: 'kickboxing_packs_cache',
+  CART: 'kickboxing_cart_cache',
 };
 
 function saveLocalCache<T>(key: string, data: T): void {
@@ -53,6 +58,7 @@ export default function Home() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [deletions, setDeletions] = useState<DeletionLog[]>([]);
+  const [packs, setPacks] = useState<EquipmentPack[]>([]);
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -71,6 +77,87 @@ export default function Home() {
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [saleItem, setSaleItem] = useState<Equipment | null>(null);
   const [itemToDelete, setItemToDelete] = useState<Equipment | null>(null);
+
+  // Pack Modals state
+  const [isPackModalOpen, setIsPackModalOpen] = useState(false);
+  const [editingPack, setEditingPack] = useState<EquipmentPack | null>(null);
+  const [preSelectedPackItems, setPreSelectedPackItems] = useState<Equipment[]>([]);
+  const [sellingPack, setSellingPack] = useState<EquipmentPack | null>(null);
+
+  // Panier / Multi-Item Cart state (User Request: group items to sell in 1 step with custom element prices)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isCartHydrated, setIsCartHydrated] = useState<boolean>(false);
+
+  // 1. Hydrate cart from localStorage immediately on mount
+  useEffect(() => {
+    try {
+      const cachedCart = loadLocalCache<CartItem[]>(CACHE_KEYS.CART);
+      if (cachedCart && Array.isArray(cachedCart) && cachedCart.length > 0) {
+        setCart(cachedCart);
+      }
+    } catch (err) {
+      console.error('Failed to load cart cache:', err);
+    } finally {
+      setIsCartHydrated(true);
+    }
+  }, []);
+
+  // 2. Persist cart to localStorage whenever it changes (guarded so initial [] never wipes cache)
+  useEffect(() => {
+    if (!isCartHydrated) return;
+    saveLocalCache(CACHE_KEYS.CART, cart);
+  }, [cart, isCartHydrated]);
+
+  // 3. Multi-tab synchronization (storage event)
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === CACHE_KEYS.CART) {
+        try {
+          const updated = e.newValue ? JSON.parse(e.newValue) : [];
+          if (Array.isArray(updated)) {
+            setCart(updated);
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // 4. Validate cart stock against refreshed inventory to prevent out-of-stock discrepancies
+  useEffect(() => {
+    if (!isCartHydrated || equipment.length === 0 || cart.length === 0) return;
+    setCart((prev) => {
+      let modified = false;
+      const updated = prev.map((cItem) => {
+        const liveEquip = equipment.find((e) => e.id === cItem.equipment.id);
+        if (!liveEquip) return cItem;
+
+        let liveMaxStock = liveEquip.stock ?? 0;
+        if (cItem.size || cItem.color) {
+          const sz = liveEquip.sizes?.find((s) => s.size === (cItem.size || 'Unique'));
+          if (sz) {
+            const clr = sz.colors.find((c) => c.color === (cItem.color || 'Standard'));
+            if (clr) liveMaxStock = clr.quantity;
+          }
+        }
+
+        const validQuantity = Math.max(1, Math.min(cItem.quantity, liveMaxStock > 0 ? liveMaxStock : 1));
+        if (validQuantity !== cItem.quantity || liveMaxStock !== cItem.maxStock) {
+          modified = true;
+          return {
+            ...cItem,
+            quantity: validQuantity,
+            maxStock: liveMaxStock,
+            equipment: liveEquip,
+          };
+        }
+        return cItem;
+      });
+      return modified ? updated : prev;
+    });
+  }, [equipment, isCartHydrated, cart.length]);
 
   // Security PIN Lock & 10-minute Inactivity Tracking
   const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
@@ -157,6 +244,8 @@ export default function Home() {
     const cachedInv = loadLocalCache<Equipment[]>(CACHE_KEYS.INVENTORY);
     const cachedSales = loadLocalCache<Sale[]>(CACHE_KEYS.SALES);
     const cachedDel = loadLocalCache<DeletionLog[]>(CACHE_KEYS.DELETIONS);
+    const cachedPacks = loadLocalCache<EquipmentPack[]>(CACHE_KEYS.PACKS);
+    const cachedCart = loadLocalCache<CartItem[]>(CACHE_KEYS.CART);
     const hasLocalEdits = typeof window !== 'undefined' && localStorage.getItem('kickboxing_has_user_edits') === 'true';
 
     if (cachedInv && cachedInv.length > 0) {
@@ -164,6 +253,8 @@ export default function Home() {
     }
     if (cachedSales) setSales(cachedSales);
     if (cachedDel) setDeletions(cachedDel);
+    if (cachedPacks) setPacks(cachedPacks);
+    if (cachedCart && Array.isArray(cachedCart)) setCart(cachedCart);
 
     try {
       const invRes = await fetch('/api/inventory');
@@ -197,7 +288,7 @@ export default function Home() {
           }
         }
 
-        // Optimized single-flight: sync sales and deletions from same payload
+        // Optimized single-flight: sync sales, deletions and packs from same payload
         if (Array.isArray(invData.sales)) {
           setSales(invData.sales);
           saveLocalCache(CACHE_KEYS.SALES, invData.sales);
@@ -205,6 +296,10 @@ export default function Home() {
         if (Array.isArray(invData.deletions)) {
           setDeletions(invData.deletions);
           saveLocalCache(CACHE_KEYS.DELETIONS, invData.deletions);
+        }
+        if (Array.isArray(invData.packs)) {
+          setPacks(invData.packs);
+          saveLocalCache(CACHE_KEYS.PACKS, invData.packs);
         }
       }
     } catch (err) {
@@ -480,6 +575,330 @@ export default function Home() {
     }
   };
 
+  // Pack Handlers
+  const handleSavePack = async (packData: Partial<EquipmentPack>) => {
+    try {
+      if (editingPack) {
+        // Edit PUT
+        const res = await fetch(`/api/packs/${editingPack.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(packData),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const updated = packs.map((p) => (p.id === editingPack.id ? data.pack : p));
+        setPacks(updated);
+        saveLocalCache(CACHE_KEYS.PACKS, updated);
+        markUserEdits();
+        addToast('success', `✏️ Pack "${data.pack.name}" mis à jour avec succès`);
+      } else {
+        // Add POST
+        const res = await fetch('/api/packs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(packData),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const updated = [data.pack, ...packs];
+        setPacks(updated);
+        saveLocalCache(CACHE_KEYS.PACKS, updated);
+        markUserEdits();
+        addToast('success', `📦 Pack "${data.pack.name}" créé avec succès`);
+      }
+      setEditingPack(null);
+      setPreSelectedPackItems([]);
+    } catch (err: any) {
+      addToast('error', err.message || 'Erreur lors de la sauvegarde du pack');
+      throw err;
+    }
+  };
+
+  const handleDeletePack = async (pack: EquipmentPack) => {
+    const confirmed = window.confirm(
+      `Êtes-vous sûr de vouloir supprimer le pack "${pack.name}" ?\n(Les équipements qui le composent restent intacts dans votre inventaire)`
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/packs/${pack.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      const updated = packs.filter((p) => p.id !== pack.id);
+      setPacks(updated);
+      saveLocalCache(CACHE_KEYS.PACKS, updated);
+      markUserEdits();
+      addToast('info', `🗑️ Pack "${pack.name}" supprimé`);
+    } catch (err: any) {
+      addToast('error', err.message || 'Erreur lors de la suppression du pack');
+    }
+  };
+
+  const handleSellPack = async (saleData: {
+    packId: string;
+    buyerName?: string;
+    paymentMethod: 'cash' | 'card' | 'transfer' | 'autre';
+    notes?: string;
+    variantSelections?: Record<string, { size?: string; color?: string }>;
+  }) => {
+    try {
+      const res = await fetch(`/api/packs/${saleData.packId}/sell`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleData),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      if (Array.isArray(data.updatedEquipment)) {
+        setEquipment(data.updatedEquipment);
+        saveLocalCache(CACHE_KEYS.INVENTORY, data.updatedEquipment);
+      }
+      if (Array.isArray(data.sales)) {
+        setSales(data.sales);
+        saveLocalCache(CACHE_KEYS.SALES, data.sales);
+      }
+      if (data.stats) {
+        setStats(data.stats);
+      }
+      markUserEdits();
+      addToast(
+        'success',
+        `🎉 Vente de pack enregistrée : "${data.packName}" (${formatCurrency(data.totalPackPrice, currency)})`
+      );
+    } catch (err: any) {
+      addToast('error', err.message || 'Erreur lors de la vente du pack');
+      throw err;
+    }
+  };
+
+  // =========================================================================
+  // PANIER / MULTI-ITEM CART HANDLERS (Add multiple items & sell in 1 step)
+  // =========================================================================
+  const handleAddToCart = useCallback(
+    (
+      item: Equipment,
+      variant?: {
+        size?: string;
+        color?: string;
+        quantity?: number;
+        unitPrice?: number;
+        maxStock?: number;
+      }
+    ) => {
+      const size = variant?.size;
+      const color = variant?.color;
+      const quantityToAdd = variant?.quantity || 1;
+      const unitPrice = variant?.unitPrice !== undefined ? variant.unitPrice : item.sellingPrice;
+      const maxStock =
+        variant?.maxStock !== undefined
+          ? variant.maxStock
+          : item.stock !== undefined
+          ? item.stock
+          : 999;
+
+      const lineId = `${item.id}-${size || 'unique'}-${color || 'standard'}`;
+
+      setCart((prev) => {
+        const existing = prev.find((c) => c.cartLineId === lineId);
+        let updated: CartItem[];
+
+        if (existing) {
+          const newQty = Math.min(maxStock, existing.quantity + quantityToAdd);
+          updated = prev.map((c) =>
+            c.cartLineId === lineId
+              ? {
+                  ...c,
+                  quantity: newQty,
+                  unitPrice: variant?.unitPrice !== undefined ? variant.unitPrice : c.unitPrice,
+                }
+              : c
+          );
+        } else {
+          updated = [
+            ...prev,
+            {
+              cartLineId: lineId,
+              equipment: item,
+              size,
+              color,
+              quantity: Math.min(maxStock, quantityToAdd),
+              unitPrice,
+              originalPrice: item.sellingPrice || unitPrice,
+              costPrice: item.costPrice || 0,
+              maxStock,
+            },
+          ];
+        }
+
+        saveLocalCache(CACHE_KEYS.CART, updated);
+        return updated;
+      });
+
+      addToast(
+        'success',
+        `🛒 "${item.name}" ajouté au panier (${formatCurrency(unitPrice * quantityToAdd, currency)})`
+      );
+    },
+    [currency, addToast]
+  );
+
+  const handleAddBatchToCart = useCallback(
+    (itemsToAdd: Equipment[]) => {
+      if (itemsToAdd.length === 0) return;
+
+      setCart((prev) => {
+        let current = [...prev];
+
+        for (const item of itemsToAdd) {
+          const sizes = item.sizes || [];
+          const firstSize = sizes[0]?.size;
+          const firstColor = sizes[0]?.colors?.[0]?.color;
+          const maxStock = sizes[0]?.colors?.[0]?.quantity || item.stock || 1;
+          const lineId = `${item.id}-${firstSize || 'unique'}-${firstColor || 'standard'}`;
+
+          const existingIndex = current.findIndex((c) => c.cartLineId === lineId);
+          if (existingIndex !== -1) {
+            current[existingIndex] = {
+              ...current[existingIndex],
+              quantity: Math.min(maxStock, current[existingIndex].quantity + 1),
+            };
+          } else {
+            current.push({
+              cartLineId: lineId,
+              equipment: item,
+              size: firstSize,
+              color: firstColor,
+              quantity: 1,
+              unitPrice: item.sellingPrice,
+              originalPrice: item.sellingPrice,
+              costPrice: item.costPrice || 0,
+              maxStock,
+            });
+          }
+        }
+
+        saveLocalCache(CACHE_KEYS.CART, current);
+        return current;
+      });
+
+      addToast('success', `🛒 ${itemsToAdd.length} article(s) ajouté(s) au panier`);
+    },
+    [addToast]
+  );
+
+  const handleUpdateCartItemQuantity = useCallback((cartLineId: string, delta: number) => {
+    setCart((prev) => {
+      const updated = prev
+        .map((item) => {
+          if (item.cartLineId === cartLineId) {
+            const nextQty = item.quantity + delta;
+            if (nextQty <= 0) return null;
+            if (nextQty > item.maxStock) return item;
+            return { ...item, quantity: nextQty };
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[];
+
+      saveLocalCache(CACHE_KEYS.CART, updated);
+      return updated;
+    });
+  }, []);
+
+  const handleUpdateCartItemPrice = useCallback((cartLineId: string, newPrice: number) => {
+    setCart((prev) => {
+      const updated = prev.map((item) =>
+        item.cartLineId === cartLineId ? { ...item, unitPrice: Math.max(0, newPrice) } : item
+      );
+      saveLocalCache(CACHE_KEYS.CART, updated);
+      return updated;
+    });
+  }, []);
+
+  const handleRemoveFromCart = useCallback((cartLineId: string) => {
+    setCart((prev) => {
+      const updated = prev.filter((item) => item.cartLineId !== cartLineId);
+      saveLocalCache(CACHE_KEYS.CART, updated);
+      return updated;
+    });
+  }, []);
+
+  const handleClearCart = useCallback(() => {
+    setCart([]);
+    saveLocalCache(CACHE_KEYS.CART, []);
+  }, []);
+
+  const handleCheckoutCart = useCallback(
+    async (checkoutData: {
+      buyerName: string;
+      paymentMethod: 'cash' | 'card' | 'transfer' | 'autre';
+      notes?: string;
+    }) => {
+      if (cart.length === 0) return;
+
+      try {
+        const payload = {
+          items: cart.map((line) => ({
+            equipmentId: line.equipment.id,
+            size: line.size,
+            color: line.color,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+          })),
+          buyerName: checkoutData.buyerName,
+          paymentMethod: checkoutData.paymentMethod,
+          notes: checkoutData.notes,
+        };
+
+        const res = await fetch('/api/sales', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        // Update equipment & sales from response
+        if (Array.isArray(data.updatedEquipment)) {
+          setEquipment(data.updatedEquipment);
+          saveLocalCache(CACHE_KEYS.INVENTORY, data.updatedEquipment);
+        }
+        if (Array.isArray(data.sales)) {
+          const combinedSales = [...data.sales, ...sales];
+          setSales(combinedSales);
+          saveLocalCache(CACHE_KEYS.SALES, combinedSales);
+        }
+        if (data.stats) {
+          setStats(data.stats);
+        }
+
+        markUserEdits();
+        handleClearCart();
+
+        const totalSold = cart.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+        addToast(
+          'success',
+          `🎉 Vente groupée enregistrée avec succès en 1 étape ! (${cart.length} articles pour ${formatCurrency(
+            totalSold,
+            currency
+          )})`
+        );
+      } catch (err: any) {
+        addToast('error', err.message || 'Erreur lors du règlement groupé');
+        throw err;
+      }
+    },
+    [cart, sales, currency, addToast, handleClearCart]
+  );
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Top Navigation */}
@@ -495,6 +914,8 @@ export default function Home() {
         }}
         onOpenHelpModal={() => setIsHelpModalOpen(true)}
         onLockSession={handleManualLock}
+        cartItemCount={cart.reduce((s, i) => s + i.quantity, 0)}
+        onOpenCart={() => setIsCartOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -526,6 +947,8 @@ export default function Home() {
             {activeTab === 'inventory' && (
               <InventoryView
                 equipment={equipment}
+                packs={packs}
+                cart={cart}
                 currency={currency}
                 onOpenAddModal={() => {
                   setEditingItem(null);
@@ -544,6 +967,23 @@ export default function Home() {
                   setHistorySubTab('deletions');
                 }}
                 deletionsCount={deletions.length}
+                onOpenCreatePackModal={(preselected) => {
+                  setEditingPack(null);
+                  setPreSelectedPackItems(preselected || []);
+                  setIsPackModalOpen(true);
+                }}
+                onOpenEditPackModal={(pack) => {
+                  setEditingPack(pack);
+                  setPreSelectedPackItems([]);
+                  setIsPackModalOpen(true);
+                }}
+                onOpenSellPackModal={(pack) => {
+                  setSellingPack(pack);
+                }}
+                onDeletePack={handleDeletePack}
+                onAddToCart={handleAddToCart}
+                onAddBatchToCart={handleAddBatchToCart}
+                onOpenCart={() => setIsCartOpen(true)}
               />
             )}
 
@@ -551,6 +991,13 @@ export default function Home() {
               <PosView
                 equipment={equipment}
                 currency={currency}
+                cart={cart}
+                onAddToCart={handleAddToCart}
+                onUpdateCartItemQuantity={handleUpdateCartItemQuantity}
+                onUpdateCartItemPrice={handleUpdateCartItemPrice}
+                onRemoveCartItem={handleRemoveFromCart}
+                onClearCart={handleClearCart}
+                onCheckoutCart={handleCheckoutCart}
                 onRecordSale={handleRecordSale}
               />
             )}
@@ -600,6 +1047,7 @@ export default function Home() {
         equipment={saleItem}
         onConfirmSale={handleRecordSale}
         onDirectAdjustStock={handleAdjustStock}
+        onAddToCart={handleAddToCart}
         currency={currency}
       />
 
@@ -610,6 +1058,45 @@ export default function Home() {
         equipment={itemToDelete}
         currency={currency}
         onConfirmDelete={handleConfirmDelete}
+      />
+
+      {/* Panier / Multi-Item Cart Drawer (User Request: Group multiple items, edit unit prices, sell in 1 step) */}
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        currency={currency}
+        onUpdateItemQuantity={handleUpdateCartItemQuantity}
+        onUpdateItemPrice={handleUpdateCartItemPrice}
+        onRemoveItem={handleRemoveFromCart}
+        onClearCart={handleClearCart}
+        onCheckout={handleCheckoutCart}
+        onNavigateToInventory={() => setActiveTab('inventory')}
+      />
+
+      {/* Pack Builder / Editor Modal */}
+      <PackModal
+        isOpen={isPackModalOpen}
+        onClose={() => {
+          setIsPackModalOpen(false);
+          setEditingPack(null);
+          setPreSelectedPackItems([]);
+        }}
+        onSave={handleSavePack}
+        initialData={editingPack}
+        preSelectedEquipment={preSelectedPackItems}
+        allEquipment={equipment}
+        currency={currency}
+      />
+
+      {/* Pack Sale Checkout Modal */}
+      <PackSaleModal
+        isOpen={!!sellingPack}
+        onClose={() => setSellingPack(null)}
+        pack={sellingPack}
+        allEquipment={equipment}
+        currency={currency}
+        onConfirmSale={handleSellPack}
       />
 
       {/* Easy Beginner Help Modal */}

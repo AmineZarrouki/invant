@@ -6,6 +6,8 @@ import {
   DeletionLog,
   SizeVariant,
   getEquipmentTotalStock,
+  EquipmentPack,
+  PackItem,
 } from '@/types/inventory';
 import { INITIAL_EQUIPMENT, INITIAL_SALES } from './initialData';
 import { getStorageAdapter } from './storage';
@@ -410,6 +412,115 @@ export async function recordSale(saleInput: {
   return { sale: newSale, updatedEquipment: eq };
 }
 
+export async function recordBatchSale(batchInput: {
+  items: Array<{
+    equipmentId: string;
+    size?: string;
+    color?: string;
+    quantity: number;
+    unitPrice?: number;
+  }>;
+  buyerName?: string;
+  paymentMethod?: 'cash' | 'card' | 'transfer' | 'autre';
+  notes?: string;
+}): Promise<{ sales: Sale[]; updatedEquipment: Equipment[] }> {
+  if (!batchInput.items || batchInput.items.length === 0) {
+    throw new Error('Le panier est vide');
+  }
+
+  const items = await getEquipment();
+  const sales = await getSales();
+  const newSales: Sale[] = [];
+
+  // 1. Validation pass: verify all items have enough stock before deducting anything
+  for (const itemInput of batchInput.items) {
+    const eq = items.find((i) => i.id === itemInput.equipmentId);
+    if (!eq) {
+      throw new Error(`Équipement ID ${itemInput.equipmentId} non trouvé`);
+    }
+    if (!eq.sizes || eq.sizes.length === 0) {
+      throw new Error(`Aucun stock disponible pour ${eq.name}`);
+    }
+
+    let targetSize = eq.sizes.find((s) => {
+      if (!itemInput.size) return true;
+      return (s.size || '').trim().toLowerCase() === itemInput.size.trim().toLowerCase();
+    });
+    if (!targetSize) targetSize = eq.sizes[0];
+
+    let targetColor = targetSize.colors.find((c) => {
+      if (!itemInput.color) return true;
+      return (c.color || '').trim().toLowerCase() === itemInput.color.trim().toLowerCase();
+    });
+    if (!targetColor) targetColor = targetSize.colors[0];
+
+    if (!targetColor || targetColor.quantity < itemInput.quantity) {
+      const available = targetColor ? targetColor.quantity : 0;
+      const variantDesc = [targetSize.size, targetColor?.color].filter(Boolean).join(' - ');
+      throw new Error(
+        `Stock insuffisant pour ${eq.name}${variantDesc ? ` (${variantDesc})` : ''} : ${available} restant(s)`
+      );
+    }
+  }
+
+  // 2. Deduction and Sale creation pass
+  const now = new Date().toISOString();
+  for (const itemInput of batchInput.items) {
+    const eq = items.find((i) => i.id === itemInput.equipmentId)!;
+
+    let targetSize = eq.sizes.find((s) => {
+      if (!itemInput.size) return true;
+      return (s.size || '').trim().toLowerCase() === itemInput.size.trim().toLowerCase();
+    });
+    if (!targetSize) targetSize = eq.sizes[0];
+
+    let targetColor = targetSize.colors.find((c) => {
+      if (!itemInput.color) return true;
+      return (c.color || '').trim().toLowerCase() === itemInput.color.trim().toLowerCase();
+    });
+    if (!targetColor) targetColor = targetSize.colors[0];
+
+    targetColor.quantity -= itemInput.quantity;
+    eq.stock = getEquipmentTotalStock(eq);
+    eq.updatedAt = now;
+
+    const unitPrice = itemInput.unitPrice !== undefined ? itemInput.unitPrice : eq.sellingPrice;
+    const totalPrice = unitPrice * itemInput.quantity;
+    const costTotal = (eq.costPrice || 0) * itemInput.quantity;
+    const profit = totalPrice - costTotal;
+
+    const newSale: Sale = {
+      id: `sale-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      equipmentId: eq.id,
+      equipmentName: eq.name,
+      category: eq.category,
+      brand: eq.brand,
+      size: targetSize.size,
+      color: targetColor.color,
+      quantity: itemInput.quantity,
+      unitPrice,
+      totalPrice,
+      costPrice: eq.costPrice || 0,
+      profit,
+      buyerName: batchInput.buyerName || 'Client dojo',
+      paymentMethod: batchInput.paymentMethod || 'cash',
+      date: now,
+      notes: batchInput.notes,
+    };
+
+    newSales.push(newSale);
+    sales.unshift(newSale);
+  }
+
+  await saveEquipmentList(items);
+  await saveSalesList(sales);
+
+  return {
+    sales: newSales,
+    updatedEquipment: items,
+  };
+}
+
 export async function refundSale(saleId: string): Promise<{ success: boolean; refundedSale: Sale }> {
   const sales = await getSales();
   const saleIndex = sales.findIndex((s) => s.id === saleId);
@@ -631,3 +742,224 @@ export function getStorageStatus(): { provider: string; isCloud: boolean } {
     isCloud: adapter.isCloud(),
   };
 }
+
+// -------------------------------------------------------------
+// PACKS MANAGEMENT (GROUPING EQUIPMENTS WITH INDIVIDUAL PRICES)
+// -------------------------------------------------------------
+
+export async function getPacks(): Promise<EquipmentPack[]> {
+  try {
+    const adapter = getStorageAdapter();
+    const raw = await adapter.get('packs');
+    if (!raw || !Array.isArray(raw)) {
+      return [];
+    }
+    return raw;
+  } catch (err) {
+    console.error('Error in getPacks:', err);
+    return [];
+  }
+}
+
+export async function savePacksList(packs: EquipmentPack[]): Promise<void> {
+  const adapter = getStorageAdapter();
+  await adapter.set('packs', packs);
+}
+
+export async function addPack(
+  packData: Omit<EquipmentPack, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<EquipmentPack> {
+  const packs = await getPacks();
+  const now = new Date().toISOString();
+
+  // Compute totals
+  const totalOriginalPrice = packData.items.reduce(
+    (sum, it) => sum + (Number(it.originalPrice) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+  const totalPackPrice = packData.items.reduce(
+    (sum, it) => sum + (Number(it.packPrice) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+  const discountAmount = Math.max(0, totalOriginalPrice - totalPackPrice);
+  const discountPercentage =
+    totalOriginalPrice > 0 ? Math.round((discountAmount / totalOriginalPrice) * 100) : 0;
+
+  const newPack: EquipmentPack = {
+    ...packData,
+    id: `pack-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    totalOriginalPrice,
+    totalPackPrice,
+    discountAmount,
+    discountPercentage,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  packs.unshift(newPack);
+  await savePacksList(packs);
+  return newPack;
+}
+
+export async function updatePack(
+  id: string,
+  updates: Partial<EquipmentPack>
+): Promise<EquipmentPack | null> {
+  const packs = await getPacks();
+  const index = packs.findIndex((p) => p.id === id);
+  if (index === -1) return null;
+
+  const current = packs[index];
+  const items = updates.items || current.items;
+
+  const totalOriginalPrice = items.reduce(
+    (sum, it) => sum + (Number(it.originalPrice) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+  const totalPackPrice = items.reduce(
+    (sum, it) => sum + (Number(it.packPrice) || 0) * (Number(it.quantity) || 1),
+    0
+  );
+  const discountAmount = Math.max(0, totalOriginalPrice - totalPackPrice);
+  const discountPercentage =
+    totalOriginalPrice > 0 ? Math.round((discountAmount / totalOriginalPrice) * 100) : 0;
+
+  const updated: EquipmentPack = {
+    ...current,
+    ...updates,
+    items,
+    totalOriginalPrice,
+    totalPackPrice,
+    discountAmount,
+    discountPercentage,
+    updatedAt: new Date().toISOString(),
+  };
+
+  packs[index] = updated;
+  await savePacksList(packs);
+  return updated;
+}
+
+export async function deletePack(id: string): Promise<boolean> {
+  const packs = await getPacks();
+  const filtered = packs.filter((p) => p.id !== id);
+  if (filtered.length === packs.length) return false;
+
+  await savePacksList(filtered);
+  return true;
+}
+
+export async function recordPackSale(
+  packId: string,
+  options: {
+    buyerName?: string;
+    paymentMethod?: 'cash' | 'card' | 'transfer' | 'autre';
+    notes?: string;
+    variantSelections?: Record<string, { size?: string; color?: string }>;
+  }
+): Promise<{ sales: Sale[]; updatedEquipment: Equipment[] }> {
+  const packs = await getPacks();
+  const pack = packs.find((p) => p.id === packId);
+  if (!pack) {
+    throw new Error('Pack non trouvé');
+  }
+
+  const equipmentList = await getEquipment();
+  const createdSales: Sale[] = [];
+  const now = new Date().toISOString();
+
+  // Validate stock for all items in the pack before deducting any
+  for (const packItem of pack.items) {
+    const eq = equipmentList.find((e) => e.id === packItem.equipmentId);
+    if (!eq) {
+      throw new Error(`Article "${packItem.equipmentName}" non trouvé dans l'inventaire`);
+    }
+
+    const selectedVariant = options.variantSelections?.[packItem.equipmentId] || {};
+    const targetSizeStr = selectedVariant.size || packItem.size;
+    const targetColorStr = selectedVariant.color || packItem.color;
+
+    let targetSize = eq.sizes?.find((s) => {
+      if (!targetSizeStr) return true;
+      return (s.size || '').toLowerCase() === targetSizeStr.toLowerCase();
+    });
+    if (!targetSize && eq.sizes?.length) targetSize = eq.sizes[0];
+
+    let targetColor = targetSize?.colors?.find((c) => {
+      if (!targetColorStr) return true;
+      return (c.color || '').toLowerCase() === targetColorStr.toLowerCase();
+    });
+    if (!targetColor && targetSize?.colors?.length) targetColor = targetSize.colors[0];
+
+    const available = targetColor?.quantity || 0;
+    const requiredQty = Number(packItem.quantity) || 1;
+    if (available < requiredQty) {
+      throw new Error(
+        `Stock insuffisant pour "${eq.name}" (${targetSize?.size || 'Standard'} / ${targetColor?.color || 'Standard'}) dans le pack : ${available} restant(s), ${requiredQty} requis`
+      );
+    }
+  }
+
+  // Deduct stock and record sales
+  for (const packItem of pack.items) {
+    const eq = equipmentList.find((e) => e.id === packItem.equipmentId)!;
+    const selectedVariant = options.variantSelections?.[packItem.equipmentId] || {};
+    const targetSizeStr = selectedVariant.size || packItem.size;
+    const targetColorStr = selectedVariant.color || packItem.color;
+
+    let targetSize = eq.sizes?.find((s) => {
+      if (!targetSizeStr) return true;
+      return (s.size || '').toLowerCase() === targetSizeStr.toLowerCase();
+    });
+    if (!targetSize && eq.sizes?.length) targetSize = eq.sizes[0];
+
+    let targetColor = targetSize?.colors?.find((c) => {
+      if (!targetColorStr) return true;
+      return (c.color || '').toLowerCase() === targetColorStr.toLowerCase();
+    });
+    if (!targetColor && targetSize?.colors?.length) targetColor = targetSize.colors[0];
+
+    const requiredQty = Number(packItem.quantity) || 1;
+    if (targetColor) {
+      targetColor.quantity -= requiredQty;
+    }
+    eq.stock = getEquipmentTotalStock(eq);
+    eq.updatedAt = now;
+
+    // Record sale with the element's custom pack price
+    const unitPrice = Number(packItem.packPrice) || 0;
+    const totalPrice = unitPrice * requiredQty;
+    const costTotal = (Number(packItem.costPrice) || Number(eq.costPrice) || 0) * requiredQty;
+    const profit = totalPrice - costTotal;
+
+    const sale: Sale = {
+      id: `sale-pack-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      equipmentId: eq.id,
+      equipmentName: `${eq.name} (Pack: ${pack.name})`,
+      category: eq.category,
+      brand: eq.brand,
+      size: targetSize?.size,
+      color: targetColor?.color,
+      quantity: requiredQty,
+      unitPrice,
+      totalPrice,
+      costPrice: Number(packItem.costPrice) || Number(eq.costPrice) || 0,
+      profit,
+      buyerName: options.buyerName || 'Client dojo',
+      paymentMethod: options.paymentMethod || 'cash',
+      date: now,
+      notes: options.notes ? `[Pack: ${pack.name}] ${options.notes}` : `Vente du pack "${pack.name}"`,
+    };
+
+    createdSales.push(sale);
+  }
+
+  // Save all modified equipment and new sales
+  await saveEquipmentList(equipmentList);
+  const sales = await getSales();
+  sales.unshift(...createdSales);
+  await saveSalesList(sales);
+
+  return { sales: createdSales, updatedEquipment: equipmentList };
+}
+

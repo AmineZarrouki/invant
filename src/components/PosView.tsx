@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   ShoppingCart,
@@ -20,13 +20,33 @@ import {
   HelpCircle,
   Check,
 } from 'lucide-react';
-import { Equipment } from '@/types/inventory';
+import { Equipment, CartItem } from '@/types/inventory';
 import { formatCurrency, CurrencyCode, CURRENCY_CONFIG } from '@/lib/currency';
 import { getColorSwatch, CATEGORY_CONFIG } from '@/lib/categoryColors';
 
 interface PosViewProps {
   equipment: Equipment[];
   currency: CurrencyCode;
+  cart?: CartItem[];
+  onAddToCart?: (
+    item: Equipment,
+    variant?: {
+      size?: string;
+      color?: string;
+      quantity?: number;
+      unitPrice?: number;
+      maxStock?: number;
+    }
+  ) => void;
+  onUpdateCartItemQuantity?: (cartLineId: string, delta: number) => void;
+  onUpdateCartItemPrice?: (cartLineId: string, newPrice: number) => void;
+  onRemoveCartItem?: (cartLineId: string) => void;
+  onClearCart?: () => void;
+  onCheckoutCart?: (checkoutData: {
+    buyerName: string;
+    paymentMethod: 'cash' | 'card' | 'transfer' | 'autre';
+    notes?: string;
+  }) => Promise<void>;
   onRecordSale: (saleData: {
     equipmentId: string;
     size?: string;
@@ -39,20 +59,23 @@ interface PosViewProps {
   }) => Promise<void>;
 }
 
-interface CartItem {
-  cartLineId: string;
-  equipment: Equipment;
-  size?: string;
-  color?: string;
-  quantity: number;
-  unitPrice: number;
-  maxStock: number;
-}
-
-export default function PosView({ equipment, currency, onRecordSale }: PosViewProps) {
+export default function PosView({
+  equipment,
+  currency,
+  cart: externalCart,
+  onAddToCart,
+  onUpdateCartItemQuantity,
+  onUpdateCartItemPrice,
+  onRemoveCartItem,
+  onClearCart,
+  onCheckoutCart,
+  onRecordSale,
+}: PosViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [localCart, setLocalCart] = useState<CartItem[]>([]);
+  const cart = externalCart ?? localCart;
+
   const [buyerName, setBuyerName] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer' | 'autre'>('cash');
   const [notes, setNotes] = useState('');
@@ -63,6 +86,41 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
     buyer: string;
     date: string;
   } | null>(null);
+
+  // Restore draft checkout info from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedBuyer = localStorage.getItem('kickboxing_cart_buyer');
+      const savedPayment = localStorage.getItem('kickboxing_cart_payment') as any;
+      const savedNotes = localStorage.getItem('kickboxing_cart_notes');
+      if (savedBuyer) setBuyerName(savedBuyer);
+      if (savedPayment && ['cash', 'card', 'transfer', 'autre'].includes(savedPayment)) {
+        setPaymentMethod(savedPayment);
+      }
+      if (savedNotes) setNotes(savedNotes);
+    } catch {}
+  }, []);
+
+  const handleBuyerNameChange = (name: string) => {
+    setBuyerName(name);
+    try {
+      localStorage.setItem('kickboxing_cart_buyer', name);
+    } catch {}
+  };
+
+  const handlePaymentMethodChange = (pm: 'cash' | 'card' | 'transfer' | 'autre') => {
+    setPaymentMethod(pm);
+    try {
+      localStorage.setItem('kickboxing_cart_payment', pm);
+    } catch {}
+  };
+
+  const handleNotesChange = (n: string) => {
+    setNotes(n);
+    try {
+      localStorage.setItem('kickboxing_cart_notes', n);
+    } catch {}
+  };
 
   // Variant selector popup state
   const [pickingItem, setPickingItem] = useState<Equipment | null>(null);
@@ -97,8 +155,18 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
     color?: string,
     variantMaxStock: number = 0
   ) => {
+    if (onAddToCart) {
+      onAddToCart(item, {
+        size,
+        color,
+        quantity: 1,
+        maxStock: variantMaxStock,
+      });
+      return;
+    }
+
     const lineId = `${item.id}-${size || 'none'}-${color || 'none'}`;
-    setCart((prev) => {
+    setLocalCart((prev) => {
       const existing = prev.find((c) => c.cartLineId === lineId);
       if (existing) {
         if (existing.quantity >= variantMaxStock) return prev;
@@ -115,6 +183,8 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
           color,
           quantity: 1,
           unitPrice: item.sellingPrice,
+          originalPrice: item.sellingPrice,
+          costPrice: item.costPrice || 0,
           maxStock: variantMaxStock,
         },
       ];
@@ -154,7 +224,11 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
   };
 
   const updateCartQuantity = (cartLineId: string, delta: number) => {
-    setCart((prev) => {
+    if (onUpdateCartItemQuantity) {
+      onUpdateCartItemQuantity(cartLineId, delta);
+      return;
+    }
+    setLocalCart((prev) => {
       return prev
         .map((c) => {
           if (c.cartLineId === cartLineId) {
@@ -169,12 +243,32 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
     });
   };
 
+  const updateCartPrice = (cartLineId: string, newPrice: number) => {
+    if (onUpdateCartItemPrice) {
+      onUpdateCartItemPrice(cartLineId, newPrice);
+      return;
+    }
+    setLocalCart((prev) =>
+      prev.map((c) =>
+        c.cartLineId === cartLineId ? { ...c, unitPrice: Math.max(0, newPrice) } : c
+      )
+    );
+  };
+
   const removeFromCart = (cartLineId: string) => {
-    setCart((prev) => prev.filter((c) => c.cartLineId !== cartLineId));
+    if (onRemoveCartItem) {
+      onRemoveCartItem(cartLineId);
+      return;
+    }
+    setLocalCart((prev) => prev.filter((c) => c.cartLineId !== cartLineId));
   };
 
   const clearCart = () => {
-    setCart([]);
+    if (onClearCart) {
+      onClearCart();
+      return;
+    }
+    setLocalCart([]);
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
@@ -183,17 +277,26 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
     if (cart.length === 0) return;
     setLoading(true);
     try {
-      for (const item of cart) {
-        await onRecordSale({
-          equipmentId: item.equipment.id,
-          size: item.size,
-          color: item.color,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
+      if (onCheckoutCart) {
+        await onCheckoutCart({
           buyerName: buyerName.trim() || 'Client Dojo',
           paymentMethod,
           notes: notes.trim() || 'Vente Caisse',
         });
+      } else {
+        for (const item of cart) {
+          await onRecordSale({
+            equipmentId: item.equipment.id,
+            size: item.size,
+            color: item.color,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            buyerName: buyerName.trim() || 'Client Dojo',
+            paymentMethod,
+            notes: notes.trim() || 'Vente Caisse',
+          });
+        }
+        setLocalCart([]);
       }
 
       setLastSaleReceipt({
@@ -203,9 +306,12 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
         date: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       });
 
-      setCart([]);
       setBuyerName('');
       setNotes('');
+      try {
+        localStorage.removeItem('kickboxing_cart_buyer');
+        localStorage.removeItem('kickboxing_cart_notes');
+      } catch {}
     } catch (err: any) {
       alert(err.message || 'Erreur lors du règlement');
     } finally {
@@ -414,8 +520,21 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                             <span>{line.color}</span>
                           </span>
                         )}
-                        <span className="text-blue-700 font-bold ml-1">
-                          {formatCurrency(line.unitPrice, currency)}/u
+                      </div>
+
+                      {/* Editable Unit Price per line (User Request) */}
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <span className="text-[10px] text-slate-500 font-bold">Prix unitaire :</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={line.unitPrice}
+                          onChange={(e) => updateCartPrice(line.cartLineId, parseFloat(e.target.value) || 0)}
+                          className="w-20 px-1.5 py-0.5 text-xs font-black text-blue-800 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 text-right"
+                        />
+                        <span className="text-[10px] text-slate-500 font-bold">
+                          {CURRENCY_CONFIG[currency]?.symbol || currency}
                         </span>
                       </div>
                     </div>
@@ -496,7 +615,7 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                     <button
                       key={m.id}
                       type="button"
-                      onClick={() => setPaymentMethod(m.id as any)}
+                      onClick={() => handlePaymentMethodChange(m.id as any)}
                       className={`py-2.5 px-2 rounded-2xl border flex flex-col items-center gap-1 text-xs font-bold transition-all ${
                         isSelected
                           ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
@@ -519,7 +638,7 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                   type="text"
                   placeholder="Nom de l'adhérent (optionnel)"
                   value={buyerName}
-                  onChange={(e) => setBuyerName(e.target.value)}
+                  onChange={(e) => handleBuyerNameChange(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 font-medium transition-colors"
                 />
               </div>
@@ -529,7 +648,7 @@ export default function PosView({ equipment, currency, onRecordSale }: PosViewPr
                   type="text"
                   placeholder="Remarque (ex: Payé en avance)"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(e) => handleNotesChange(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 font-medium transition-colors"
                 />
               </div>
